@@ -357,36 +357,49 @@ export async function getReformulationSignals(
 export type ConsumerDemandSignals = {
   topProducts: { name: string; count: number }[];
   topBrands: { name: string; count: number }[];
-  weeklyVolume: { weekStart: string; count: number }[];
+  avgScoreByPorosity: { porosity: Porosity; averageScore: number | null; count: number }[];
+  dailyVolume: { date: string; count: number }[];
   topConcerns: { concern: string; count: number }[];
 };
 
-function startOfWeek(date: Date): Date {
-  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-  const day = d.getUTCDay();
-  const diff = (day + 6) % 7; // Monday as week start
-  d.setUTCDate(d.getUTCDate() - diff);
-  return d;
-}
-
+// topProducts/topBrands/avgScoreByPorosity are all-time aggregates across
+// every logged search; dailyVolume is the one metric explicitly scoped to
+// the last 30 days. All derived from a single fetch of product_searches
+// rather than one query per metric.
 export async function getConsumerDemandSignals(): Promise<ConsumerDemandSignals> {
   const supabase = getSupabaseAdmin();
 
-  const [{ data: requests, error: requestsError }, { data: profiles, error: profilesError }] =
+  const [{ data: searches, error: searchesError }, { data: profiles, error: profilesError }] =
     await Promise.all([
-      supabase.from("product_requests").select("product_name, brand_name, created_at"),
+      supabase
+        .from("product_searches")
+        .select(
+          "product_name, brand_name, compatibility_score, hair_profile_porosity, searched_at"
+        ),
       supabase.from("hair_profiles").select("hair_concerns"),
     ]);
 
-  if (requestsError) throw new Error(requestsError.message);
+  if (searchesError) throw new Error(searchesError.message);
   if (profilesError) throw new Error(profilesError.message);
 
   const productCounts = new Map<string, number>();
   const brandCounts = new Map<string, number>();
+  const scoresByPorosity: Record<Porosity, number[]> = { low: [], medium: [], high: [] };
 
-  for (const r of requests ?? []) {
-    if (r.product_name) productCounts.set(r.product_name, (productCounts.get(r.product_name) ?? 0) + 1);
-    if (r.brand_name) brandCounts.set(r.brand_name, (brandCounts.get(r.brand_name) ?? 0) + 1);
+  for (const s of searches ?? []) {
+    if (s.product_name) {
+      productCounts.set(s.product_name, (productCounts.get(s.product_name) ?? 0) + 1);
+    }
+    if (s.brand_name) {
+      brandCounts.set(s.brand_name, (brandCounts.get(s.brand_name) ?? 0) + 1);
+    }
+    const porosity = s.hair_profile_porosity as string | null;
+    if (
+      s.compatibility_score !== null &&
+      (porosity === "low" || porosity === "medium" || porosity === "high")
+    ) {
+      scoresByPorosity[porosity].push(s.compatibility_score);
+    }
   }
 
   const topProducts = Array.from(productCounts.entries())
@@ -399,21 +412,35 @@ export async function getConsumerDemandSignals(): Promise<ConsumerDemandSignals>
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 
-  const weeks: { weekStart: string; count: number }[] = [];
-  const now = new Date();
-  const currentWeekStart = startOfWeek(now);
-  for (let i = 7; i >= 0; i--) {
-    const weekStart = new Date(currentWeekStart);
-    weekStart.setUTCDate(weekStart.getUTCDate() - i * 7);
-    weeks.push({ weekStart: weekStart.toISOString().slice(0, 10), count: 0 });
-  }
-  const weekIndexByStart = new Map(weeks.map((w, i) => [w.weekStart, i]));
+  const avgScoreByPorosity = POROSITY_LEVELS.map((porosity) => {
+    const scores = scoresByPorosity[porosity];
+    return {
+      porosity,
+      averageScore:
+        scores.length > 0
+          ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+          : null,
+      count: scores.length,
+    };
+  });
 
-  for (const r of requests ?? []) {
-    if (!r.created_at) continue;
-    const weekStart = startOfWeek(new Date(r.created_at)).toISOString().slice(0, 10);
-    const idx = weekIndexByStart.get(weekStart);
-    if (idx !== undefined) weeks[idx].count += 1;
+  const days: { date: string; count: number }[] = [];
+  const today = new Date();
+  const todayUTC = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+  );
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(todayUTC);
+    d.setUTCDate(d.getUTCDate() - i);
+    days.push({ date: d.toISOString().slice(0, 10), count: 0 });
+  }
+  const dayIndexByDate = new Map(days.map((d, i) => [d.date, i]));
+
+  for (const s of searches ?? []) {
+    if (!s.searched_at) continue;
+    const date = s.searched_at.slice(0, 10);
+    const idx = dayIndexByDate.get(date);
+    if (idx !== undefined) days[idx].count += 1;
   }
 
   const concernCounts = new Map<string, number>();
@@ -426,7 +453,7 @@ export async function getConsumerDemandSignals(): Promise<ConsumerDemandSignals>
     .map(([concern, count]) => ({ concern, count }))
     .sort((a, b) => b.count - a.count);
 
-  return { topProducts, topBrands, weeklyVolume: weeks, topConcerns };
+  return { topProducts, topBrands, avgScoreByPorosity, dailyVolume: days, topConcerns };
 }
 
 export async function getPorosityDistribution(): Promise<Record<Porosity, number>> {
