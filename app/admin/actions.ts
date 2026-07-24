@@ -3,6 +3,68 @@
 import { redirect } from "next/navigation";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
+function generateTempPassword(): string {
+  return "Qoyl" + Math.random().toString(36).slice(2, 8).toUpperCase() + "!";
+}
+
+function approvalEmailBody(params: {
+  contactName: string;
+  email: string;
+  tempPassword: string;
+  siteUrl: string;
+}): string {
+  return `Hi ${params.contactName},
+
+Welcome to Qoyl — your brand intelligence dashboard is ready.
+
+Login at: ${params.siteUrl}/login
+Email: ${params.email}
+Temporary password: ${params.tempPassword}
+
+Please change your password after your first login by clicking "Forgot password" on the login page.
+
+Your dashboard gives you access to:
+→ Ingredient performance scores for your products
+→ Consumer demand signals from real Qoyl users
+→ Reformulation recommendations
+
+To get started, log in and add your first product under "My Products."
+
+Questions? Reply to this email — we're here.
+
+D
+Founder, Qoyl`;
+}
+
+// Best-effort -- a failed send shouldn't undo the account/auth-user that
+// were already created. Callers check the return value to warn the admin.
+async function sendApprovalEmail(params: {
+  email: string;
+  contactName: string;
+  tempPassword: string;
+}): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "onboarding@resend.dev",
+      to: params.email,
+      subject: "Your Qoyl Brand Dashboard is approved",
+      text: approvalEmailBody({ ...params, siteUrl }),
+    }),
+  });
+
+  return res.ok;
+}
+
 export async function approveApplication(formData: FormData) {
   const id = formData.get("id");
   const password = formData.get("password");
@@ -24,6 +86,18 @@ export async function approveApplication(formData: FormData) {
 
   if (fetchError || !application) {
     throw new Error("Application not found");
+  }
+
+  const tempPassword = generateTempPassword();
+
+  const { error: authError } = await supabaseAdmin.auth.admin.createUser({
+    email: application.email,
+    password: tempPassword,
+    email_confirm: true,
+  });
+
+  if (authError) {
+    throw new Error(authError.message);
   }
 
   const { error: insertError } = await supabaseAdmin.from("brand_accounts").insert({
@@ -49,7 +123,18 @@ export async function approveApplication(formData: FormData) {
     throw new Error(updateError.message);
   }
 
-  redirect(`/admin?password=${encodeURIComponent(password)}`);
+  const emailSent = await sendApprovalEmail({
+    email: application.email,
+    contactName: application.contact_name,
+    tempPassword,
+  });
+
+  const params = new URLSearchParams({
+    password,
+    approved_email: application.email,
+    email_sent: emailSent ? "1" : "0",
+  });
+  redirect(`/admin?${params.toString()}`);
 }
 
 const VALID_TIERS = new Set(["early_stage", "growth", "enterprise"]);

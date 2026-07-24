@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 const PRODUCT_COUNT_OPTIONS = ["1-5", "6-15", "16-30", "30+"];
@@ -13,7 +14,25 @@ const REVENUE_OPTIONS = [
   "$5M+",
 ];
 
+const TIER_LABELS: Record<string, string> = {
+  early_stage: "Early Stage ($250/month)",
+  growth: "Growth ($750/month)",
+  enterprise: "Enterprise ($2,500/month)",
+};
+
 export default function ApplyPage() {
+  return (
+    <Suspense fallback={null}>
+      <ApplyForm />
+    </Suspense>
+  );
+}
+
+function ApplyForm() {
+  const searchParams = useSearchParams();
+  const requestedTier = searchParams.get("tier");
+  const tierLabel = requestedTier ? TIER_LABELS[requestedTier] : null;
+
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +115,11 @@ export default function ApplyPage() {
         <h1 className="font-serif text-3xl sm:text-4xl text-cream mt-6">
           Apply for brand access
         </h1>
+        {tierLabel && (
+          <p className="mt-3 inline-block rounded-full border border-bronze/40 bg-bronze/10 px-4 py-1.5 text-xs uppercase tracking-wider text-bronze2">
+            Applying for {tierLabel}
+          </p>
+        )}
         <p className="mt-3 text-sand leading-relaxed">
           Tell us about your brand. We review every application personally.
         </p>

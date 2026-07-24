@@ -25,12 +25,20 @@ export default function Home() {
         <span className="font-serif text-xl tracking-wide text-cream">
           QOYL <span className="text-bronze2">BUSINESS</span>
         </span>
-        <Link
-          href="/login"
-          className="text-sm text-muted hover:text-cream transition-colors"
-        >
-          Brand login
-        </Link>
+        <nav className="flex items-center gap-6">
+          <Link
+            href="/pricing"
+            className="text-sm text-muted hover:text-cream transition-colors"
+          >
+            Pricing
+          </Link>
+          <Link
+            href="/login"
+            className="text-sm text-muted hover:text-cream transition-colors"
+          >
+            Brand login
+          </Link>
+        </nav>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 sm:px-12 text-center">
@@ -51,6 +59,13 @@ export default function Home() {
         >
           Apply for brand access
           <span aria-hidden>→</span>
+        </Link>
+
+        <Link
+          href="/pricing"
+          className="mt-5 text-sm text-muted hover:text-cream transition-colors"
+        >
+          See pricing →
         </Link>
       </main>
 

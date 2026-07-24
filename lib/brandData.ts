@@ -355,6 +355,7 @@ export async function getReformulationSignals(
 }
 
 export type ConsumerDemandSignals = {
+  totalSearches: number;
   topProducts: { name: string; count: number }[];
   topBrands: { name: string; count: number }[];
   avgScoreByPorosity: { porosity: Porosity; averageScore: number | null; count: number }[];
@@ -369,18 +370,23 @@ export type ConsumerDemandSignals = {
 export async function getConsumerDemandSignals(): Promise<ConsumerDemandSignals> {
   const supabase = getSupabaseAdmin();
 
-  const [{ data: searches, error: searchesError }, { data: profiles, error: profilesError }] =
-    await Promise.all([
-      supabase
-        .from("product_searches")
-        .select(
-          "product_name, brand_name, compatibility_score, hair_profile_porosity, searched_at"
-        ),
-      supabase.from("hair_profiles").select("hair_concerns"),
-    ]);
+  const [
+    { data: searches, error: searchesError },
+    { data: profiles, error: profilesError },
+    { count: totalSearches, error: countError },
+  ] = await Promise.all([
+    supabase
+      .from("product_searches")
+      .select(
+        "product_name, brand_name, compatibility_score, hair_profile_porosity, searched_at"
+      ),
+    supabase.from("hair_profiles").select("hair_concerns"),
+    supabase.from("product_searches").select("*", { count: "exact", head: true }),
+  ]);
 
   if (searchesError) throw new Error(searchesError.message);
   if (profilesError) throw new Error(profilesError.message);
+  if (countError) throw new Error(countError.message);
 
   const productCounts = new Map<string, number>();
   const brandCounts = new Map<string, number>();
@@ -453,7 +459,14 @@ export async function getConsumerDemandSignals(): Promise<ConsumerDemandSignals>
     .map(([concern, count]) => ({ concern, count }))
     .sort((a, b) => b.count - a.count);
 
-  return { topProducts, topBrands, avgScoreByPorosity, dailyVolume: days, topConcerns };
+  return {
+    totalSearches: totalSearches ?? 0,
+    topProducts,
+    topBrands,
+    avgScoreByPorosity,
+    dailyVolume: days,
+    topConcerns,
+  };
 }
 
 export async function getPorosityDistribution(): Promise<Record<Porosity, number>> {

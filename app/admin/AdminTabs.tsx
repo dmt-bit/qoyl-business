@@ -46,16 +46,43 @@ export default function AdminTabs({
   accounts,
   password,
   initialTab,
+  approvedEmail,
+  emailSent,
 }: {
   applications: Application[];
   accounts: Account[];
   password: string;
   initialTab: "applications" | "accounts";
+  approvedEmail: string | null;
+  emailSent: boolean;
 }) {
   const [tab, setTab] = useState<"applications" | "accounts">(initialTab);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   return (
     <div>
+      {approvedEmail && !bannerDismissed && (
+        <div
+          className={`mb-6 flex items-center justify-between rounded-md border px-4 py-3 text-sm ${
+            emailSent
+              ? "border-green/30 bg-green/10 text-green"
+              : "border-amber/30 bg-amber/10 text-amber"
+          }`}
+        >
+          <span>
+            {emailSent
+              ? `Approved — login credentials sent to ${approvedEmail}`
+              : `Approved — but the welcome email failed to send to ${approvedEmail}. Share their login manually or check your Resend configuration.`}
+          </span>
+          <button
+            onClick={() => setBannerDismissed(true)}
+            className="ml-4 text-xs uppercase tracking-wider text-muted hover:text-cream"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <div className="mb-8 flex gap-2 border-b border-warm/10">
         <button
           onClick={() => setTab("applications")}
