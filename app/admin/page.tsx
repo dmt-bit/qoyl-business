@@ -6,7 +6,13 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: { password?: string; tab?: string; approved_email?: string; email_sent?: string };
+  searchParams: {
+    password?: string;
+    tab?: string;
+    approved_email?: string;
+    approval_status?: string;
+    error_detail?: string;
+  };
 }) {
   const password = searchParams.password ?? "";
   const authorized =
@@ -59,7 +65,8 @@ export default async function AdminPage({
         password={password}
         initialTab={searchParams.tab === "accounts" ? "accounts" : "applications"}
         approvedEmail={searchParams.approved_email ?? null}
-        emailSent={searchParams.email_sent === "1"}
+        approvalStatus={searchParams.approval_status ?? null}
+        errorDetail={searchParams.error_detail ?? null}
       />
     </div>
   );

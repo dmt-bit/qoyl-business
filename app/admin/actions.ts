@@ -37,33 +37,63 @@ Founder, Qoyl`;
 }
 
 // Best-effort -- a failed send shouldn't undo the account/auth-user that
-// were already created. Callers check the return value to warn the admin.
+// were already created. Never throws; always reports what happened so the
+// caller can log it and tell the admin.
 async function sendApprovalEmail(params: {
   email: string;
   contactName: string;
   tempPassword: string;
-}): Promise<boolean> {
+  applicationId: string;
+}): Promise<{ sent: boolean; error: string | null }> {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return false;
+  if (!apiKey) {
+    const error = "RESEND_API_KEY is not set";
+    console.error("[approveApplication] email not sent", {
+      applicationId: params.applicationId,
+      error,
+    });
+    return { sent: false, error };
+  }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "onboarding@resend.dev",
-      to: params.email,
-      subject: "Your Qoyl Brand Dashboard is approved",
-      text: approvalEmailBody({ ...params, siteUrl }),
-    }),
-  });
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "onboarding@resend.dev",
+        to: params.email,
+        subject: "Your Qoyl Brand Dashboard is approved",
+        text: approvalEmailBody({ ...params, siteUrl }),
+      }),
+    });
 
-  return res.ok;
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      const error = `Resend API responded ${res.status}: ${body.slice(0, 300)}`;
+      console.error("[approveApplication] email not sent", {
+        applicationId: params.applicationId,
+        error,
+      });
+      return { sent: false, error };
+    }
+
+    return { sent: true, error: null };
+  } catch (err) {
+    const error = err instanceof Error ? err.message : String(err);
+    console.error("[approveApplication] email send threw", {
+      applicationId: params.applicationId,
+      error,
+    });
+    return { sent: false, error };
+  }
 }
+
+type ApprovalStatus = "ok" | "email_failed" | "auth_failed" | "account_failed" | "not_found";
 
 export async function approveApplication(formData: FormData) {
   const id = formData.get("id");
@@ -76,65 +106,114 @@ export async function approveApplication(formData: FormData) {
     throw new Error("Missing application id");
   }
 
-  const supabaseAdmin = getSupabaseAdmin();
+  let approvalStatus: ApprovalStatus = "ok";
+  let approvedEmail: string | null = null;
+  let errorDetail: string | null = null;
 
-  const { data: application, error: fetchError } = await supabaseAdmin
-    .from("brand_applications")
-    .select("*")
-    .eq("id", id)
-    .single();
+  // Every risky step below is isolated so one failure (a flaky Resend call,
+  // GoTrue rejecting a duplicate email, etc.) can't crash the whole action
+  // with Next's generic digest error -- which is what was happening in
+  // production. redirect() is only ever called once, at the very end,
+  // outside of any try/catch (it throws internally to perform the
+  // navigation, and a surrounding catch would swallow that).
+  try {
+    const supabaseAdmin = getSupabaseAdmin();
 
-  if (fetchError || !application) {
-    throw new Error("Application not found");
+    const { data: application, error: fetchError } = await supabaseAdmin
+      .from("brand_applications")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !application) {
+      console.error("[approveApplication] application not found", {
+        id,
+        error: fetchError?.message,
+      });
+      approvalStatus = "not_found";
+    } else {
+      approvedEmail = application.email;
+      const tempPassword = generateTempPassword();
+      let authCreated = false;
+
+      try {
+        const { error: authError } = await supabaseAdmin.auth.admin.createUser({
+          email: application.email,
+          password: tempPassword,
+          email_confirm: true,
+        });
+        if (authError) throw authError;
+        authCreated = true;
+      } catch (err) {
+        errorDetail = err instanceof Error ? err.message : String(err);
+        console.error("[approveApplication] auth.admin.createUser failed", {
+          applicationId: id,
+          email: application.email,
+          error: errorDetail,
+        });
+      }
+
+      // Always persist the approval, regardless of the auth/email outcome
+      // above -- an admin shouldn't be stuck re-clicking Approve forever
+      // because Resend or GoTrue had a bad moment.
+      const { error: insertError } = await supabaseAdmin.from("brand_accounts").insert({
+        company_name: application.company_name,
+        contact_name: application.contact_name,
+        email: application.email,
+        website: application.website,
+        instagram_handle: application.instagram_handle,
+        status: "approved",
+        approved_at: new Date().toISOString(),
+      });
+
+      const { error: updateError } = await supabaseAdmin
+        .from("brand_applications")
+        .update({ status: "approved" })
+        .eq("id", id);
+
+      if (insertError || updateError) {
+        errorDetail = insertError?.message ?? updateError?.message ?? errorDetail;
+        console.error("[approveApplication] brand_accounts/brand_applications write failed", {
+          applicationId: id,
+          email: application.email,
+          insertError: insertError?.message,
+          updateError: updateError?.message,
+        });
+        approvalStatus = "account_failed";
+      } else if (!authCreated) {
+        approvalStatus = "auth_failed";
+      } else {
+        const { sent, error: emailError } = await sendApprovalEmail({
+          email: application.email,
+          contactName: application.contact_name,
+          tempPassword,
+          applicationId: id,
+        });
+
+        if (!sent) {
+          errorDetail = emailError;
+          // The account and login both work -- just log the temp password
+          // server-side so the admin can pull it from the logs and hand
+          // it over manually, since it can't be shown in the URL/UI.
+          console.error("[approveApplication] manual credential handoff needed", {
+            applicationId: id,
+            email: application.email,
+            tempPassword,
+          });
+          approvalStatus = "email_failed";
+        }
+      }
+    }
+  } catch (err) {
+    errorDetail = err instanceof Error ? err.message : String(err);
+    console.error("[approveApplication] unexpected error", { id, error: errorDetail });
+    approvalStatus = "account_failed";
   }
 
-  const tempPassword = generateTempPassword();
-
-  const { error: authError } = await supabaseAdmin.auth.admin.createUser({
-    email: application.email,
-    password: tempPassword,
-    email_confirm: true,
-  });
-
-  if (authError) {
-    throw new Error(authError.message);
-  }
-
-  const { error: insertError } = await supabaseAdmin.from("brand_accounts").insert({
-    company_name: application.company_name,
-    contact_name: application.contact_name,
-    email: application.email,
-    website: application.website,
-    instagram_handle: application.instagram_handle,
-    status: "approved",
-    approved_at: new Date().toISOString(),
-  });
-
-  if (insertError) {
-    throw new Error(insertError.message);
-  }
-
-  const { error: updateError } = await supabaseAdmin
-    .from("brand_applications")
-    .update({ status: "approved" })
-    .eq("id", id);
-
-  if (updateError) {
-    throw new Error(updateError.message);
-  }
-
-  const emailSent = await sendApprovalEmail({
-    email: application.email,
-    contactName: application.contact_name,
-    tempPassword,
-  });
-
-  const params = new URLSearchParams({
-    password,
-    approved_email: application.email,
-    email_sent: emailSent ? "1" : "0",
-  });
-  redirect(`/admin?${params.toString()}`);
+  const redirectParams = new URLSearchParams({ password, approval_status: approvalStatus });
+  if (approvedEmail) redirectParams.set("approved_email", approvedEmail);
+  if (errorDetail) redirectParams.set("error_detail", errorDetail.slice(0, 300));
+  redirect(`/admin?${redirectParams.toString()}`);
 }
 
 const VALID_TIERS = new Set(["early_stage", "growth", "enterprise"]);

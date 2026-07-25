@@ -22,7 +22,16 @@ export function getSupabaseAdmin(): SupabaseClient {
       );
     }
 
-    adminClient = createClient(supabaseUrl, serviceRoleKey);
+    adminClient = createClient(supabaseUrl, serviceRoleKey, {
+      global: {
+        // Next.js patches the global fetch with its own Data Cache, which
+        // silently cached these reads even on force-dynamic pages -- e.g.
+        // /admin kept rendering an application as "pending" with a stale
+        // Approve button after it had already been approved, inviting a
+        // second click straight into a "user already registered" error.
+        fetch: (url, options) => fetch(url, { ...options, cache: "no-store" }),
+      },
+    });
   }
   return adminClient;
 }

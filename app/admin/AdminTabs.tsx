@@ -41,42 +41,82 @@ type Account = {
   created_at: string;
 };
 
+type ApprovalStatus = "ok" | "email_failed" | "auth_failed" | "account_failed" | "not_found";
+
+const APPROVAL_BANNER_TONE: Record<ApprovalStatus, "good" | "warn" | "bad"> = {
+  ok: "good",
+  email_failed: "warn",
+  auth_failed: "warn",
+  account_failed: "bad",
+  not_found: "bad",
+};
+
+const BANNER_TONE_CLASSES: Record<"good" | "warn" | "bad", string> = {
+  good: "border-green/30 bg-green/10 text-green",
+  warn: "border-amber/30 bg-amber/10 text-amber",
+  bad: "border-red/30 bg-red/10 text-red",
+};
+
+function approvalMessage(
+  status: ApprovalStatus,
+  email: string | null,
+  errorDetail: string | null
+): string {
+  switch (status) {
+    case "ok":
+      return `Approved successfully — login credentials sent to ${email}`;
+    case "email_failed":
+      return `Approved but email failed — send credentials manually to ${email}.${
+        errorDetail ? ` (${errorDetail})` : ""
+      }`;
+    case "auth_failed":
+      return `Approved, but creating their login failed${
+        errorDetail ? ` (${errorDetail})` : ""
+      } — create it manually in Supabase Auth for ${email}.`;
+    case "account_failed":
+      return `Something went wrong saving the approval${email ? ` for ${email}` : ""}${
+        errorDetail ? ` (${errorDetail})` : ""
+      }. Check the server logs and retry.`;
+    case "not_found":
+      return "Couldn't find that application — it may have already been processed.";
+  }
+}
+
 export default function AdminTabs({
   applications,
   accounts,
   password,
   initialTab,
   approvedEmail,
-  emailSent,
+  approvalStatus,
+  errorDetail,
 }: {
   applications: Application[];
   accounts: Account[];
   password: string;
   initialTab: "applications" | "accounts";
   approvedEmail: string | null;
-  emailSent: boolean;
+  approvalStatus: string | null;
+  errorDetail: string | null;
 }) {
   const [tab, setTab] = useState<"applications" | "accounts">(initialTab);
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
+  const validStatus: ApprovalStatus | null =
+    approvalStatus && approvalStatus in APPROVAL_BANNER_TONE
+      ? (approvalStatus as ApprovalStatus)
+      : null;
+
   return (
     <div>
-      {approvedEmail && !bannerDismissed && (
+      {validStatus && !bannerDismissed && (
         <div
-          className={`mb-6 flex items-center justify-between rounded-md border px-4 py-3 text-sm ${
-            emailSent
-              ? "border-green/30 bg-green/10 text-green"
-              : "border-amber/30 bg-amber/10 text-amber"
-          }`}
+          className={`mb-6 flex items-center justify-between rounded-md border px-4 py-3 text-sm ${BANNER_TONE_CLASSES[APPROVAL_BANNER_TONE[validStatus]]}`}
         >
-          <span>
-            {emailSent
-              ? `Approved — login credentials sent to ${approvedEmail}`
-              : `Approved — but the welcome email failed to send to ${approvedEmail}. Share their login manually or check your Resend configuration.`}
-          </span>
+          <span>{approvalMessage(validStatus, approvedEmail, errorDetail)}</span>
           <button
             onClick={() => setBannerDismissed(true)}
-            className="ml-4 text-xs uppercase tracking-wider text-muted hover:text-cream"
+            className="ml-4 shrink-0 text-xs uppercase tracking-wider text-muted hover:text-cream"
           >
             Dismiss
           </button>
