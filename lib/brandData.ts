@@ -360,19 +360,18 @@ export type ConsumerDemandSignals = {
   topBrands: { name: string; count: number }[];
   avgScoreByPorosity: { porosity: Porosity; averageScore: number | null; count: number }[];
   dailyVolume: { date: string; count: number }[];
-  topConcerns: { concern: string; count: number }[];
+  scoreDistribution: { green: number; amber: number; red: number };
 };
 
-// topProducts/topBrands/avgScoreByPorosity are all-time aggregates across
-// every logged search; dailyVolume is the one metric explicitly scoped to
-// the last 30 days. All derived from a single fetch of product_searches
-// rather than one query per metric.
+// topProducts/topBrands/avgScoreByPorosity/scoreDistribution are all-time
+// aggregates across every logged search; dailyVolume is the one metric
+// explicitly scoped to the last 30 days. All derived from a single fetch
+// of product_searches rather than one query per metric.
 export async function getConsumerDemandSignals(): Promise<ConsumerDemandSignals> {
   const supabase = getSupabaseAdmin();
 
   const [
     { data: searches, error: searchesError },
-    { data: profiles, error: profilesError },
     { count: totalSearches, error: countError },
   ] = await Promise.all([
     supabase
@@ -380,17 +379,16 @@ export async function getConsumerDemandSignals(): Promise<ConsumerDemandSignals>
       .select(
         "product_name, brand_name, compatibility_score, hair_profile_porosity, searched_at"
       ),
-    supabase.from("hair_profiles").select("hair_concerns"),
     supabase.from("product_searches").select("*", { count: "exact", head: true }),
   ]);
 
   if (searchesError) throw new Error(searchesError.message);
-  if (profilesError) throw new Error(profilesError.message);
   if (countError) throw new Error(countError.message);
 
   const productCounts = new Map<string, number>();
   const brandCounts = new Map<string, number>();
   const scoresByPorosity: Record<Porosity, number[]> = { low: [], medium: [], high: [] };
+  const scoreDistribution = { green: 0, amber: 0, red: 0 };
 
   for (const s of searches ?? []) {
     if (s.product_name) {
@@ -398,6 +396,9 @@ export async function getConsumerDemandSignals(): Promise<ConsumerDemandSignals>
     }
     if (s.brand_name) {
       brandCounts.set(s.brand_name, (brandCounts.get(s.brand_name) ?? 0) + 1);
+    }
+    if (s.compatibility_score !== null) {
+      scoreDistribution[scoreTier(s.compatibility_score)] += 1;
     }
     const porosity = s.hair_profile_porosity as string | null;
     if (
@@ -449,24 +450,204 @@ export async function getConsumerDemandSignals(): Promise<ConsumerDemandSignals>
     if (idx !== undefined) days[idx].count += 1;
   }
 
-  const concernCounts = new Map<string, number>();
-  for (const p of profiles ?? []) {
-    for (const concern of p.hair_concerns ?? []) {
-      concernCounts.set(concern, (concernCounts.get(concern) ?? 0) + 1);
-    }
-  }
-  const topConcerns = Array.from(concernCounts.entries())
-    .map(([concern, count]) => ({ concern, count }))
-    .sort((a, b) => b.count - a.count);
-
   return {
     totalSearches: totalSearches ?? 0,
     topProducts,
     topBrands,
     avgScoreByPorosity,
     dailyVolume: days,
-    topConcerns,
+    scoreDistribution,
   };
+}
+
+export type HairProfileBreakdown = {
+  totalProfiles: number;
+  byCurlType: { label: string; count: number; pct: number }[];
+  byPorosity: { label: Porosity; count: number; pct: number }[];
+  byScalpCondition: { label: string; count: number; pct: number }[];
+  topZipCodes: { zip: string; count: number }[];
+  topConcerns: { concern: string; count: number }[];
+};
+
+function rankDistribution(
+  counts: Map<string, number>,
+  knownTotal: number
+): { label: string; count: number; pct: number }[] {
+  return Array.from(counts.entries())
+    .map(([label, count]) => ({
+      label,
+      count,
+      pct: knownTotal > 0 ? Math.round((count / knownTotal) * 100) : 0,
+    }))
+    .sort((a, b) => b.count - a.count);
+}
+
+// Every distribution below is scoped to profiles where that specific field
+// is filled in (not the full table), since hair_type/user_id-style gaps are
+// common on this table -- a % of "profiles with a known curl type" is more
+// honest than diluting it against rows that never answered that question.
+export async function getHairProfileBreakdown(): Promise<HairProfileBreakdown> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("hair_profiles")
+    .select("curl_type, porosity, scalp_condition, zip_code, hair_concerns");
+
+  if (error) throw new Error(error.message);
+
+  const rows = data ?? [];
+  const curlCounts = new Map<string, number>();
+  const porosityCounts = new Map<Porosity, number>();
+  const scalpCounts = new Map<string, number>();
+  const zipCounts = new Map<string, number>();
+  const concernCounts = new Map<string, number>();
+
+  let curlKnown = 0;
+  let porosityKnown = 0;
+  let scalpKnown = 0;
+
+  for (const row of rows) {
+    if (row.curl_type) {
+      curlCounts.set(row.curl_type, (curlCounts.get(row.curl_type) ?? 0) + 1);
+      curlKnown += 1;
+    }
+    if (row.porosity === "low" || row.porosity === "medium" || row.porosity === "high") {
+      porosityCounts.set(row.porosity, (porosityCounts.get(row.porosity) ?? 0) + 1);
+      porosityKnown += 1;
+    }
+    if (row.scalp_condition) {
+      scalpCounts.set(row.scalp_condition, (scalpCounts.get(row.scalp_condition) ?? 0) + 1);
+      scalpKnown += 1;
+    }
+    if (row.zip_code) {
+      zipCounts.set(row.zip_code, (zipCounts.get(row.zip_code) ?? 0) + 1);
+    }
+    for (const concern of row.hair_concerns ?? []) {
+      concernCounts.set(concern, (concernCounts.get(concern) ?? 0) + 1);
+    }
+  }
+
+  return {
+    totalProfiles: rows.length,
+    byCurlType: rankDistribution(curlCounts, curlKnown),
+    byPorosity: POROSITY_LEVELS.map((p) => ({
+      label: p,
+      count: porosityCounts.get(p) ?? 0,
+      pct: porosityKnown > 0 ? Math.round(((porosityCounts.get(p) ?? 0) / porosityKnown) * 100) : 0,
+    })),
+    byScalpCondition: rankDistribution(scalpCounts, scalpKnown),
+    topZipCodes: Array.from(zipCounts.entries())
+      .map(([zip, count]) => ({ zip, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5),
+    topConcerns: Array.from(concernCounts.entries())
+      .map(([concern, count]) => ({ concern, count }))
+      .sort((a, b) => b.count - a.count),
+  };
+}
+
+export type IngredientFlagSignals = {
+  mostFlagged: { name: string; count: number }[];
+  mostTrusted: { name: string; count: number }[];
+};
+
+// Counts rows, not distinct ingredients -- an ingredient flagged 'caution'
+// or 'avoid' at all three porosity levels counts 3 times, which is exactly
+// "how often this shows up as a problem across all porosity levels."
+export async function getIngredientFlagSignals(): Promise<IngredientFlagSignals> {
+  const supabase = getSupabaseAdmin();
+
+  const [{ data: scores, error: scoresError }, allIngredients] = await Promise.all([
+    supabase.from("compatibility_scores").select("ingredient_id, rating"),
+    fetchAllIngredients(),
+  ]);
+
+  if (scoresError) throw new Error(scoresError.message);
+
+  const nameById = new Map(allIngredients.map((ing) => [ing.id, displayName(ing)]));
+
+  const flaggedCounts = new Map<string, number>();
+  const goodCounts = new Map<string, number>();
+
+  for (const row of scores ?? []) {
+    if (row.rating === "caution" || row.rating === "avoid") {
+      flaggedCounts.set(row.ingredient_id, (flaggedCounts.get(row.ingredient_id) ?? 0) + 1);
+    } else if (row.rating === "good") {
+      goodCounts.set(row.ingredient_id, (goodCounts.get(row.ingredient_id) ?? 0) + 1);
+    }
+  }
+
+  const rank = (counts: Map<string, number>) =>
+    Array.from(counts.entries())
+      .map(([id, count]) => ({ name: nameById.get(id) ?? "Unknown ingredient", count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+  return { mostFlagged: rank(flaggedCounts), mostTrusted: rank(goodCounts) };
+}
+
+export type ProductRequestSignals = {
+  totalRequests: number;
+  topBrands: { name: string; count: number }[];
+  topProducts: { name: string; count: number }[];
+  weeklyVolume: { weekStart: string; count: number }[];
+};
+
+function startOfWeek(date: Date): Date {
+  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const day = d.getUTCDay();
+  const diff = (day + 6) % 7; // Monday as week start
+  d.setUTCDate(d.getUTCDate() - diff);
+  return d;
+}
+
+export async function getProductRequestSignals(): Promise<ProductRequestSignals> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("product_requests")
+    .select("product_name, brand_name, created_at");
+
+  if (error) throw new Error(error.message);
+
+  const rows = data ?? [];
+  const productCounts = new Map<string, number>();
+  const brandCounts = new Map<string, number>();
+
+  for (const r of rows) {
+    if (r.product_name) {
+      productCounts.set(r.product_name, (productCounts.get(r.product_name) ?? 0) + 1);
+    }
+    if (r.brand_name) {
+      brandCounts.set(r.brand_name, (brandCounts.get(r.brand_name) ?? 0) + 1);
+    }
+  }
+
+  const topProducts = Array.from(productCounts.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+
+  const topBrands = Array.from(brandCounts.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+
+  const weeks: { weekStart: string; count: number }[] = [];
+  const currentWeekStart = startOfWeek(new Date());
+  for (let i = 7; i >= 0; i--) {
+    const weekStart = new Date(currentWeekStart);
+    weekStart.setUTCDate(weekStart.getUTCDate() - i * 7);
+    weeks.push({ weekStart: weekStart.toISOString().slice(0, 10), count: 0 });
+  }
+  const weekIndexByStart = new Map(weeks.map((w, i) => [w.weekStart, i]));
+
+  for (const r of rows) {
+    if (!r.created_at) continue;
+    const weekStart = startOfWeek(new Date(r.created_at)).toISOString().slice(0, 10);
+    const idx = weekIndexByStart.get(weekStart);
+    if (idx !== undefined) weeks[idx].count += 1;
+  }
+
+  return { totalRequests: rows.length, topBrands, topProducts, weeklyVolume: weeks };
 }
 
 export async function getPorosityDistribution(): Promise<Record<Porosity, number>> {
