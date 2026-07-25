@@ -63,7 +63,7 @@ export default async function InsightsPage() {
           Consumer Demand Signals
         </p>
         <h1 className="font-serif text-3xl sm:text-4xl text-cream mt-1">
-          What type 4 hair consumers are searching for on Qoyl
+          What consumers across all hair textures are searching for on Qoyl
         </h1>
         <p className="mt-3 text-xs text-muted">
           Updated in real time · Based on {signals.totalSearches.toLocaleString()}{" "}

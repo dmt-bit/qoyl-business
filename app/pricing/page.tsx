@@ -152,7 +152,7 @@ export default function PricingPage() {
 
       <footer className="px-6 pb-8 text-center text-xs text-muted sm:px-12">
         © {new Date().getFullYear()} Qoyl. Brand intelligence for the next
-        generation of type 4 hair care.
+        generation of hair care, across every texture.
       </footer>
     </div>
   );

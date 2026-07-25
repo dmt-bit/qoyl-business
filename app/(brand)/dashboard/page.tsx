@@ -72,8 +72,8 @@ export default function DashboardPage() {
           ) : products.length === 0 ? (
             <div className="rounded-lg border border-warm/10 bg-warm/[0.03] px-8 py-16 text-center">
               <p className="font-serif text-xl text-sand">
-                Add your first product to see how it scores with type 4 hair
-                consumers{" "}
+                Add your first product to see how it scores with consumers
+                across all hair textures{" "}
                 <Link href="/products/add" className="text-bronze2 hover:text-bronze">
                   →
                 </Link>

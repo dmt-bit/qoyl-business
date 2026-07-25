@@ -9,7 +9,7 @@ const pillars = [
   {
     title: "Consumer Demand Signals",
     description:
-      "Track what type 4 consumers are actually asking for, before it shows up in your competitors' formulas.",
+      "Track what consumers across all hair textures are actually asking for, before it shows up in your competitors' formulas.",
   },
   {
     title: "Reformulation Recommendations",
@@ -46,7 +46,7 @@ export default function Home() {
           B2B Brand Intelligence
         </p>
         <h1 className="font-serif text-4xl sm:text-6xl leading-tight max-w-3xl text-cream">
-          Ingredient-level intelligence for your type 4 hair products.
+          Ingredient-level intelligence for your hair care products — across all hair textures.
         </h1>
         <p className="mt-6 max-w-2xl text-lg sm:text-xl text-sand leading-relaxed">
           See exactly how your formulas score across real consumer profiles —
@@ -89,7 +89,7 @@ export default function Home() {
 
       <footer className="px-6 pb-8 text-center text-xs text-muted sm:px-12">
         © {new Date().getFullYear()} Qoyl. Brand intelligence for the next
-        generation of type 4 hair care.
+        generation of hair care, across every texture.
       </footer>
     </div>
   );
