@@ -336,7 +336,9 @@ export default function Home() {
             Consumer app
           </a>
           <span aria-hidden>·</span>
-          <span>Privacy Policy</span>
+          <Link href="/privacy" className="hover:text-cream">
+            Privacy Policy
+          </Link>
           <span aria-hidden>·</span>
           <a href="mailto:support@qoyl.live" className="hover:text-cream">
             support@qoyl.live
