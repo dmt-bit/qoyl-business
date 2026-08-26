@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { approveApplication, updateBrandTier } from "./actions";
+import {
+  approveApplication,
+  approveFakeHairBrandApplication,
+  approveStylistApplication,
+  updateBrandTier,
+} from "./actions";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "text-bronze2",
@@ -17,7 +22,7 @@ const TIERS = [
   { value: "enterprise", label: "Enterprise" },
 ];
 
-type Application = {
+type BrandApplication = {
   id: string;
   company_name: string;
   contact_name: string;
@@ -31,7 +36,7 @@ type Application = {
   created_at: string;
 };
 
-type Account = {
+type BrandAccount = {
   id: string;
   company_name: string;
   contact_name: string;
@@ -40,6 +45,63 @@ type Account = {
   status: string;
   created_at: string;
 };
+
+type FakeHairApplication = {
+  id: string;
+  company_name: string;
+  contact_name: string;
+  email: string;
+  website: string | null;
+  instagram_handle: string | null;
+  product_count: string | null;
+  why_qoyl: string | null;
+  status: string;
+  created_at: string;
+};
+
+type FakeHairAccount = {
+  id: string;
+  company_name: string;
+  contact_name: string;
+  email: string;
+  status: string;
+  created_at: string;
+};
+
+type StylistApplication = {
+  id: string;
+  display_name: string;
+  contact_name: string;
+  email: string;
+  phone: string | null;
+  city: string;
+  neighborhood: string | null;
+  salon_name: string | null;
+  instagram: string | null;
+  years_experience: number | null;
+  hair_types_served: string[] | null;
+  why_qoyl: string | null;
+  status: string;
+  created_at: string;
+};
+
+type StylistAccount = {
+  id: string;
+  display_name: string;
+  contact_name: string;
+  email: string;
+  city: string;
+  status: string;
+  created_at: string;
+};
+
+type TabKey =
+  | "brand_applications"
+  | "brand_accounts"
+  | "fake_hair_applications"
+  | "fake_hair_accounts"
+  | "stylist_applications"
+  | "stylist_accounts";
 
 type ApprovalStatus = "ok" | "email_failed" | "auth_failed" | "account_failed" | "not_found";
 
@@ -83,29 +145,46 @@ function approvalMessage(
 }
 
 export default function AdminTabs({
-  applications,
-  accounts,
+  brandApplications,
+  brandAccounts,
+  fakeHairApplications,
+  fakeHairAccounts,
+  stylistApplications,
+  stylistAccounts,
   password,
   initialTab,
   approvedEmail,
   approvalStatus,
   errorDetail,
 }: {
-  applications: Application[];
-  accounts: Account[];
+  brandApplications: BrandApplication[];
+  brandAccounts: BrandAccount[];
+  fakeHairApplications: FakeHairApplication[];
+  fakeHairAccounts: FakeHairAccount[];
+  stylistApplications: StylistApplication[];
+  stylistAccounts: StylistAccount[];
   password: string;
-  initialTab: "applications" | "accounts";
+  initialTab: TabKey;
   approvedEmail: string | null;
   approvalStatus: string | null;
   errorDetail: string | null;
 }) {
-  const [tab, setTab] = useState<"applications" | "accounts">(initialTab);
+  const [tab, setTab] = useState<TabKey>(initialTab);
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
   const validStatus: ApprovalStatus | null =
     approvalStatus && approvalStatus in APPROVAL_BANNER_TONE
       ? (approvalStatus as ApprovalStatus)
       : null;
+
+  const TABS: { key: TabKey; label: string }[] = [
+    { key: "brand_applications", label: "Brand Applications" },
+    { key: "brand_accounts", label: "Brand Accounts" },
+    { key: "fake_hair_applications", label: "Fake Hair Applications" },
+    { key: "fake_hair_accounts", label: "Fake Hair Accounts" },
+    { key: "stylist_applications", label: "Stylist Applications" },
+    { key: "stylist_accounts", label: "Stylist Accounts" },
+  ];
 
   return (
     <div>
@@ -123,30 +202,23 @@ export default function AdminTabs({
         </div>
       )}
 
-      <div className="mb-8 flex gap-2 border-b border-warm/10">
-        <button
-          onClick={() => setTab("applications")}
-          className={`px-4 py-3 text-sm uppercase tracking-wider transition-colors ${
-            tab === "applications"
-              ? "border-b-2 border-bronze text-cream"
-              : "text-muted hover:text-sand"
-          }`}
-        >
-          Applications
-        </button>
-        <button
-          onClick={() => setTab("accounts")}
-          className={`px-4 py-3 text-sm uppercase tracking-wider transition-colors ${
-            tab === "accounts"
-              ? "border-b-2 border-bronze text-cream"
-              : "text-muted hover:text-sand"
-          }`}
-        >
-          Brand Accounts
-        </button>
+      <div className="mb-8 flex flex-wrap gap-2 border-b border-warm/10">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-4 py-3 text-sm uppercase tracking-wider transition-colors ${
+              tab === t.key
+                ? "border-b-2 border-bronze text-cream"
+                : "text-muted hover:text-sand"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      {tab === "applications" ? (
+      {tab === "brand_applications" && (
         <div className="overflow-x-auto rounded-lg border border-warm/10">
           <table className="min-w-full text-left text-sm">
             <thead className="bg-warm/[0.04] text-muted uppercase text-xs tracking-wider">
@@ -165,7 +237,7 @@ export default function AdminTabs({
               </tr>
             </thead>
             <tbody>
-              {applications.map((app) => (
+              {brandApplications.map((app) => (
                 <tr key={app.id} className="border-t border-warm/10 align-top">
                   <td className="px-4 py-3 text-cream">{app.company_name}</td>
                   <td className="px-4 py-3 text-sand">{app.contact_name}</td>
@@ -197,7 +269,7 @@ export default function AdminTabs({
                   </td>
                 </tr>
               ))}
-              {applications.length === 0 && (
+              {brandApplications.length === 0 && (
                 <tr>
                   <td colSpan={11} className="px-4 py-8 text-center text-muted">
                     No applications yet.
@@ -207,7 +279,9 @@ export default function AdminTabs({
             </tbody>
           </table>
         </div>
-      ) : (
+      )}
+
+      {tab === "brand_accounts" && (
         <div className="overflow-x-auto rounded-lg border border-warm/10">
           <table className="min-w-full text-left text-sm">
             <thead className="bg-warm/[0.04] text-muted uppercase text-xs tracking-wider">
@@ -221,7 +295,7 @@ export default function AdminTabs({
               </tr>
             </thead>
             <tbody>
-              {accounts.map((account) => (
+              {brandAccounts.map((account) => (
                 <tr key={account.id} className="border-t border-warm/10">
                   <td className="px-4 py-3 text-cream">{account.company_name}</td>
                   <td className="px-4 py-3 text-sand">{account.contact_name}</td>
@@ -256,10 +330,217 @@ export default function AdminTabs({
                   </td>
                 </tr>
               ))}
-              {accounts.length === 0 && (
+              {brandAccounts.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-muted">
                     No brand accounts yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {tab === "fake_hair_applications" && (
+        <div className="overflow-x-auto rounded-lg border border-warm/10">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-warm/[0.04] text-muted uppercase text-xs tracking-wider">
+              <tr>
+                <th className="px-4 py-3">Company</th>
+                <th className="px-4 py-3">Contact</th>
+                <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Website</th>
+                <th className="px-4 py-3">Instagram</th>
+                <th className="px-4 py-3">Products</th>
+                <th className="px-4 py-3">Why Qoyl</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Applied</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {fakeHairApplications.map((app) => (
+                <tr key={app.id} className="border-t border-warm/10 align-top">
+                  <td className="px-4 py-3 text-cream">{app.company_name}</td>
+                  <td className="px-4 py-3 text-sand">{app.contact_name}</td>
+                  <td className="px-4 py-3 text-sand">{app.email}</td>
+                  <td className="px-4 py-3 text-sand">{app.website || "—"}</td>
+                  <td className="px-4 py-3 text-sand">{app.instagram_handle || "—"}</td>
+                  <td className="px-4 py-3 text-sand">{app.product_count || "—"}</td>
+                  <td className="px-4 py-3 text-sand max-w-xs">{app.why_qoyl || "—"}</td>
+                  <td className={`px-4 py-3 font-medium ${STATUS_STYLES[app.status] ?? "text-muted"}`}>
+                    {app.status}
+                  </td>
+                  <td className="px-4 py-3 text-muted whitespace-nowrap">
+                    {new Date(app.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    {app.status === "pending" ? (
+                      <form action={approveFakeHairBrandApplication}>
+                        <input type="hidden" name="id" value={app.id} />
+                        <input type="hidden" name="password" value={password} />
+                        <button
+                          type="submit"
+                          className="rounded-full bg-bronze px-4 py-2 text-xs font-medium uppercase tracking-wider text-dark transition-colors hover:bg-bronze2"
+                        >
+                          Approve
+                        </button>
+                      </form>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+              {fakeHairApplications.length === 0 && (
+                <tr>
+                  <td colSpan={10} className="px-4 py-8 text-center text-muted">
+                    No applications yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {tab === "fake_hair_accounts" && (
+        <div className="overflow-x-auto rounded-lg border border-warm/10">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-warm/[0.04] text-muted uppercase text-xs tracking-wider">
+              <tr>
+                <th className="px-4 py-3">Company</th>
+                <th className="px-4 py-3">Contact</th>
+                <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fakeHairAccounts.map((account) => (
+                <tr key={account.id} className="border-t border-warm/10">
+                  <td className="px-4 py-3 text-cream">{account.company_name}</td>
+                  <td className="px-4 py-3 text-sand">{account.contact_name}</td>
+                  <td className="px-4 py-3 text-sand">{account.email}</td>
+                  <td className={`px-4 py-3 font-medium ${STATUS_STYLES[account.status] ?? "text-muted"}`}>
+                    {account.status}
+                  </td>
+                  <td className="px-4 py-3 text-muted whitespace-nowrap">
+                    {new Date(account.created_at).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+              {fakeHairAccounts.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted">
+                    No fake hair brand accounts yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {tab === "stylist_applications" && (
+        <div className="overflow-x-auto rounded-lg border border-warm/10">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-warm/[0.04] text-muted uppercase text-xs tracking-wider">
+              <tr>
+                <th className="px-4 py-3">Display name</th>
+                <th className="px-4 py-3">Contact</th>
+                <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">City</th>
+                <th className="px-4 py-3">Experience</th>
+                <th className="px-4 py-3">Hair types served</th>
+                <th className="px-4 py-3">Why Qoyl</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Applied</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {stylistApplications.map((app) => (
+                <tr key={app.id} className="border-t border-warm/10 align-top">
+                  <td className="px-4 py-3 text-cream">{app.display_name}</td>
+                  <td className="px-4 py-3 text-sand">{app.contact_name}</td>
+                  <td className="px-4 py-3 text-sand">{app.email}</td>
+                  <td className="px-4 py-3 text-sand">
+                    {app.city}
+                    {app.neighborhood ? `, ${app.neighborhood}` : ""}
+                  </td>
+                  <td className="px-4 py-3 text-sand">
+                    {app.years_experience != null ? `${app.years_experience} yrs` : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-sand">
+                    {app.hair_types_served?.join(", ") || "—"}
+                  </td>
+                  <td className="px-4 py-3 text-sand max-w-xs">{app.why_qoyl || "—"}</td>
+                  <td className={`px-4 py-3 font-medium ${STATUS_STYLES[app.status] ?? "text-muted"}`}>
+                    {app.status}
+                  </td>
+                  <td className="px-4 py-3 text-muted whitespace-nowrap">
+                    {new Date(app.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    {app.status === "pending" ? (
+                      <form action={approveStylistApplication}>
+                        <input type="hidden" name="id" value={app.id} />
+                        <input type="hidden" name="password" value={password} />
+                        <button
+                          type="submit"
+                          className="rounded-full bg-bronze px-4 py-2 text-xs font-medium uppercase tracking-wider text-dark transition-colors hover:bg-bronze2"
+                        >
+                          Approve
+                        </button>
+                      </form>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+              {stylistApplications.length === 0 && (
+                <tr>
+                  <td colSpan={10} className="px-4 py-8 text-center text-muted">
+                    No applications yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {tab === "stylist_accounts" && (
+        <div className="overflow-x-auto rounded-lg border border-warm/10">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-warm/[0.04] text-muted uppercase text-xs tracking-wider">
+              <tr>
+                <th className="px-4 py-3">Display name</th>
+                <th className="px-4 py-3">Contact</th>
+                <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">City</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stylistAccounts.map((account) => (
+                <tr key={account.id} className="border-t border-warm/10">
+                  <td className="px-4 py-3 text-cream">{account.display_name}</td>
+                  <td className="px-4 py-3 text-sand">{account.contact_name}</td>
+                  <td className="px-4 py-3 text-sand">{account.email}</td>
+                  <td className="px-4 py-3 text-sand">{account.city}</td>
+                  <td className={`px-4 py-3 font-medium ${STATUS_STYLES[account.status] ?? "text-muted"}`}>
+                    {account.status}
+                  </td>
+                  <td className="px-4 py-3 text-muted whitespace-nowrap">
+                    {new Date(account.created_at).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+              {stylistAccounts.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-muted">
+                    No stylist accounts yet.
                   </td>
                 </tr>
               )}

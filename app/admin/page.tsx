@@ -44,26 +44,59 @@ export default async function AdminPage({
   }
 
   const supabaseAdmin = getSupabaseAdmin();
-  const [{ data: applications }, { data: accounts }] = await Promise.all([
+  const [
+    { data: brandApplications },
+    { data: brandAccounts },
+    { data: fakeHairApplications },
+    { data: fakeHairAccounts },
+    { data: stylistApplications },
+    { data: stylistAccounts },
+  ] = await Promise.all([
+    supabaseAdmin.from("brand_applications").select("*").order("created_at", { ascending: false }),
+    supabaseAdmin.from("brand_accounts").select("*").order("created_at", { ascending: false }),
     supabaseAdmin
-      .from("brand_applications")
+      .from("fake_hair_brand_applications")
       .select("*")
       .order("created_at", { ascending: false }),
     supabaseAdmin
-      .from("brand_accounts")
+      .from("fake_hair_brand_accounts")
       .select("*")
       .order("created_at", { ascending: false }),
+    supabaseAdmin.from("stylist_applications").select("*").order("created_at", { ascending: false }),
+    supabaseAdmin.from("stylist_accounts").select("*").order("created_at", { ascending: false }),
   ]);
+
+  const VALID_TABS = new Set([
+    "brand_applications",
+    "brand_accounts",
+    "fake_hair_applications",
+    "fake_hair_accounts",
+    "stylist_applications",
+    "stylist_accounts",
+  ]);
+  const initialTab = VALID_TABS.has(searchParams.tab ?? "")
+    ? (searchParams.tab as
+        | "brand_applications"
+        | "brand_accounts"
+        | "fake_hair_applications"
+        | "fake_hair_accounts"
+        | "stylist_applications"
+        | "stylist_accounts")
+    : "brand_applications";
 
   return (
     <div className="min-h-screen px-6 py-12 sm:px-12">
       <h1 className="font-serif text-3xl text-cream mb-8">Admin</h1>
 
       <AdminTabs
-        applications={applications ?? []}
-        accounts={accounts ?? []}
+        brandApplications={brandApplications ?? []}
+        brandAccounts={brandAccounts ?? []}
+        fakeHairApplications={fakeHairApplications ?? []}
+        fakeHairAccounts={fakeHairAccounts ?? []}
+        stylistApplications={stylistApplications ?? []}
+        stylistAccounts={stylistAccounts ?? []}
         password={password}
-        initialTab={searchParams.tab === "accounts" ? "accounts" : "applications"}
+        initialTab={initialTab}
         approvedEmail={searchParams.approved_email ?? null}
         approvalStatus={searchParams.approval_status ?? null}
         errorDetail={searchParams.error_detail ?? null}

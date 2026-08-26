@@ -22,14 +22,30 @@ export default function LoginPage() {
       password,
     });
 
-    setSubmitting(false);
-
     if (signInError) {
+      setSubmitting(false);
       setError("Invalid email or password.");
       return;
     }
 
-    router.push("/dashboard");
+    // One login for all three account types -- route based on whichever
+    // table has a matching row for this email. RLS on each table already
+    // scopes the read to the caller's own row, so this can't be used to
+    // probe other accounts.
+    const [{ data: stylist }, { data: fakeHairBrand }] = await Promise.all([
+      supabase.from("stylist_accounts").select("id").eq("email", email).maybeSingle(),
+      supabase.from("fake_hair_brand_accounts").select("id").eq("email", email).maybeSingle(),
+    ]);
+
+    setSubmitting(false);
+
+    if (stylist) {
+      router.push("/stylist/dashboard");
+    } else if (fakeHairBrand) {
+      router.push("/fake-hair-brand/dashboard");
+    } else {
+      router.push("/dashboard");
+    }
   }
 
   return (
@@ -42,9 +58,10 @@ export default function LoginPage() {
           ← Qoyl Business
         </Link>
 
-        <h1 className="font-serif text-3xl text-cream mt-6 mb-8">
-          Brand login
-        </h1>
+        <h1 className="font-serif text-3xl text-cream mt-6 mb-2">Log in</h1>
+        <p className="mb-8 text-sm text-muted">
+          For brand, stylist, and fake hair brand partner accounts.
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <label className="block">

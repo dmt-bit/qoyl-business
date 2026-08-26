@@ -6,6 +6,7 @@ import {
   scoreTier,
   SCORE_TIER_TEXT_CLASSES,
 } from "@/lib/brandData";
+import { getStyleMatchSignals } from "@/lib/styleSignals";
 
 export const dynamic = "force-dynamic";
 
@@ -91,12 +92,14 @@ function PercentBarList({
 }
 
 export default async function InsightsPage() {
-  const [signals, hairProfiles, ingredientFlags, productRequests] = await Promise.all([
-    getConsumerDemandSignals(),
-    getHairProfileBreakdown(),
-    getIngredientFlagSignals(),
-    getProductRequestSignals(),
-  ]);
+  const [signals, hairProfiles, ingredientFlags, productRequests, styleMatchSignals] =
+    await Promise.all([
+      getConsumerDemandSignals(),
+      getHairProfileBreakdown(),
+      getIngredientFlagSignals(),
+      getProductRequestSignals(),
+      getStyleMatchSignals(),
+    ]);
 
   const lastUpdated = new Date().toLocaleString(undefined, {
     dateStyle: "medium",
@@ -383,6 +386,59 @@ export default async function InsightsPage() {
             Products scoring green for a user&apos;s profile have significantly higher
             purchase intent.
           </p>
+        </section>
+
+        {/* Section 9 -- Style Match signals */}
+        <section className="mt-16 pt-10 mb-8 border-t border-warm/10">
+          <h2 className="font-serif text-2xl text-cream mb-1">Style Match signals</h2>
+          <p className="mb-6 text-xs text-muted">
+            From {styleMatchSignals.totalMatches.toLocaleString()} Style Match
+            {styleMatchSignals.totalMatches === 1 ? "" : "es"} —{" "}
+            {styleMatchSignals.matchesWithKnownCity.toLocaleString()} with a known city.
+            City coverage is limited today since most hair profiles aren&apos;t linked to
+            an account yet.
+          </p>
+
+          <div className="grid gap-10 sm:grid-cols-2">
+            <div>
+              <h3 className="font-serif text-lg text-bronze2 mb-3">
+                Most matched styles by city
+              </h3>
+              <RankedList
+                items={styleMatchSignals.mostMatchedByCity.map((m) => ({
+                  name: `${m.city} — ${m.style}`,
+                  count: m.count,
+                }))}
+              />
+            </div>
+            <div>
+              <h3 className="font-serif text-lg text-bronze2 mb-3">
+                Fake hair demand by style and city
+              </h3>
+              <RankedList
+                items={styleMatchSignals.fakeHairDemandByCity.map((m) => ({
+                  name: `${m.city} — ${m.style}`,
+                  count: m.count,
+                }))}
+              />
+            </div>
+          </div>
+
+          <div className="mt-10 rounded-lg border border-bronze/30 bg-bronze/10 p-6">
+            <p className="text-xs uppercase tracking-wider text-bronze2">
+              Conversion rate — matched to followed through
+            </p>
+            <p className="mt-2 font-serif text-3xl text-cream">
+              {styleMatchSignals.conversionRate.ratePct !== null
+                ? `${styleMatchSignals.conversionRate.ratePct}%`
+                : "—"}
+            </p>
+            <p className="mt-1 text-xs text-sand">
+              {styleMatchSignals.conversionRate.followedThrough} of{" "}
+              {styleMatchSignals.conversionRate.total} matches were followed through
+              on.
+            </p>
+          </div>
         </section>
       </div>
     </div>
