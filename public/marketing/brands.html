@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>qoyl for brands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --k:#0a0a0a;--w:#ffffff;
+  --g1:#f5f5f5;--g2:#e8e8e8;--g4:#aaa;--g6:#666;
+  --gr:#2D7A3D;--am:#C4831A;--rd:#B03030;
+  --f:'Space Grotesk',sans-serif;
+  --m:'Space Mono',monospace;
+}
+body{background:var(--w);color:var(--k);font-family:var(--f);font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased}
+
+/* NAV — minimal, no border */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 32px;
+}
+.logo{font-size:17px;font-weight:700;letter-spacing:-0.5px;text-transform:lowercase;color:var(--k);text-decoration:none}
+.logo-tag{font-family:var(--m);font-size:9px;letter-spacing:.12em;color:var(--g4);margin-left:6px}
+.nav-r{display:flex;gap:20px;align-items:center}
+.nav-r a{font-size:11px;color:var(--g6);text-decoration:none;text-transform:lowercase}
+.nav-r a:last-child{background:var(--k);color:var(--w);padding:7px 16px;font-size:11px;font-weight:500;letter-spacing:.05em}
+
+/* HERO — full bleed black, text only, very dense */
+.hero{
+  background:var(--k);
+  padding:80px 32px 64px;
+  border-top:1px solid var(--k);
+  border-bottom:1px solid var(--k);
+}
+.hero-inner{max-width:1100px;margin:0 auto}
+.hero-pre{
+  font-family:var(--m);font-size:10px;letter-spacing:.18em;
+  color:#555;margin-bottom:40px;text-transform:lowercase;
+}
+.hero-h{
+  font-size:clamp(44px,7vw,96px);
+  font-weight:700;line-height:.92;letter-spacing:-4px;
+  text-transform:lowercase;color:var(--w);
+  margin-bottom:0;
+}
+.hero-h em{font-style:normal;color:#444}
+.hero-split{
+  display:flex;gap:80px;margin-top:56px;
+  align-items:flex-end;flex-wrap:wrap;
+}
+.hero-sub{
+  font-size:14px;color:#888;line-height:1.8;
+  max-width:380px;font-weight:300;flex:1;min-width:240px;
+}
+.hero-actions{
+  display:flex;flex-direction:column;gap:10px;
+  align-items:flex-start;flex-shrink:0;
+}
+.btn-w{background:var(--w);color:var(--k);border:none;padding:13px 28px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:lowercase;text-decoration:none;display:inline-block;font-family:var(--f)}
+.btn-ghost{background:transparent;color:#555;border:1px solid #333;padding:12px 28px;font-size:11px;letter-spacing:.06em;text-transform:lowercase;text-decoration:none;display:inline-block;font-family:var(--f)}
+
+/* TICKER — horizontal scrolling stat bar */
+.ticker{
+  border-bottom:1px solid var(--k);
+  overflow:hidden;white-space:nowrap;
+  padding:14px 0;background:var(--g1);
+}
+.ticker-inner{display:inline-flex;gap:0;animation:tick 20s linear infinite}
+.ticker-item{
+  font-family:var(--m);font-size:10px;letter-spacing:.12em;
+  color:var(--g6);text-transform:lowercase;padding:0 40px;
+  border-right:1px solid var(--g2);
+}
+.ticker-item span{color:var(--k);font-weight:700}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* THREE QUESTIONS — stacked, full width, very large type */
+.questions{border-bottom:1px solid var(--k)}
+.q-row{
+  padding:40px 32px;border-bottom:1px solid var(--g2);
+  display:flex;align-items:center;gap:40px;
+  transition:background .15s;cursor:default;
+}
+.q-row:last-child{border-bottom:none}
+.q-row:hover{background:var(--g1)}
+.q-num{font-family:var(--m);font-size:11px;color:var(--g4);flex-shrink:0;width:24px}
+.q-text{
+  font-size:clamp(18px,2.5vw,28px);font-weight:600;
+  color:var(--k);letter-spacing:-0.5px;text-transform:lowercase;flex:1;
+}
+.q-answer{
+  font-size:12px;color:var(--g6);max-width:340px;line-height:1.65;
+  text-align:right;flex-shrink:0;
+}
+
+/* SCORE DEMO — asymmetric. big score left, explanation right */
+.demo{
+  display:grid;grid-template-columns:1fr 2fr;
+  border-bottom:1px solid var(--k);
+}
+.demo-score{
+  padding:48px 40px;border-right:1px solid var(--k);
+  background:var(--k);display:flex;flex-direction:column;
+  justify-content:center;
+}
+.score-product-name{
+  font-family:var(--m);font-size:10px;letter-spacing:.12em;
+  color:#555;margin-bottom:24px;text-transform:lowercase;
+}
+.score-big{
+  font-family:var(--m);font-size:88px;font-weight:700;
+  line-height:1;color:var(--w);margin-bottom:4px;
+}
+.score-seg-name{
+  font-size:11px;color:#666;text-transform:lowercase;margin-bottom:32px;
+}
+.score-others{display:flex;flex-direction:column;gap:12px}
+.score-other-row{display:flex;align-items:center;gap:12px}
+.score-other-label{font-size:10px;color:#555;text-transform:lowercase;width:120px;flex-shrink:0}
+.score-bar-bg{flex:1;height:2px;background:#222}
+.score-bar-fill{height:100%}
+.score-other-num{font-family:var(--m);font-size:11px;font-weight:700;width:28px;text-align:right}
+
+.demo-right{padding:48px 48px}
+.demo-eyebrow{font-family:var(--m);font-size:9px;letter-spacing:.16em;color:var(--g4);margin-bottom:20px;text-transform:lowercase}
+.demo-h{font-size:clamp(20px,2vw,28px);font-weight:700;letter-spacing:-0.8px;text-transform:lowercase;margin-bottom:16px}
+.demo-body{font-size:13px;color:var(--g6);line-height:1.8;margin-bottom:28px}
+.demo-body strong{color:var(--k);font-weight:500}
+.alert-box{
+  border:1px solid var(--k);padding:16px 20px;
+  background:var(--g1);margin-bottom:20px;
+}
+.alert-label{font-family:var(--m);font-size:9px;letter-spacing:.1em;color:var(--k);margin-bottom:6px;text-transform:lowercase}
+.alert-body{font-size:12px;color:var(--g6);line-height:1.65}
+.alert-body strong{color:var(--k);font-weight:600}
+
+/* THREE INSIGHTS — unconventional: big left numbers */
+.insights{border-bottom:1px solid var(--k)}
+.insight{
+  display:grid;grid-template-columns:120px 1fr 1fr;
+  border-bottom:1px solid var(--g2);min-height:200px;
+}
+.insight:last-child{border-bottom:none}
+.insight-n{
+  padding:40px 32px;border-right:1px solid var(--g2);
+  display:flex;align-items:flex-start;
+}
+.insight-n-text{
+  font-family:var(--m);font-size:56px;font-weight:700;
+  color:var(--g2);line-height:1;writing-mode:vertical-lr;
+  transform:rotate(180deg);letter-spacing:-3px;
+}
+.insight-content{padding:40px 40px;border-right:1px solid var(--g2)}
+.insight-title{font-size:18px;font-weight:700;letter-spacing:-0.5px;text-transform:lowercase;margin-bottom:12px}
+.insight-body{font-size:12px;color:var(--g6);line-height:1.75}
+.insight-body strong{color:var(--k);font-weight:500}
+.insight-example{
+  padding:40px 40px;background:var(--g1);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.eg-label{font-family:var(--m);font-size:9px;letter-spacing:.14em;color:var(--g4);margin-bottom:12px;text-transform:lowercase}
+.eg-text{font-size:13px;color:var(--k);line-height:1.75}
+.eg-text em{font-style:normal;font-weight:600;border-bottom:1px solid var(--k)}
+
+/* INTEGRITY — single column, large text, centered */
+.integrity{
+  max-width:720px;margin:0 auto;
+  padding:96px 32px;text-align:center;
+  border-bottom:1px solid var(--k);
+}
+.integrity-pre{font-family:var(--m);font-size:9px;letter-spacing:.16em;color:var(--g4);margin-bottom:24px;text-transform:lowercase}
+.integrity-h{font-size:clamp(24px,3vw,40px);font-weight:700;letter-spacing:-1.5px;line-height:1.1;text-transform:lowercase;margin-bottom:20px}
+.integrity-body{font-size:14px;color:var(--g6);line-height:1.85;margin-bottom:0}
+.integrity-rules{
+  margin-top:48px;display:grid;grid-template-columns:1fr 1fr;
+  gap:0;border:1px solid var(--k);text-align:left;
+}
+.ir{
+  padding:20px 24px;border-bottom:1px solid var(--g2);
+  border-right:1px solid var(--g2);font-size:12px;
+  color:var(--g6);line-height:1.65;
+}
+.ir:nth-child(2n){border-right:none}
+.ir:nth-last-child(-n+2){border-bottom:none}
+.ir strong{color:var(--k);font-weight:500;display:block;margin-bottom:3px}
+
+/* PRICING — horizontal row, not cards */
+.pricing{border-bottom:1px solid var(--k)}
+.pricing-header{
+  padding:48px 32px 0;display:flex;
+  align-items:flex-end;justify-content:space-between;
+  border-bottom:1px solid var(--k);flex-wrap:wrap;gap:24px;
+  padding-bottom:32px;
+}
+.pricing-h{font-size:clamp(20px,2.5vw,32px);font-weight:700;letter-spacing:-1px;text-transform:lowercase}
+.pricing-note{font-size:12px;color:var(--g6);max-width:340px;line-height:1.65;text-align:right}
+.pricing-tiers{display:grid;grid-template-columns:repeat(3,1fr)}
+.tier{padding:40px 32px;border-right:1px solid var(--k)}
+.tier:last-child{border-right:none}
+.tier.mid{background:var(--k)}
+.tier-name{font-family:var(--m);font-size:9px;letter-spacing:.14em;color:var(--g4);margin-bottom:16px;text-transform:lowercase}
+.tier.mid .tier-name{color:#555}
+.tier-price{font-family:var(--m);font-size:44px;font-weight:700;color:var(--k);line-height:1;margin-bottom:4px}
+.tier.mid .tier-price{color:var(--w)}
+.tier-per{font-family:var(--m);font-size:10px;color:var(--g4);margin-bottom:24px;text-transform:lowercase}
+.tier.mid .tier-per{color:#555}
+.tier-features{list-style:none;margin-bottom:32px}
+.tier-features li{font-size:11px;color:var(--g6);padding:8px 0;border-top:1px solid var(--g2);display:flex;gap:8px;text-transform:lowercase;line-height:1.5}
+.tier.mid .tier-features li{color:#888;border-top-color:#222}
+.tier-features li::before{content:'+';flex-shrink:0}
+.tier-btn{display:block;text-align:center;padding:11px;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:lowercase;font-family:var(--f);text-decoration:none;cursor:pointer;border:1px solid var(--k);color:var(--k);background:transparent}
+.tier.mid .tier-btn{background:var(--w);border-color:var(--w);color:var(--k)}
+.founding{
+  padding:20px 32px;background:var(--g1);
+  font-size:12px;color:var(--g6);line-height:1.7;
+}
+.founding strong{color:var(--k);font-weight:500}
+
+/* FOOTER NAV — directory style */
+.footer-nav{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  border-top:1px solid var(--k);
+}
+.fn-col{padding:32px;border-right:1px solid var(--k)}
+.fn-col:last-child{border-right:none}
+.fn-label{font-family:var(--m);font-size:9px;letter-spacing:.14em;color:var(--g4);margin-bottom:16px;text-transform:lowercase}
+.fn-link{display:block;font-size:12px;color:var(--g6);text-decoration:none;padding:4px 0;text-transform:lowercase}
+.fn-link:hover{color:var(--k)}
+.fn-primary{font-size:13px;font-weight:500;color:var(--k)}
+.fn-note{font-family:var(--m);font-size:9px;color:var(--g2);padding:16px 32px;border-top:1px solid var(--g2);text-transform:lowercase}
+
+@media(max-width:768px){
+  nav{padding:14px 20px}
+  .nav-r a:not(:last-child){display:none}
+  .hero{padding:56px 20px 48px}
+  .hero-h{letter-spacing:-2px}
+  .hero-split{gap:32px;margin-top:40px}
+  .q-row{flex-direction:column;align-items:flex-start;gap:12px}
+  .q-answer{text-align:left;max-width:100%}
+  .demo{grid-template-columns:1fr}
+  .demo-score{border-right:none;border-bottom:1px solid var(--k)}
+  .insight{grid-template-columns:1fr}
+  .insight-n{display:none}
+  .insight-content{border-right:none;border-bottom:1px solid var(--g2);padding:32px 20px}
+  .insight-example{padding:28px 20px}
+  .integrity{padding:64px 20px}
+  .integrity-rules{grid-template-columns:1fr}
+  .ir:nth-child(2n){border-right:1px solid var(--g2)}
+  .ir:nth-last-child(-n+2){border-bottom:1px solid var(--g2)}
+  .ir:last-child{border-bottom:none}
+  .pricing-header{padding:32px 20px}
+  .pricing-tiers{grid-template-columns:1fr}
+  .tier{border-right:none;border-bottom:1px solid var(--k)}
+  .tier:last-child{border-bottom:none}
+  .founding{padding:16px 20px}
+  .footer-nav{grid-template-columns:1fr}
+  .fn-col{border-right:none;border-bottom:1px solid var(--g2);padding:24px 20px}
+  .fn-col:last-child{border-bottom:none}
+  .fn-note{padding:14px 20px}
+  .demo-right{padding:32px 20px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div>
+    <a href="/" class="logo">qoyl</a>
+    <span class="logo-tag">for brands</span>
+  </div>
+  <div class="nav-r">
+    <a href="/stylists">for stylists</a>
+    <a href="/hair-sellers">for hair sellers</a>
+    <a href="https://qoyl.live">consumer app</a>
+    <a href="/login">log in</a>
+    <a href="/apply">apply for access</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-pre">brand intelligence · ingredient-level · real consumer data</div>
+    <h1 class="hero-h">
+      your formula<br>
+      <em>is right</em><br>
+      for someone.
+    </h1>
+    <div class="hero-split">
+      <p class="hero-sub">qoyl scores products against real consumer hair profiles — curl type, porosity, scalp condition, climate, water hardness. your dashboard shows who your formula wins with, which ingredient is costing you customers, and where your product actually performs.</p>
+      <div class="hero-actions">
+        <a href="/apply" class="btn-w">apply for brand access →</a>
+        <a href="#demo" class="btn-ghost">see what the data looks like</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-inner">
+    <span class="ticker-item"><span>82%</span> ingredient coverage</span>
+    <span class="ticker-item"><span>850+</span> ingredients scored</span>
+    <span class="ticker-item"><span>8</span> scoring variables per product</span>
+    <span class="ticker-item"><span>porosity</span> · <span>curl type</span> · <span>scalp</span> · <span>climate</span> · <span>water hardness</span> · <span>age</span> · <span>concerns</span> · <span>season</span></span>
+    <span class="ticker-item"><span>$5,000</span> focus group → <span>$250</span>/month dashboard</span>
+    <span class="ticker-item"><span>82%</span> ingredient coverage</span>
+    <span class="ticker-item"><span>850+</span> ingredients scored</span>
+    <span class="ticker-item"><span>8</span> scoring variables per product</span>
+    <span class="ticker-item"><span>porosity</span> · <span>curl type</span> · <span>scalp</span> · <span>climate</span> · <span>water hardness</span> · <span>age</span> · <span>concerns</span> · <span>season</span></span>
+    <span class="ticker-item"><span>$5,000</span> focus group → <span>$250</span>/month dashboard</span>
+  </div>
+</div>
+
+<section class="questions">
+  <div class="q-row">
+    <div class="q-num">01</div>
+    <div class="q-text">which ingredient is costing you customers?</div>
+    <div class="q-answer">not a guess. your dashboard names the specific ingredient flagged for specific consumer segments — and shows the swap that would close the gap.</div>
+  </div>
+  <div class="q-row">
+    <div class="q-num">02</div>
+    <div class="q-text">which customers was your formula made for?</div>
+    <div class="q-answer">not "curly hair" — 30% of the population. specifically which curl types, porosity levels, scalp conditions, and climate zones your formula scores well for.</div>
+  </div>
+  <div class="q-row">
+    <div class="q-num">03</div>
+    <div class="q-text">where in the country does your formula win?</div>
+    <div class="q-answer">water hardness and climate vary by zip code. your formula that works in seattle may fail in phoenix. qoyl maps your performance to geography.</div>
+  </div>
+</section>
+
+<section class="demo" id="demo">
+  <div class="demo-score">
+    <div class="score-product-name">moisture curl cream · sample analysis</div>
+    <div class="score-big">91</div>
+    <div class="score-seg-name">4a · high porosity · humid · atlanta</div>
+    <div class="score-others">
+      <div class="score-other-row">
+        <div class="score-other-label">4b low porosity</div>
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:54%;background:var(--am)"></div></div>
+        <div class="score-other-num" style="color:var(--am)">54</div>
+      </div>
+      <div class="score-other-row">
+        <div class="score-other-label">2c medium porosity</div>
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:68%;background:#555"></div></div>
+        <div class="score-other-num" style="color:#555">68</div>
+      </div>
+      <div class="score-other-row">
+        <div class="score-other-label">1b fine · dry climate</div>
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:31%;background:var(--rd)"></div></div>
+        <div class="score-other-num" style="color:var(--rd)">31</div>
+      </div>
+    </div>
+  </div>
+  <div class="demo-right">
+    <div class="demo-eyebrow">what your dashboard shows</div>
+    <h2 class="demo-h">the same product. four different customers. four completely different scores.</h2>
+    <p class="demo-body">the 91 is real — your formula wins for 4a high porosity users in humid climates. the 31 is also real. <strong>propylene glycol at position 3</strong> creates a film on low porosity cuticles that prevents moisture absorption. the 1b fine hair user in a dry climate is not the customer your formula was made for.</p>
+    <div class="alert-box">
+      <div class="alert-label">formulation gap · high impact</div>
+      <div class="alert-body"><strong>propylene glycol at position 3</strong> is flagging for 4b low porosity profiles in dry climates — 623 profiles affected in your search data. swapping to sodium pca is projected to move this segment from 54 → 76. this is what a cosmetic chemist charges $5,000 to tell you.</div>
+    </div>
+  </div>
+</section>
+
+<section class="insights">
+  <div class="insight">
+    <div class="insight-n"><div class="insight-n-text">01</div></div>
+    <div class="insight-content">
+      <h3 class="insight-title">which customers your formula was made for</h3>
+      <p class="insight-body">not a category. specifically: which curl types, porosity levels, scalp conditions, and climate zones your formula scores well for. <strong>now you can market to the right customer</strong> instead of hoping they find you.</p>
+    </div>
+    <div class="insight-example">
+      <div class="eg-label">what this looks like</div>
+      <p class="eg-text">your deep conditioner scores <em>91/100 for 4a high porosity in humid climates</em> — atlanta, houston, miami. it scores <em>54/100 for 4b low porosity in dry climates</em>. your instagram spend is going to chicago influencers. your formula wins in atlanta.</p>
+    </div>
+  </div>
+  <div class="insight">
+    <div class="insight-n"><div class="insight-n-text">02</div></div>
+    <div class="insight-content">
+      <h3 class="insight-title">which ingredient is costing you customers</h3>
+      <p class="insight-body">qoyl identifies the specific ingredient flagged for specific segments — and shows the swap that closes the gap. <strong>this is what a cosmetic chemist charges $5,000 to produce.</strong> qoyl produces it automatically.</p>
+    </div>
+    <div class="insight-example">
+      <div class="eg-label">real insight example</div>
+      <p class="eg-text">propylene glycol at position 3 is flagging for <em>34% of the hair profiles</em> in our database. swapping to sodium pca would move this segment from <em>54 → an estimated 79.</em></p>
+    </div>
+  </div>
+  <div class="insight">
+    <div class="insight-n"><div class="insight-n-text">03</div></div>
+    <div class="insight-content">
+      <h3 class="insight-title">where your formula actually wins — by city</h3>
+      <p class="insight-body">water hardness and climate vary dramatically by geography. your formula that works beautifully in seattle may fail in indianapolis. <strong>qoyl maps your performance to zip codes</strong> so your marketing spend goes where your formula wins.</p>
+    </div>
+    <div class="insight-example">
+      <div class="eg-label">geographic demand signal</div>
+      <p class="eg-text">your curl butter is being searched primarily in <em>atlanta and houston</em> — high humidity markets where your formula performs well. chicago has hard water and your formula has no chelating agents. <em>relocate your ad spend.</em></p>
+    </div>
+  </div>
+</section>
+
+<section class="integrity">
+  <div class="integrity-pre">on data integrity</div>
+  <h2 class="integrity-h">the score is the score. no exceptions.</h2>
+  <p class="integrity-body">a platform that adjusts scores for paying brands produces data that no one trusts. qoyl produces data that brands use to make real formulation decisions — because the score reflects the science, not the commercial relationship.</p>
+  <div class="integrity-rules">
+    <div class="ir"><strong>scores are algorithmic</strong>computed from ingredient properties. no editorial override, no exceptions for paying partners.</div>
+    <div class="ir"><strong>paying buys data</strong>paying for a dashboard gives you insight into your scores. it does not change your scores.</div>
+    <div class="ir"><strong>profiles are anonymized</strong>dashboards show aggregate patterns. never individual user data.</div>
+    <div class="ir"><strong>gaps are reported</strong>if your formula has a formulation gap, your dashboard will tell you. that is the point.</div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="pricing-header">
+    <h2 class="pricing-h">pricing that reflects where you are</h2>
+    <p class="pricing-note">flat monthly rate. no platform fees. no percentage of revenue. data that improves your formula.</p>
+  </div>
+  <div class="pricing-tiers">
+    <div class="tier">
+      <div class="tier-name">early stage · 1-5 products</div>
+      <div class="tier-price">$50<span style="font-size:16px;font-weight:400">/mo</span></div>
+      <div class="tier-per">founding partner rate · locks 12 months</div>
+      <ul class="tier-features">
+        <li>ingredient performance scores across all hair profiles</li>
+        <li>top and bottom performing consumer segments</li>
+        <li>monthly demand signal report by city</li>
+        <li>products featured in style match shopping lists</li>
+        <li>founding partner badge on consumer profile</li>
+      </ul>
+      <a href="/apply" class="tier-btn">apply as founding partner</a>
+    </div>
+    <div class="tier mid">
+      <div class="tier-name">growth · 6-20 products</div>
+      <div class="tier-price">$250<span style="font-size:16px;font-weight:400">/mo</span></div>
+      <div class="tier-per">for established brands</div>
+      <ul class="tier-features">
+        <li>everything in early stage</li>
+        <li>reformulation signals — specific ingredient swap suggestions</li>
+        <li>competitor comparison data</li>
+        <li>priority product listing in search and recommendations</li>
+        <li>quarterly strategy call</li>
+        <li>featured placement in style match results</li>
+      </ul>
+      <a href="/apply" class="tier-btn">apply for access</a>
+    </div>
+    <div class="tier">
+      <div class="tier-name">enterprise · custom</div>
+      <div class="tier-price">$750<span style="font-size:16px;font-weight:400">/mo</span></div>
+      <div class="tier-per">full catalog · api access</div>
+      <ul class="tier-features">
+        <li>everything in growth</li>
+        <li>full catalog scored — unlimited skus</li>
+        <li>custom segment reports by request</li>
+        <li>api access to scoring data</li>
+        <li>co-marketing on qoyl consumer platform</li>
+        <li>monthly executive briefing</li>
+      </ul>
+      <a href="mailto:hey@qoyl.live" class="tier-btn">contact us</a>
+    </div>
+  </div>
+  <div class="founding"><strong>founding partner rate:</strong> the first 10 brand partners lock in at $50/month for 12 months. by the time the platform reaches 10,000 consumers, you will have 12 months of your products scored against real profiles while competitors have zero data.</div>
+</section>
+
+<div class="footer-nav">
+  <div class="fn-col">
+    <div class="fn-label">qoyl business</div>
+    <a href="/" class="fn-link fn-primary">for brands</a>
+    <a href="/stylists" class="fn-link">for stylists</a>
+    <a href="/hair-sellers" class="fn-link">for hair sellers</a>
+    <a href="/apply" class="fn-link">apply for access</a>
+  </div>
+  <div class="fn-col">
+    <div class="fn-label">qoyl consumer</div>
+    <a href="https://qoyl.live" class="fn-link">qoyl.live</a>
+    <a href="https://qoyl.live/how-we-score" class="fn-link">how we score</a>
+    <a href="/privacy" class="fn-link">privacy policy</a>
+  </div>
+  <div class="fn-col">
+    <div class="fn-label">contact</div>
+    <a href="mailto:hey@qoyl.live" class="fn-link fn-primary">hey@qoyl.live</a>
+    <a href="/login" class="fn-link">brand login</a>
+    <p style="margin-top:16px;font-size:11px;color:var(--g6);line-height:1.6">every message read personally.</p>
+  </div>
+</div>
+<div class="fn-note">qoyl provides cosmetic hair care information only. not a substitute for professional medical advice. brand intelligence data reflects aggregate consumer behavior on the qoyl platform. © 2026 qoyl</div>
+
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>qoyl for hair sellers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --k:#0a0a0a;--w:#ffffff;
+  --g1:#f5f5f5;--g2:#e8e8e8;--g4:#aaa;--g6:#666;
+  --f:'Space Grotesk',sans-serif;--m:'Space Mono',monospace;
+}
+body{background:var(--w);color:var(--k);font-family:var(--f);font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased}
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid var(--k)}
+.logo{font-size:17px;font-weight:700;letter-spacing:-0.5px;text-transform:lowercase;color:var(--k);text-decoration:none}
+.logo-tag{font-family:var(--m);font-size:9px;letter-spacing:.12em;color:var(--g4);margin-left:6px}
+.nav-r{display:flex;gap:20px;align-items:center}
+.nav-r a{font-size:11px;color:var(--g6);text-decoration:none;text-transform:lowercase}
+.nav-r a:last-child{background:var(--k);color:var(--w);padding:7px 16px;font-size:11px;font-weight:500;letter-spacing:.05em}
+
+/* HERO — shopping list demo IS the hero. no fluff. */
+.hero{
+  display:grid;grid-template-columns:1fr 360px;
+  border-bottom:1px solid var(--k);min-height:90vh;
+}
+.hero-left{
+  padding:64px 48px;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.hero-pre{font-family:var(--m);font-size:10px;letter-spacing:.18em;color:var(--g4);margin-bottom:36px;text-transform:lowercase}
+.hero-h{
+  font-size:clamp(36px,5.5vw,72px);font-weight:700;
+  line-height:.95;letter-spacing:-3px;text-transform:lowercase;
+  margin-bottom:32px;
+}
+.hero-stats{display:flex;gap:0;border:1px solid var(--k);margin-bottom:36px}
+.hero-stat{flex:1;padding:16px 20px;border-right:1px solid var(--k)}
+.hero-stat:last-child{border-right:none}
+.hero-stat-n{font-family:var(--m);font-size:22px;font-weight:700;line-height:1;margin-bottom:3px}
+.hero-stat-l{font-family:var(--m);font-size:9px;color:var(--g4);letter-spacing:.06em;text-transform:lowercase}
+.hero-sub{font-size:14px;color:var(--g6);line-height:1.8;max-width:440px;margin-bottom:32px;font-weight:300}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn-k{background:var(--k);color:var(--w);border:none;padding:13px 28px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:lowercase;text-decoration:none;display:inline-block;font-family:var(--f)}
+.btn-o{background:transparent;color:var(--k);border:1px solid var(--k);padding:12px 24px;font-size:11px;letter-spacing:.06em;text-transform:lowercase;text-decoration:none;display:inline-block;font-family:var(--f)}
+
+/* HERO RIGHT — shopping list, no padding, flush */
+.hero-right{border-left:1px solid var(--k);background:var(--g1);display:flex;flex-direction:column;justify-content:flex-start;padding:32px 24px}
+.list-label{font-family:var(--m);font-size:9px;letter-spacing:.14em;color:var(--g4);margin-bottom:12px;text-transform:lowercase}
+.list-title-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--k);margin-bottom:1px}
+.list-style{font-size:12px;font-weight:600;color:var(--w);text-transform:lowercase}
+.list-profile{font-family:var(--m);font-size:9px;color:#555}
+.list-item{
+  background:var(--w);border-left:1px solid var(--k);
+  border-right:1px solid var(--k);border-bottom:1px solid var(--g2);
+  padding:12px 16px;display:flex;gap:12px;align-items:flex-start;
+}
+.list-item:last-of-type{border-bottom:1px solid var(--k)}
+.li-cat{font-family:var(--m);font-size:8px;color:var(--g4);letter-spacing:.08em;text-transform:lowercase;width:72px;flex-shrink:0;padding-top:2px}
+.li-body{flex:1}
+.li-name{font-size:12px;font-weight:500;color:var(--k);text-transform:lowercase;margin-bottom:2px}
+.li-sub{font-size:10px;color:var(--g6);text-transform:lowercase}
+.li-badge{font-family:var(--m);font-size:8px;padding:3px 8px;flex-shrink:0}
+.badge-on{background:var(--k);color:var(--w)}
+.badge-off{border:1px solid var(--g2);color:var(--g4)}
+.list-note{
+  margin-top:8px;padding:12px 16px;
+  border:1px solid var(--g2);background:var(--w);
+  font-size:11px;color:var(--g6);line-height:1.6;
+}
+.list-note strong{color:var(--k);font-weight:500}
+
+/* PROBLEM STATEMENTS — full width text rows, no cards */
+.problems{border-bottom:1px solid var(--k)}
+.problem{
+  display:grid;grid-template-columns:1fr 1fr;
+  border-bottom:1px solid var(--g2);
+  padding:40px 48px;gap:80px;align-items:start;
+}
+.problem:last-child{border-bottom:none}
+.problem-q{
+  font-size:clamp(16px,2vw,22px);font-weight:600;
+  color:var(--k);letter-spacing:-0.5px;text-transform:lowercase;line-height:1.35;
+}
+.problem-a{font-size:13px;color:var(--g6);line-height:1.8}
+
+/* COLOR MATCHING — full bleed black section */
+.color-section{
+  background:var(--k);
+  border-bottom:1px solid var(--k);
+  padding:64px 48px;
+}
+.color-pre{font-family:var(--m);font-size:10px;letter-spacing:.18em;color:#444;margin-bottom:28px;text-transform:lowercase}
+.color-h{
+  font-size:clamp(28px,4vw,56px);font-weight:700;
+  letter-spacing:-2px;line-height:1.0;text-transform:lowercase;
+  color:var(--w);margin-bottom:20px;max-width:700px;
+}
+.color-sub{font-size:14px;color:#888;line-height:1.8;max-width:540px;margin-bottom:48px}
+.color-table{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#333}
+.color-row{background:var(--k);padding:20px 24px}
+.color-row-detected{font-family:var(--m);font-size:9px;letter-spacing:.1em;color:#444;margin-bottom:6px;text-transform:lowercase}
+.color-row-value{font-size:13px;color:var(--w);margin-bottom:8px;font-weight:500;text-transform:lowercase}
+.color-row-matches{font-size:11px;color:#666;text-transform:lowercase;line-height:1.6}
+.color-row-matches strong{color:#888;font-weight:400}
+
+/* HOW TO LIST — numbered steps, full width */
+.steps-section{border-bottom:1px solid var(--k)}
+.steps-header{padding:48px 48px 0;border-bottom:1px solid var(--k)}
+.steps-h{font-size:clamp(20px,2.5vw,32px);font-weight:700;letter-spacing:-1px;text-transform:lowercase;margin-bottom:32px}
+.steps-grid{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--k)}
+.step{padding:36px 40px;border-bottom:1px solid var(--g2);border-right:1px solid var(--k)}
+.step:nth-child(2n){border-right:none}
+.step:nth-last-child(-n+2){border-bottom:none}
+.step-n{font-family:var(--m);font-size:32px;font-weight:700;color:var(--g2);line-height:1;margin-bottom:12px}
+.step-title{font-size:15px;font-weight:600;color:var(--k);text-transform:lowercase;letter-spacing:-0.2px;margin-bottom:8px}
+.step-body{font-size:12px;color:var(--g6);line-height:1.7;text-transform:lowercase}
+
+/* PRICING — different approach: comparison table style */
+.pricing{border-bottom:1px solid var(--k)}
+.pricing-top{padding:48px 48px 0;border-bottom:1px solid var(--k)}
+.pricing-h{font-size:clamp(20px,2.5vw,32px);font-weight:700;letter-spacing:-1px;text-transform:lowercase;margin-bottom:8px}
+.pricing-sub{font-size:13px;color:var(--g6);margin-bottom:32px}
+.pricing-table{width:100%;border-collapse:collapse}
+.pt-head{background:var(--g1)}
+.pt-head th{padding:14px 20px;font-family:var(--m);font-size:9px;letter-spacing:.1em;color:var(--g6);text-transform:lowercase;font-weight:400;border-bottom:1px solid var(--k);border-right:1px solid var(--g2);text-align:left}
+.pt-head th:last-child{border-right:none}
+.pt-head th.tier{font-size:13px;font-weight:700;color:var(--k);font-family:var(--f)}
+.pt-head th.tier.mid{background:var(--k);color:var(--w)}
+.pt-row td{padding:14px 20px;font-size:12px;color:var(--g6);border-bottom:1px solid var(--g2);border-right:1px solid var(--g2);vertical-align:top;text-transform:lowercase}
+.pt-row td:last-child{border-right:none}
+.pt-row td.mid{background:#fafafa}
+.pt-row:last-child td{border-bottom:none}
+.pt-check{color:var(--k);font-weight:500}
+.pt-dash{color:var(--g2)}
+.pricing-cta-row{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--k)}
+.pt-cta{padding:24px;border-right:1px solid var(--k);display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.pt-cta:last-child{border-right:none}
+.pt-cta.mid{background:var(--k)}
+.pt-price{font-family:var(--m);font-size:28px;font-weight:700;color:var(--k)}
+.pt-cta.mid .pt-price{color:var(--w)}
+.pt-per{font-family:var(--m);font-size:9px;color:var(--g4);text-transform:lowercase}
+.pt-cta.mid .pt-per{color:#555}
+.pt-btn{display:inline-block;padding:10px 20px;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:lowercase;font-family:var(--f);text-decoration:none;border:1px solid var(--k);color:var(--k);background:transparent;margin-top:4px}
+.pt-cta.mid .pt-btn{background:var(--w);border-color:var(--w);color:var(--k)}
+
+/* CTA STRIP */
+.cta-strip{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:40px 48px;border-bottom:1px solid var(--k);
+  flex-wrap:wrap;gap:24px;background:var(--g1);
+}
+.cta-strip-left{}
+.cta-strip-h{font-size:clamp(18px,2vw,26px);font-weight:700;letter-spacing:-0.8px;text-transform:lowercase;margin-bottom:6px}
+.cta-strip-sub{font-size:13px;color:var(--g6)}
+
+.footer-nav{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--k)}
+.fn-col{padding:32px;border-right:1px solid var(--k)}
+.fn-col:last-child{border-right:none}
+.fn-label{font-family:var(--m);font-size:9px;letter-spacing:.14em;color:var(--g4);margin-bottom:16px;text-transform:lowercase}
+.fn-link{display:block;font-size:12px;color:var(--g6);text-decoration:none;padding:4px 0;text-transform:lowercase}
+.fn-link:hover{color:var(--k)}
+.fn-primary{font-size:13px;font-weight:500;color:var(--k)}
+.fn-note{font-family:var(--m);font-size:9px;color:var(--g2);padding:16px 32px;border-top:1px solid var(--g2);text-transform:lowercase}
+
+@media(max-width:768px){
+  nav{padding:14px 20px}
+  .nav-r a:not(:last-child){display:none}
+  .hero{grid-template-columns:1fr;min-height:auto}
+  .hero-left{padding:48px 20px;border-bottom:none}
+  .hero-right{border-left:none;border-top:1px solid var(--k);padding:24px 20px}
+  .problem{grid-template-columns:1fr;padding:32px 20px;gap:16px}
+  .color-section{padding:48px 20px}
+  .color-table{grid-template-columns:1fr}
+  .steps-header{padding:32px 20px 0}
+  .steps-grid{grid-template-columns:1fr}
+  .step{border-right:none;border-bottom:1px solid var(--g2);padding:28px 20px}
+  .step:last-child{border-bottom:none}
+  .pricing-top{padding:32px 20px 0}
+  .pricing-cta-row{grid-template-columns:1fr}
+  .pt-cta{border-right:none;border-bottom:1px solid var(--g2)}
+  .pt-cta:last-child{border-bottom:none}
+  .cta-strip{padding:32px 20px}
+  .footer-nav{grid-template-columns:1fr}
+  .fn-col{border-right:none;border-bottom:1px solid var(--g2);padding:24px 20px}
+  .fn-note{padding:14px 20px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div>
+    <a href="/" class="logo">qoyl</a>
+    <span class="logo-tag">for hair sellers</span>
+  </div>
+  <div class="nav-r">
+    <a href="/">for brands</a>
+    <a href="/stylists">for stylists</a>
+    <a href="https://qoyl.live">consumer app</a>
+    <a href="/login">log in</a>
+    <a href="/apply/fake-hair-brand">list my catalog</a>
+  </div>
+</nav>
+
+<!-- HERO: product demo is the hero -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-pre">qoyl · style match placement</div>
+    <h1 class="hero-h">your hair in the cart before they leave the app.</h1>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-n">100%</div>
+        <div class="hero-stat-l">purchase intent</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-n">8</div>
+        <div class="hero-stat-l">match variables</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-n">0%</div>
+        <div class="hero-stat-l">commission on sales</div>
+      </div>
+    </div>
+    <p class="hero-sub">every style match that requires added hair generates a shopping list. right now that list links to a generic amazon search. your brand's specific products — matched by color, texture, and heat rating — appear instead.</p>
+    <div class="hero-actions">
+      <a href="/apply/fake-hair-brand" class="btn-k">list my catalog →</a>
+      <a href="#matching" class="btn-o">see how matching works</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="list-label">style match shopping list · live</div>
+    <div class="list-title-row">
+      <span class="list-style">knotless braids · waist length</span>
+      <span class="list-profile">4b · color 1b detected</span>
+    </div>
+    <div class="list-item">
+      <div class="li-cat">braiding hair</div>
+      <div class="li-body">
+        <div class="li-name">x-pression ultra braid — 1b</div>
+        <div class="li-sub">5 packs recommended · color matched · $4.99/pack</div>
+      </div>
+      <div class="li-badge badge-on">featured</div>
+    </div>
+    <div class="list-item">
+      <div class="li-cat">edge control</div>
+      <div class="li-body">
+        <div class="li-name">eco style olive oil gel</div>
+        <div class="li-sub">scored 81/100 for 4b high porosity</div>
+      </div>
+      <div class="li-badge badge-on">matched</div>
+    </div>
+    <div class="list-item">
+      <div class="li-cat">scalp oil</div>
+      <div class="li-body">
+        <div class="li-name">mielle rosemary mint scalp oil</div>
+        <div class="li-sub">scored 92/100 · thinning concern flag</div>
+      </div>
+      <div class="li-badge badge-on">matched</div>
+    </div>
+    <div class="list-item">
+      <div class="li-cat">braiding hair</div>
+      <div class="li-body">
+        <div class="li-name">generic amazon search</div>
+        <div class="li-sub">no catalog match found for this color</div>
+      </div>
+      <div class="li-badge badge-off">unmatched</div>
+    </div>
+    <div class="list-note"><strong>color 1b detected from selfie.</strong> x-pression listed 1b in their color catalog. matched automatically — no manual curation by qoyl.</div>
+  </div>
+</section>
+
+<!-- THREE PROBLEMS -->
+<section class="problems">
+  <div class="problem">
+    <div class="problem-q">"i love this hair but which color do i get for my natural hair?"</div>
+    <div class="problem-a">color matching is the biggest conversion barrier for fake hair. qoyl detects the user's natural hair color from their selfie and matches it to your catalog automatically. you list the colors you carry. qoyl does the matching.</div>
+  </div>
+  <div class="problem">
+    <div class="problem-q">"bought 4 packs and needed 7. had to order more and wait."</div>
+    <div class="problem-a">pack count uncertainty causes returns and kills repeat purchases. qoyl calculates exact pack count based on the user's desired length and hair density — and attributes the recommendation to your brand's product specifically.</div>
+  </div>
+  <div class="problem">
+    <div class="problem-q">"i only ever see the same three brands when i search."</div>
+    <div class="problem-a">amazon and tiktok surface brands with ad budgets. qoyl surfaces brands whose product specifications match the user's exact style, color, and texture needs — regardless of who spends more on ads.</div>
+  </div>
+</section>
+
+<!-- COLOR MATCHING — full bleed black -->
+<section class="color-section">
+  <div class="color-pre">color matching system</div>
+  <h2 class="color-h">selfie analysis → catalog match → right product in the cart.</h2>
+  <p class="color-sub">when a qoyl user uploads a selfie for style match, we detect their natural hair color and map it to compatible extension color codes. your catalog lists which colors you carry. the rest is automatic.</p>
+  <div class="color-table">
+    <div class="color-row">
+      <div class="color-row-detected">detected: black natural hair</div>
+      <div class="color-row-value">jet black · natural black</div>
+      <div class="color-row-matches"><strong>extension colors:</strong> 1 jet black · 1b off-black</div>
+    </div>
+    <div class="color-row">
+      <div class="color-row-detected">detected: dark brown natural hair</div>
+      <div class="color-row-value">darkest brown · off-black</div>
+      <div class="color-row-matches"><strong>extension colors:</strong> 1b · 2 darkest brown · 4 dark brown · 1b/27 ombre</div>
+    </div>
+    <div class="color-row">
+      <div class="color-row-detected">detected: medium brown natural hair</div>
+      <div class="color-row-value">medium to dark brown</div>
+      <div class="color-row-matches"><strong>extension colors:</strong> 4 dark brown · 6 medium brown · 27 honey · 4/27 ombre</div>
+    </div>
+    <div class="color-row">
+      <div class="color-row-detected">detected: light brown / highlighted</div>
+      <div class="color-row-value">warm brown · highlighted</div>
+      <div class="color-row-matches"><strong>extension colors:</strong> 27 honey blonde · 30 auburn · 6/27 · 4/30 ombre</div>
+    </div>
+    <div class="color-row">
+      <div class="color-row-detected">detected: red / auburn tones</div>
+      <div class="color-row-value">reddish brown · auburn</div>
+      <div class="color-row-matches"><strong>extension colors:</strong> 30 auburn · 33 dark auburn · 350 ginger · 1b/30</div>
+    </div>
+    <div class="color-row">
+      <div class="color-row-detected">detected: blonde / very light</div>
+      <div class="color-row-value">blonde · platinum · highlighted</div>
+      <div class="color-row-matches"><strong>extension colors:</strong> 613 blonde · 27 honey · 60 platinum · bleach blonde</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO LIST YOUR CATALOG -->
+<section class="steps-section" id="matching">
+  <div class="steps-header">
+    <h2 class="steps-h">listing your catalog takes under 10 minutes.</h2>
+  </div>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-n">01</div>
+      <div class="step-title">create your seller account</div>
+      <div class="step-body">sign up at business.qoyl.live — no approval required. standard listing is live the same day. featured placement reviewed within 24 hours.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">02</div>
+      <div class="step-title">add your products</div>
+      <div class="step-body">name, hair type (braiding, crochet, wig, clip-in), compatible styles, available colors, price per pack, and your product url or amazon link.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">03</div>
+      <div class="step-title">upload your color catalog</div>
+      <div class="step-body">list every colorway you carry and what natural hair shades it's compatible with. qoyl handles the matching logic automatically from there.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">04</div>
+      <div class="step-title">your products go live</div>
+      <div class="step-body">when a user matches a style that requires your product type and their detected color matches yours, your brand surfaces in the shopping list instead of the generic link.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING — table style -->
+<section class="pricing">
+  <div class="pricing-top">
+    <h2 class="pricing-h">two tiers. no booking fees. no commission.</h2>
+    <p class="pricing-sub">flat monthly rate. every purchase through your link goes entirely to you.</p>
+    <table class="pricing-table">
+      <thead class="pt-head">
+        <tr>
+          <th style="width:40%">what's included</th>
+          <th class="tier">standard listing</th>
+          <th class="tier mid">featured placement</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="pt-row"><td>full catalog listing — unlimited products</td><td class="pt-check">✓</td><td class="mid pt-check">✓</td></tr>
+        <tr class="pt-row"><td>automated color matching from selfie</td><td class="pt-check">✓</td><td class="mid pt-check">✓</td></tr>
+        <tr class="pt-row"><td>pack count recommendation per product</td><td class="pt-check">✓</td><td class="mid pt-check">✓</td></tr>
+        <tr class="pt-row"><td>placement in style match shopping lists</td><td class="pt-check">✓</td><td class="mid pt-check">✓</td></tr>
+        <tr class="pt-row"><td>human vs synthetic preference filter</td><td class="pt-check">✓</td><td class="mid pt-check">✓</td></tr>
+        <tr class="pt-row"><td>monthly impression and click report</td><td class="pt-check">✓</td><td class="mid pt-check">✓</td></tr>
+        <tr class="pt-row"><td>priority position — top of shopping list</td><td class="pt-dash">–</td><td class="mid pt-check">✓</td></tr>
+        <tr class="pt-row"><td>featured badge on product card</td><td class="pt-dash">–</td><td class="mid pt-check">✓</td></tr>
+        <tr class="pt-row"><td>inclusion in qoyl social and newsletter</td><td class="pt-dash">–</td><td class="mid pt-check">✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pricing-cta-row">
+    <div class="pt-cta">
+      <div style="font-family:var(--m);font-size:9px;letter-spacing:.12em;color:var(--g4);text-transform:lowercase">standard listing</div>
+      <div class="pt-price">$25<span style="font-size:16px;font-weight:400">/mo</span></div>
+      <div class="pt-per">flat rate · no commission on sales</div>
+      <a href="/apply/fake-hair-brand" class="pt-btn">list my catalog</a>
+    </div>
+    <div class="pt-cta mid">
+      <div style="font-family:var(--m);font-size:9px;letter-spacing:.12em;color:#555;text-transform:lowercase">featured placement</div>
+      <div class="pt-price">$50<span style="font-size:16px;font-weight:400">/mo</span></div>
+      <div class="pt-per">priority listing · top of shopping list when matched</div>
+      <a href="/apply/fake-hair-brand" class="pt-btn">get featured</a>
+    </div>
+    <div class="pt-cta">
+      <div style="font-family:var(--m);font-size:9px;letter-spacing:.12em;color:var(--g4);text-transform:lowercase">questions?</div>
+      <div style="font-size:16px;font-weight:600;color:var(--k);text-transform:lowercase;margin:8px 0">hey@qoyl.live</div>
+      <div style="font-size:12px;color:var(--g6);line-height:1.6;text-transform:lowercase">every message read personally. featured and standard placement both match by the same criteria — color, style, hair type. paying for featured gets you priority position when matched, not matches you wouldn't otherwise get.</div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-strip">
+  <div class="cta-strip-left">
+    <div class="cta-strip-h">stop losing sales to generic amazon searches.</div>
+    <div class="cta-strip-sub">every style match that needs your product type is a placement opportunity — matched by color and texture, not by ad spend.</div>
+  </div>
+  <a href="/apply/fake-hair-brand" class="btn-k">list my catalog — $25/month →</a>
+</div>
+
+<div class="footer-nav">
+  <div class="fn-col">
+    <div class="fn-label">qoyl business</div>
+    <a href="/" class="fn-link">for brands</a>
+    <a href="/stylists" class="fn-link">for stylists</a>
+    <a href="/hair-sellers" class="fn-link fn-primary">for hair sellers</a>
+    <a href="/apply/fake-hair-brand" class="fn-link">list my catalog</a>
+  </div>
+  <div class="fn-col">
+    <div class="fn-label">qoyl consumer</div>
+    <a href="https://qoyl.live" class="fn-link">qoyl.live</a>
+    <a href="/privacy" class="fn-link">privacy policy</a>
+  </div>
+  <div class="fn-col">
+    <div class="fn-label">contact</div>
+    <a href="mailto:hey@qoyl.live" class="fn-link fn-primary">hey@qoyl.live</a>
+    <a href="/login" class="fn-link">log in</a>
+  </div>
+</div>
+<div class="fn-note">qoyl provides cosmetic hair care information only. placement in shopping lists reflects catalog match data — not endorsement. © 2026 qoyl</div>
+
+</body>
+</html>

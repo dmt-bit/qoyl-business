@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>qoyl for stylists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --k:#0a0a0a;--w:#ffffff;
+  --g1:#f5f5f5;--g2:#e8e8e8;--g4:#aaa;--g6:#666;
+  --gr:#2D7A3D;
+  --f:'Space Grotesk',sans-serif;--m:'Space Mono',monospace;
+}
+body{background:var(--w);color:var(--k);font-family:var(--f);font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased}
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid var(--g2)}
+.logo{font-size:17px;font-weight:700;letter-spacing:-0.5px;text-transform:lowercase;color:var(--k);text-decoration:none}
+.logo-tag{font-family:var(--m);font-size:9px;letter-spacing:.12em;color:var(--g4);margin-left:6px}
+.nav-r{display:flex;gap:20px;align-items:center}
+.nav-r a{font-size:11px;color:var(--g6);text-decoration:none;text-transform:lowercase}
+.nav-r a:last-child{background:var(--k);color:var(--w);padding:7px 16px;font-size:11px;font-weight:500;letter-spacing:.05em}
+
+/* HERO — white, single column, very large, left-aligned */
+.hero{padding:80px 32px 64px;border-bottom:1px solid var(--k);max-width:none}
+.hero-label{font-family:var(--m);font-size:10px;letter-spacing:.18em;color:var(--g4);margin-bottom:32px;text-transform:lowercase}
+.hero-h{
+  font-size:clamp(48px,8vw,110px);font-weight:700;
+  line-height:.9;letter-spacing:-5px;text-transform:lowercase;
+  margin-bottom:0;
+}
+.hero-h .line2{color:var(--g2)}
+.hero-bottom{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  margin-top:56px;gap:40px;flex-wrap:wrap;
+}
+.hero-price-block{}
+.hero-price{font-family:var(--m);font-size:56px;font-weight:700;line-height:1;color:var(--k)}
+.hero-price-note{font-family:var(--m);font-size:10px;color:var(--g4);margin-top:4px;text-transform:lowercase}
+.hero-right{max-width:420px}
+.hero-sub{font-size:14px;color:var(--g6);line-height:1.8;margin-bottom:24px;font-weight:300}
+.btn-k{background:var(--k);color:var(--w);border:none;padding:13px 28px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:lowercase;text-decoration:none;display:inline-block;font-family:var(--f)}
+.btn-o{background:transparent;color:var(--k);border:1px solid var(--k);padding:12px 28px;font-size:11px;letter-spacing:.06em;text-transform:lowercase;text-decoration:none;display:inline-block;font-family:var(--f);margin-left:8px}
+
+/* BRIEF — the key differentiator, shown prominently */
+.brief-section{
+  display:grid;grid-template-columns:200px 1fr;
+  border-bottom:1px solid var(--k);
+}
+.brief-sidebar{
+  padding:40px 32px;border-right:1px solid var(--k);
+  background:var(--k);display:flex;flex-direction:column;
+  justify-content:space-between;
+}
+.brief-sidebar-label{font-family:var(--m);font-size:9px;letter-spacing:.14em;color:#555;text-transform:lowercase;margin-bottom:auto}
+.brief-sidebar-h{font-size:20px;font-weight:700;color:var(--w);text-transform:lowercase;letter-spacing:-0.5px;line-height:1.3;margin-top:32px}
+.brief-main{padding:40px 48px}
+.brief-label{font-family:var(--m);font-size:9px;letter-spacing:.14em;color:var(--g4);margin-bottom:16px;text-transform:lowercase}
+.brief-card{border:1px solid var(--k)}
+.brief-row{padding:14px 18px;border-bottom:1px solid var(--g2);font-size:12px}
+.brief-row:last-child{border-bottom:none}
+.brief-row-label{font-family:var(--m);font-size:8px;letter-spacing:.1em;color:var(--g4);margin-bottom:3px;text-transform:lowercase}
+.brief-row-value{color:var(--k)}
+.brief-result{background:var(--g1);border:1px solid var(--g2);padding:16px 18px;margin-top:8px;font-size:12px;color:var(--g6);line-height:1.65}
+.brief-result strong{color:var(--k);font-weight:500}
+
+/* HOW — horizontal numbered steps, full bleed */
+.how{border-bottom:1px solid var(--k)}
+.how-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:32px 32px;border-bottom:1px solid var(--k);
+}
+.how-h{font-size:clamp(18px,2vw,26px);font-weight:700;letter-spacing:-0.8px;text-transform:lowercase}
+.how-steps{display:grid;grid-template-columns:repeat(4,1fr)}
+.how-step{padding:32px;border-right:1px solid var(--k)}
+.how-step:last-child{border-right:none}
+.how-step-n{
+  font-family:var(--m);font-size:10px;letter-spacing:.12em;
+  color:var(--g4);margin-bottom:20px;text-transform:lowercase;
+}
+.how-step-title{font-size:14px;font-weight:600;color:var(--k);text-transform:lowercase;letter-spacing:-0.2px;margin-bottom:8px}
+.how-step-body{font-size:12px;color:var(--g6);line-height:1.7;text-transform:lowercase}
+
+/* WHAT YOU GET — two column, alternating */
+.features{border-bottom:1px solid var(--k)}
+.feature-row{
+  display:grid;grid-template-columns:1fr 1fr;
+  border-bottom:1px solid var(--g2);
+}
+.feature-row:last-child{border-bottom:none}
+.feature-row.flip .feature-text{order:2}
+.feature-row.flip .feature-vis{order:1}
+.feature-text{
+  padding:48px 40px;border-right:1px solid var(--k);
+}
+.feature-row.flip .feature-text{border-right:none;border-left:1px solid var(--k)}
+.feature-n{font-family:var(--m);font-size:10px;letter-spacing:.12em;color:var(--g4);margin-bottom:16px;text-transform:lowercase}
+.feature-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;text-transform:lowercase;margin-bottom:12px}
+.feature-body{font-size:13px;color:var(--g6);line-height:1.8}
+.feature-body strong{color:var(--k);font-weight:500}
+.feature-vis{
+  padding:48px 40px;background:var(--g1);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.vis-label{font-family:var(--m);font-size:9px;letter-spacing:.12em;color:var(--g4);margin-bottom:16px;text-transform:lowercase}
+
+/* MATCH DEMO VIS */
+.match-flow{display:flex;flex-direction:column;gap:6px}
+.match-node{
+  background:var(--w);border:1px solid var(--k);
+  padding:12px 16px;font-size:11px;text-transform:lowercase;
+}
+.match-node-label{font-family:var(--m);font-size:8px;color:var(--g4);letter-spacing:.08em;margin-bottom:3px}
+.match-arrow{text-align:center;color:var(--g4);font-size:18px;padding:4px 0;line-height:1}
+.match-result{background:var(--k);color:var(--w);padding:14px 16px;font-size:12px;text-transform:lowercase;line-height:1.6}
+.match-result-label{font-family:var(--m);font-size:8px;color:#666;margin-bottom:4px}
+
+/* PRICE STAMP */
+.price-stamp{
+  display:inline-block;border:2px solid var(--k);
+  padding:20px 28px;margin-top:24px;
+}
+.price-stamp-num{font-family:var(--m);font-size:36px;font-weight:700;line-height:1}
+.price-stamp-note{font-family:var(--m);font-size:9px;color:var(--g6);margin-top:4px;letter-spacing:.06em;text-transform:lowercase}
+
+/* CITIES — large type, sparse */
+.cities{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-bottom:1px solid var(--k);
+}
+.city{padding:48px 40px;border-right:1px solid var(--k)}
+.city:last-child{border-right:none}
+.city-name{
+  font-size:clamp(32px,4vw,56px);font-weight:700;
+  letter-spacing:-2px;text-transform:lowercase;
+  margin-bottom:8px;
+}
+.city-state{font-family:var(--m);font-size:10px;letter-spacing:.1em;color:var(--g4);margin-bottom:16px;text-transform:lowercase}
+.city-body{font-size:12px;color:var(--g6);line-height:1.7;text-transform:lowercase}
+.city-soon{
+  display:inline-block;font-family:var(--m);font-size:9px;
+  letter-spacing:.08em;color:var(--g4);border:1px solid var(--g2);
+  padding:3px 10px;margin-top:12px;text-transform:lowercase;
+}
+
+/* CTA — full bleed black */
+.cta{
+  background:var(--k);padding:80px 32px;
+  display:flex;justify-content:space-between;
+  align-items:center;flex-wrap:wrap;gap:40px;
+  border-bottom:1px solid var(--k);
+}
+.cta-h{font-size:clamp(24px,3.5vw,48px);font-weight:700;letter-spacing:-2px;line-height:1.0;text-transform:lowercase;color:var(--w);max-width:520px}
+.cta-right{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.cta-note{font-family:var(--m);font-size:10px;color:#555;text-transform:lowercase}
+.cta-note a{color:#888;border-bottom:1px solid #333;text-decoration:none}
+
+.footer-nav{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--k)}
+.fn-col{padding:32px;border-right:1px solid var(--k)}
+.fn-col:last-child{border-right:none}
+.fn-label{font-family:var(--m);font-size:9px;letter-spacing:.14em;color:var(--g4);margin-bottom:16px;text-transform:lowercase}
+.fn-link{display:block;font-size:12px;color:var(--g6);text-decoration:none;padding:4px 0;text-transform:lowercase}
+.fn-link:hover{color:var(--k)}
+.fn-primary{font-size:13px;font-weight:500;color:var(--k)}
+.fn-note{font-family:var(--m);font-size:9px;color:var(--g2);padding:16px 32px;border-top:1px solid var(--g2);text-transform:lowercase}
+
+@media(max-width:768px){
+  nav{padding:14px 20px}
+  .nav-r a:not(:last-child){display:none}
+  .hero{padding:48px 20px 40px}
+  .hero-h{letter-spacing:-3px}
+  .hero-bottom{flex-direction:column;align-items:flex-start;gap:28px;margin-top:40px}
+  .hero-right{max-width:100%}
+  .brief-section{grid-template-columns:1fr}
+  .brief-sidebar{border-right:none;border-bottom:1px solid var(--g2);flex-direction:row;align-items:center;gap:24px;padding:24px 20px}
+  .brief-sidebar-h{margin-top:0;font-size:16px}
+  .brief-main{padding:32px 20px}
+  .how-steps{grid-template-columns:1fr 1fr}
+  .how-step:nth-child(2n){border-right:none}
+  .how-step{border-bottom:1px solid var(--k)}
+  .how-header{padding:24px 20px;flex-direction:column;align-items:flex-start;gap:8px}
+  .feature-row{grid-template-columns:1fr}
+  .feature-text{border-right:none;border-bottom:1px solid var(--k);padding:32px 20px}
+  .feature-row.flip .feature-text{border-left:none;border-bottom:1px solid var(--k)}
+  .feature-vis{padding:28px 20px}
+  .cities{grid-template-columns:1fr}
+  .city{border-right:none;border-bottom:1px solid var(--k);padding:36px 20px}
+  .city:last-child{border-bottom:none}
+  .cta{padding:56px 20px}
+  .footer-nav{grid-template-columns:1fr}
+  .fn-col{border-right:none;border-bottom:1px solid var(--g2);padding:24px 20px}
+  .fn-note{padding:14px 20px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div>
+    <a href="/" class="logo">qoyl</a>
+    <span class="logo-tag">for stylists</span>
+  </div>
+  <div class="nav-r">
+    <a href="/">for brands</a>
+    <a href="/hair-sellers">for hair sellers</a>
+    <a href="https://qoyl.live">consumer app</a>
+    <a href="/login">log in</a>
+    <a href="/apply/stylist">list my services</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-label">qoyl stylist directory</div>
+  <h1 class="hero-h">
+    clients who<br>
+    <span class="line2">already know</span><br>
+    what they want.
+  </h1>
+  <div class="hero-bottom">
+    <div class="hero-price-block">
+      <div class="hero-price">$25<span style="font-size:24px;font-weight:400">/mo</span></div>
+      <div class="hero-price-note">no booking fees · no commission · cancel anytime</div>
+    </div>
+    <div class="hero-right">
+      <p class="hero-sub">when a qoyl user matches a style, they receive a complete brief — hair profile, style references, shopping list. your profile appears when your specialty matches their style and their city. these are not cold leads.</p>
+      <a href="/apply/stylist" class="btn-k">list my services →</a>
+      <a href="#how" class="btn-o">see how it works</a>
+    </div>
+  </div>
+</section>
+
+<!-- THE CLIENT BRIEF — hero feature -->
+<section class="brief-section">
+  <div class="brief-sidebar">
+    <div class="brief-sidebar-label">what arrives with every matched client</div>
+    <div class="brief-sidebar-h">the brief they bring to your chair</div>
+  </div>
+  <div class="brief-main">
+    <div class="brief-label">client brief · generated by qoyl style match</div>
+    <div class="brief-card">
+      <div class="brief-row">
+        <div class="brief-row-label">client hair profile</div>
+        <div class="brief-row-value">4b · high porosity · normal scalp · chicago, il · hard water</div>
+      </div>
+      <div class="brief-row">
+        <div class="brief-row-label">desired style</div>
+        <div class="brief-row-value">knotless braids · waist length · human hair · color 1b</div>
+      </div>
+      <div class="brief-row">
+        <div class="brief-row-label">style references</div>
+        <div class="brief-row-value">3 youtube tutorials selected · screenshots attached</div>
+      </div>
+      <div class="brief-row">
+        <div class="brief-row-label">shopping list</div>
+        <div class="brief-row-value">braiding hair selected · care products scored for their profile · accessories listed</div>
+      </div>
+      <div class="brief-row">
+        <div class="brief-row-label">color preference</div>
+        <div class="brief-row-value">human hair only · color 1b matched to natural hair from selfie analysis</div>
+      </div>
+    </div>
+    <div class="brief-result">
+      <strong>less consultation time. clearer expectations.</strong> they've already done the work of understanding their hair and deciding what they want. you start the appointment in the middle, not at the beginning.
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="how-header">
+    <h2 class="how-h">four steps from style match to your chair</h2>
+  </div>
+  <div class="how-steps">
+    <div class="how-step">
+      <div class="how-step-n">step 01</div>
+      <div class="how-step-title">client matches a style</div>
+      <div class="how-step-body">a qoyl user uploads a photo of a style they want or picks from our library. our ai identifies the style and builds their complete plan.</div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-n">step 02</div>
+      <div class="how-step-title">their plan is built</div>
+      <div class="how-step-body">tutorials, a complete shopping list scored for their hair profile, and a stylist match — all generated automatically from their hair data.</div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-n">step 03</div>
+      <div class="how-step-title">your profile surfaces</div>
+      <div class="how-step-body">if your specialty matches their style and you're in their city, you appear in the "book a stylist" tab with your price range and booking link.</div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-n">step 04</div>
+      <div class="how-step-title">client arrives prepared</div>
+      <div class="how-step-body">they bring the brief. hair profile, style references, shopping list. less consultation. clearer expectations. better appointments for both of you.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES — alternating layout -->
+<section class="features">
+  <div class="feature-row">
+    <div class="feature-text">
+      <div class="feature-n">01 · matching</div>
+      <h3 class="feature-title">matched by specialty. not random browsing.</h3>
+      <p class="feature-body">you list which styles you do and which hair types you serve. qoyl matches you to users whose style match fits your specialty — not a directory listing that anyone can find. <strong>you only surface when the match is right.</strong></p>
+      <div class="price-stamp">
+        <div class="price-stamp-num">$25/mo</div>
+        <div class="price-stamp-note">flat rate · no booking fees · no commission</div>
+      </div>
+    </div>
+    <div class="feature-vis">
+      <div class="vis-label">how the match works</div>
+      <div class="match-flow">
+        <div class="match-node">
+          <div class="match-node-label">qoyl user · chicago, il</div>
+          4b high porosity · wants knotless braids · human hair · waist length
+        </div>
+        <div class="match-arrow">↓</div>
+        <div class="match-node">
+          <div class="match-node-label">style detected</div>
+          knotless braids · waist length · human hair · color 1b from selfie
+        </div>
+        <div class="match-arrow">↓</div>
+        <div class="match-result">
+          <div class="match-result-label">why you matched</div>
+          you listed knotless braids as a specialty in chicago serving 4a-4c hair types. this client matches your listing exactly.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="feature-row flip">
+    <div class="feature-text">
+      <div class="feature-n">02 · no middleman</div>
+      <h3 class="feature-title">your booking, your revenue, your relationship.</h3>
+      <p class="feature-body">qoyl links to your booking page — square, booksy, vagaro, instagram, your own site. the booking happens entirely outside qoyl. <strong>we take no cut of your appointments, ever.</strong> $25/month is your only cost regardless of how many clients you book.</p>
+    </div>
+    <div class="feature-vis">
+      <div class="vis-label">what clients see on your profile</div>
+      <div style="border:1px solid var(--k);background:var(--w)">
+        <div style="padding:16px;border-bottom:1px solid var(--g2)">
+          <div style="font-family:var(--m);font-size:9px;color:var(--g4);margin-bottom:4px">matched stylist · chicago</div>
+          <div style="font-size:14px;font-weight:600;text-transform:lowercase">your name here</div>
+        </div>
+        <div style="padding:12px 16px;border-bottom:1px solid var(--g2);font-size:11px;color:var(--g6)">knotless braids · box braids · faux locs · cornrows</div>
+        <div style="padding:12px 16px;border-bottom:1px solid var(--g2);font-size:11px;color:var(--g6);display:flex;justify-content:space-between">
+          <span>knotless braids (waist)</span>
+          <span style="color:var(--k);font-weight:500">$350-450 · 6-8 hrs</span>
+        </div>
+        <div style="padding:12px 16px;background:var(--k)">
+          <div style="font-size:11px;color:var(--w);font-weight:500;text-transform:lowercase">book with [your booking link] →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CITIES -->
+<section class="cities">
+  <div class="city">
+    <div class="city-name">chicago</div>
+    <div class="city-state">illinois · launch market</div>
+    <p class="city-body">our largest user base. strongest demand for natural hair stylists, braiders, and locticians. the most active style match market right now.</p>
+  </div>
+  <div class="city">
+    <div class="city-name">atlanta</div>
+    <div class="city-state">georgia · active</div>
+    <p class="city-body">high demand for protective styles — knotless braids, faux locs, goddess braids. strong 4a-4c user base with active style match usage.</p>
+  </div>
+  <div class="city">
+    <div class="city-name">new york</div>
+    <div class="city-state">new york · active</div>
+    <p class="city-body">diverse hair type demand across all textures. sign up now to be listed when we expand to houston, miami, and los angeles in q4 2026.</p>
+    <span class="city-soon">houston · miami · la coming q4 2026</span>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2 class="cta-h">your next client is already looking for you.</h2>
+  <div class="cta-right">
+    <a href="/apply/stylist" class="btn-k">list my services — $25/month →</a>
+    <div class="cta-note">no approval, no waitlist. live the same day.<br>questions? <a href="mailto:hey@qoyl.live">hey@qoyl.live</a></div>
+  </div>
+</section>
+
+<div class="footer-nav">
+  <div class="fn-col">
+    <div class="fn-label">qoyl business</div>
+    <a href="/" class="fn-link">for brands</a>
+    <a href="/stylists" class="fn-link fn-primary">for stylists</a>
+    <a href="/hair-sellers" class="fn-link">for hair sellers</a>
+  </div>
+  <div class="fn-col">
+    <div class="fn-label">qoyl consumer</div>
+    <a href="https://qoyl.live" class="fn-link">qoyl.live</a>
+    <a href="/privacy" class="fn-link">privacy policy</a>
+  </div>
+  <div class="fn-col">
+    <div class="fn-label">contact</div>
+    <a href="mailto:hey@qoyl.live" class="fn-link fn-primary">hey@qoyl.live</a>
+    <a href="/login" class="fn-link">log in</a>
+  </div>
+</div>
+<div class="fn-note">qoyl provides cosmetic hair care information only. © 2026 qoyl</div>
+
+</body>
+</html>
