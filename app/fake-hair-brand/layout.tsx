@@ -8,6 +8,7 @@ import { FakeHairBrandSessionProvider, useFakeHairBrandSession } from "@/lib/fak
 
 const NAV_ITEMS = [
   { href: "/fake-hair-brand/dashboard", label: "Dashboard", icon: GridIcon },
+  { href: "/business/dashboard/hair-seller", label: "Performance", icon: GridIcon },
   { href: "/fake-hair-brand/account", label: "Account", icon: UserIcon },
 ];
 

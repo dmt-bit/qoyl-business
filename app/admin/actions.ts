@@ -44,7 +44,7 @@ function fakeHairBrandApprovalEmailBody(params: {
 }): string {
   return `Hi ${params.contactName},
 
-Welcome to Qoyl — your fake hair brand dashboard is ready.
+Welcome to Qoyl — your hair seller account is active.
 
 Login at: ${params.siteUrl}/login
 Email: ${params.email}
@@ -52,12 +52,9 @@ Temporary password: ${params.tempPassword}
 
 Please change your password after your first login by clicking "Forgot password" on the login page.
 
-Your dashboard gives you access to:
-→ Which protective styles feature your products
-→ Click-through performance (live once Style Match integration ships)
-→ Cities with the highest demand for your styles
-
-To get started, log in and add your first product.
+What happens next:
+→ Upload your catalog (styles, colors, pack counts) so your products can be matched into Style Match shopping lists
+→ Track impressions, click-throughs and color-match rates at ${params.siteUrl}/business/dashboard/hair-seller
 
 Questions? Reply to this email — we're here.
 
@@ -356,7 +353,10 @@ export async function approveFakeHairBrandApplication(formData: FormData) {
         email: application.email,
         website: application.website,
         instagram_handle: application.instagram_handle,
-        status: "approved",
+        tier: application.tier ?? "standard",
+        product_types: application.product_types,
+        styles_served: application.styles_served,
+        status: "active",
         approved_at: new Date().toISOString(),
       });
 
@@ -382,7 +382,7 @@ export async function approveFakeHairBrandApplication(formData: FormData) {
       } else {
         const { sent, error: emailError } = await sendApprovalEmail({
           email: application.email,
-          subject: "Your Qoyl Fake Hair Brand Dashboard is approved",
+          subject: "Welcome to Qoyl — your hair seller account is active",
           body: fakeHairBrandApprovalEmailBody({
             contactName: application.contact_name,
             email: application.email,
@@ -412,11 +412,33 @@ export async function approveFakeHairBrandApplication(formData: FormData) {
   const redirectParams = new URLSearchParams({
     password,
     approval_status: approvalStatus,
-    tab: "fake_hair_applications",
+    tab: "hair_sellers",
   });
   if (approvedEmail) redirectParams.set("approved_email", approvedEmail);
   if (errorDetail) redirectParams.set("error_detail", errorDetail.slice(0, 300));
   redirect(`/admin?${redirectParams.toString()}`);
+}
+
+export async function rejectFakeHairBrandApplication(formData: FormData) {
+  const id = formData.get("id");
+  const password = formData.get("password");
+
+  if (typeof password !== "string" || password !== process.env.ADMIN_PASSWORD) {
+    throw new Error("Unauthorized");
+  }
+  if (typeof id !== "string") {
+    throw new Error("Missing application id");
+  }
+
+  const { error } = await getSupabaseAdmin()
+    .from("fake_hair_brand_applications")
+    .update({ status: "rejected" })
+    .eq("id", id);
+  if (error) {
+    console.error("[rejectFakeHairBrandApplication] update failed", { id, error: error.message });
+  }
+
+  redirect(`/admin?password=${encodeURIComponent(password)}&tab=hair_sellers`);
 }
 
 export async function approveStylistApplication(formData: FormData) {

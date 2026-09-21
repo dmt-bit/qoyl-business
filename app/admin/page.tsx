@@ -51,6 +51,7 @@ export default async function AdminPage({
     { data: fakeHairAccounts },
     { data: stylistApplications },
     { data: stylistAccounts },
+    { data: sellerProducts },
   ] = await Promise.all([
     supabaseAdmin.from("brand_applications").select("*").order("created_at", { ascending: false }),
     supabaseAdmin.from("brand_accounts").select("*").order("created_at", { ascending: false }),
@@ -64,13 +65,16 @@ export default async function AdminPage({
       .order("created_at", { ascending: false }),
     supabaseAdmin.from("stylist_applications").select("*").order("created_at", { ascending: false }),
     supabaseAdmin.from("stylist_accounts").select("*").order("created_at", { ascending: false }),
+    supabaseAdmin
+      .from("fake_hair_products")
+      .select("id, brand_id, product_name, hair_type, in_stock")
+      .order("product_name"),
   ]);
 
   const VALID_TABS = new Set([
     "brand_applications",
     "brand_accounts",
-    "fake_hair_applications",
-    "fake_hair_accounts",
+    "hair_sellers",
     "stylist_applications",
     "stylist_accounts",
   ]);
@@ -78,8 +82,7 @@ export default async function AdminPage({
     ? (searchParams.tab as
         | "brand_applications"
         | "brand_accounts"
-        | "fake_hair_applications"
-        | "fake_hair_accounts"
+        | "hair_sellers"
         | "stylist_applications"
         | "stylist_accounts")
     : "brand_applications";
@@ -95,6 +98,7 @@ export default async function AdminPage({
         fakeHairAccounts={fakeHairAccounts ?? []}
         stylistApplications={stylistApplications ?? []}
         stylistAccounts={stylistAccounts ?? []}
+        sellerProducts={sellerProducts ?? []}
         password={password}
         initialTab={initialTab}
         approvedEmail={searchParams.approved_email ?? null}
