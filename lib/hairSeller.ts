@@ -17,7 +17,6 @@ export const CATALOG_HAIR_TYPES = [
 ] as const;
 
 export const HAIR_PREFERENCES = ["human", "synthetic", "heat_resistant_synthetic"] as const;
-export const SELLER_TIERS = ["standard", "featured"] as const;
 export const LENGTH_KEYS = ["shoulder", "bra_strap", "waist", "hip"] as const;
 
 export function isStringArray(v: unknown): v is string[] {

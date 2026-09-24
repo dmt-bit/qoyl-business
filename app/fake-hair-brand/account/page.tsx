@@ -33,7 +33,7 @@ export default function FakeHairBrandAccountPage() {
           <Row label="Email" value={account.email} />
           <Row label="Website" value={account.website || "—"} />
           <Row label="Instagram" value={account.instagram_handle || "—"} />
-          <Row label="Plan" value="Fake Hair Brand — $25/month" />
+          <Row label="Plan" value="Hair seller — $35/month" />
           <Row label="Status" value={account.status} />
           <Row
             label="Member since"

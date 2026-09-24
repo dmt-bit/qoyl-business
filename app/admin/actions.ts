@@ -2,90 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { sendEmail } from "@/lib/email";
+import { approvalEmail, type EmailContent } from "@/lib/emailTemplates";
+import { paymentOptionsFor } from "@/lib/accountTypes";
 
 function generateTempPassword(): string {
   return "Qoyl" + Math.random().toString(36).slice(2, 8).toUpperCase() + "!";
-}
-
-function approvalEmailBody(params: {
-  contactName: string;
-  email: string;
-  tempPassword: string;
-  siteUrl: string;
-}): string {
-  return `Hi ${params.contactName},
-
-Welcome to Qoyl — your brand intelligence dashboard is ready.
-
-Login at: ${params.siteUrl}/login
-Email: ${params.email}
-Temporary password: ${params.tempPassword}
-
-Please change your password after your first login by clicking "Forgot password" on the login page.
-
-Your dashboard gives you access to:
-→ Ingredient performance scores for your products
-→ Consumer demand signals from real Qoyl users
-→ Reformulation recommendations
-
-To get started, log in and add your first product under "My Products."
-
-Questions? Reply to this email — we're here.
-
-D
-Founder, Qoyl`;
-}
-
-function fakeHairBrandApprovalEmailBody(params: {
-  contactName: string;
-  email: string;
-  tempPassword: string;
-  siteUrl: string;
-}): string {
-  return `Hi ${params.contactName},
-
-Welcome to Qoyl — your hair seller account is active.
-
-Login at: ${params.siteUrl}/login
-Email: ${params.email}
-Temporary password: ${params.tempPassword}
-
-Please change your password after your first login by clicking "Forgot password" on the login page.
-
-What happens next:
-→ Upload your catalog (styles, colors, pack counts) so your products can be matched into Style Match shopping lists
-→ Track impressions, click-throughs and color-match rates at ${params.siteUrl}/business/dashboard/hair-seller
-
-Questions? Reply to this email — we're here.
-
-D
-Founder, Qoyl`;
-}
-
-function stylistApprovalEmailBody(params: {
-  contactName: string;
-  email: string;
-  tempPassword: string;
-  siteUrl: string;
-}): string {
-  return `Hi ${params.contactName},
-
-Welcome to Qoyl — your stylist dashboard is ready.
-
-Login at: ${params.siteUrl}/login
-Email: ${params.email}
-Temporary password: ${params.tempPassword}
-
-Please change your password after your first login by clicking "Forgot password" on the login page.
-
-Your dashboard gives you access to:
-→ What your potential clients are matching with each month
-→ Booking inquiries from consumers who chose you after a Style Match
-
-Questions? Reply to this email — we're here.
-
-D
-Founder, Qoyl`;
 }
 
 // Best-effort -- a failed send shouldn't undo the account/auth-user that
@@ -93,54 +15,17 @@ Founder, Qoyl`;
 // caller can log it and tell the admin.
 async function sendApprovalEmail(params: {
   email: string;
-  subject: string;
-  body: string;
+  content: EmailContent;
   applicationId: string;
 }): Promise<{ sent: boolean; error: string | null }> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    const error = "RESEND_API_KEY is not set";
+  const result = await sendEmail({ to: params.email, ...params.content });
+  if (!result.sent) {
     console.error("[approveApplication] email not sent", {
       applicationId: params.applicationId,
-      error,
+      error: result.error,
     });
-    return { sent: false, error };
   }
-
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "onboarding@resend.dev",
-        to: params.email,
-        subject: params.subject,
-        text: params.body,
-      }),
-    });
-
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      const error = `Resend API responded ${res.status}: ${body.slice(0, 300)}`;
-      console.error("[approveApplication] email not sent", {
-        applicationId: params.applicationId,
-        error,
-      });
-      return { sent: false, error };
-    }
-
-    return { sent: true, error: null };
-  } catch (err) {
-    const error = err instanceof Error ? err.message : String(err);
-    console.error("[approveApplication] email send threw", {
-      applicationId: params.applicationId,
-      error,
-    });
-    return { sent: false, error };
-  }
+  return result;
 }
 
 type ApprovalStatus = "ok" | "email_failed" | "auth_failed" | "account_failed" | "not_found";
@@ -235,12 +120,13 @@ export async function approveApplication(formData: FormData) {
       } else {
         const { sent, error: emailError } = await sendApprovalEmail({
           email: application.email,
-          subject: "Your Qoyl Brand Dashboard is approved",
-          body: approvalEmailBody({
+          content: approvalEmail({
+            type: "brand",
             contactName: application.contact_name,
             email: application.email,
             tempPassword,
             siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001",
+            payment: paymentOptionsFor("brand", application.email, application.requested_tier),
           }),
           applicationId: id,
         });
@@ -382,12 +268,13 @@ export async function approveFakeHairBrandApplication(formData: FormData) {
       } else {
         const { sent, error: emailError } = await sendApprovalEmail({
           email: application.email,
-          subject: "Welcome to Qoyl — your hair seller account is active",
-          body: fakeHairBrandApprovalEmailBody({
+          content: approvalEmail({
+            type: "hair_seller",
             contactName: application.contact_name,
             email: application.email,
             tempPassword,
             siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001",
+            payment: paymentOptionsFor("hair_seller", application.email),
           }),
           applicationId: id,
         });
@@ -529,12 +416,13 @@ export async function approveStylistApplication(formData: FormData) {
       } else {
         const { sent, error: emailError } = await sendApprovalEmail({
           email: application.email,
-          subject: "Your Qoyl Stylist Dashboard is approved",
-          body: stylistApprovalEmailBody({
+          content: approvalEmail({
+            type: "stylist",
             contactName: application.contact_name,
             email: application.email,
             tempPassword,
             siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001",
+            payment: paymentOptionsFor("stylist", application.email),
           }),
           applicationId: id,
         });

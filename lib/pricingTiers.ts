@@ -12,7 +12,7 @@ export type PricingTier = {
 export const PRICING_TIERS: PricingTier[] = [
   {
     name: "Early Stage",
-    price: "$250",
+    price: "$35",
     audience: "For indie brands with 1-5 products",
     includes: [
       "Ingredient performance scores for up to 3 products",
@@ -27,7 +27,7 @@ export const PRICING_TIERS: PricingTier[] = [
   },
   {
     name: "Growth",
-    price: "$750",
+    price: "$260",
     audience: "For established brands with 6-20 products",
     includes: [
       "Everything in Early Stage",
@@ -44,7 +44,7 @@ export const PRICING_TIERS: PricingTier[] = [
   },
   {
     name: "Enterprise",
-    price: "$2,500",
+    price: "$760",
     audience: "For large catalogs and custom needs",
     includes: [
       "Everything in Growth",
