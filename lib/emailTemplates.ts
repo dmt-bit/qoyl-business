@@ -164,6 +164,44 @@ const APPROVAL_COPY: Record<AccountType, { subject: string; lead: string; bullet
   },
 };
 
+// The score preview the brand sees before paying - the first time they get
+// real value from qoyl. Built from qoyl-beta's score report (lib/scoreReportClient.ts).
+export type ScorePreviewInput = {
+  productName: string;
+  // Five rows: the top three and bottom two profiles, highest first.
+  rows: { label: string; score: number }[];
+  keyFinding: string;
+};
+
+function scoreColor(score: number): string {
+  if (score >= 70) return "#2D7A3D";
+  if (score >= 40) return "#C4831A";
+  return "#B03030";
+}
+
+function scoreMark(score: number): string {
+  if (score >= 70) return "✓";
+  if (score >= 40) return "⚠";
+  return "✗";
+}
+
+function scorePreviewHtml(sp: ScorePreviewInput): string {
+  const rows = sp.rows
+    .map(
+      (r) =>
+        `<tr><td style="padding:8px 12px 8px 0;border-top:1px solid #e8e8e8;font-family:${MONO};font-size:11px;color:#444444;">${esc(r.label)}</td><td style="padding:8px 0;border-top:1px solid #e8e8e8;text-align:right;font-family:${MONO};font-size:14px;font-weight:700;color:${scoreColor(r.score)};">${r.score} ${scoreMark(r.score)}</td></tr>`
+    )
+    .join("");
+  return `<p style="margin:24px 0 8px;font-family:${MONO};font-size:10px;letter-spacing:1px;color:#888888;">SCORE PREVIEW · ${esc(sp.productName.toUpperCase())}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0;"><tr><td style="padding:0 12px 6px 0;font-family:${MONO};font-size:9px;color:#888888;">profile</td><td style="padding:0 0 6px;font-family:${MONO};font-size:9px;color:#888888;text-align:right;">score</td></tr>${rows}</table>
+<p style="margin:16px 0;border-left:2px solid #0a0a0a;padding-left:14px;color:#0a0a0a;">${esc(sp.keyFinding)}</p>`;
+}
+
+function scorePreviewText(sp: ScorePreviewInput): string {
+  const rows = sp.rows.map((r) => `${r.label}: ${r.score} ${scoreMark(r.score)}`).join("\n");
+  return `SCORE PREVIEW · ${sp.productName}\n${rows}\n\n${sp.keyFinding}\n`;
+}
+
 export function approvalEmail(params: {
   type: AccountType;
   contactName: string;
@@ -174,9 +212,29 @@ export function approvalEmail(params: {
   // lets the applicant pick theirs. Empty = Payment Links aren't configured
   // yet, so the payment block is omitted.
   payment: PaymentOption[];
+  // Brand approvals with a score report: adds the preview and the
+  // "after payment" list, and makes the subject name the product.
+  scorePreview?: ScorePreviewInput | null;
 }): EmailContent {
   const copy = APPROVAL_COPY[params.type];
   const loginUrl = `${params.siteUrl}/login`;
+  const sp = params.scorePreview ?? null;
+  const scoreText = sp ? `\n${scorePreviewText(sp)}\n` : "";
+  const scoreHtml = sp ? scorePreviewHtml(sp) : "";
+  const afterPaymentText = sp
+    ? `\nAfter payment you'll have immediate access to:\n→ full score breakdown across all hair profiles\n→ segment analysis - which customers your formula was built for\n→ ingredient flags with reformulation recommendations\n→ geographic demand signals\n→ style match placement tracking\n`
+    : "";
+  const afterPaymentHtml = sp
+    ? `<p style="margin:16px 0 4px;color:#0a0a0a;">after payment you'll have immediate access to:</p><ul style="margin:0 0 16px;padding-left:18px;color:#444444;">${[
+        "full score breakdown across all hair profiles",
+        "segment analysis - which customers your formula was built for",
+        "ingredient flags with reformulation recommendations",
+        "geographic demand signals",
+        "style match placement tracking",
+      ]
+        .map((b) => `<li style="margin:4px 0;">${esc(b)}</li>`)
+        .join("")}</ul>`
+    : "";
 
   const paymentText = params.payment.length
     ? `\nTo activate your plan, complete payment:\n${params.payment
@@ -187,13 +245,13 @@ export function approvalEmail(params: {
   const text = `Hi ${params.contactName},
 
 Welcome to Qoyl — ${copy.lead}
-
+${scoreText}
 Login at: ${loginUrl}
 Email: ${params.email}
 Temporary password: ${params.tempPassword}
 
 Please change your password after your first login by clicking "Forgot password" on the login page.
-${paymentText}
+${paymentText}${afterPaymentText}
 Your account gives you access to:
 ${copy.bullets.map((b) => `→ ${b}`).join("\n")}
 
@@ -219,6 +277,7 @@ ${params.payment
     `${copy.lead} Log in with the temporary password inside.`,
     h1("you're approved.") +
       p(`Hi ${esc(params.contactName)}, welcome to Qoyl — ${esc(copy.lead)}`) +
+      scoreHtml +
       fieldTable([
         ["LOGIN", loginUrl],
         ["EMAIL", params.email],
@@ -227,10 +286,12 @@ ${params.payment
       button(loginUrl, "log in →") +
       p('Please change your password after your first login by clicking "Forgot password" on the login page.') +
       paymentHtml +
+      afterPaymentHtml +
       `<p style="margin:24px 0 4px;font-family:${MONO};font-size:10px;letter-spacing:1px;color:#888888;">YOUR ACCOUNT GIVES YOU</p>` +
       `<ul style="margin:0 0 16px;padding-left:18px;color:#444444;">${copy.bullets.map((b) => `<li style="margin:4px 0;">${esc(b)}</li>`).join("")}</ul>` +
       sign
   );
 
-  return { subject: copy.subject, text, html };
+  const subject = sp ? `your ${sp.productName} score report — qoyl brand access approved` : copy.subject;
+  return { subject, text, html };
 }

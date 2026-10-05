@@ -20,12 +20,15 @@ export function isBrandTier(v: unknown): v is BrandTier {
 // Stripe Payment Links accept ?prefilled_email= so the applicant doesn't
 // retype it. Returns null when the env var isn't configured -- the approval
 // email then simply omits the payment block rather than sending a dead link.
-export function paymentLink(envVar: string, email: string): string | null {
+// client_reference_id ties the payment to a brand_accounts row for the Stripe
+// webhook (app/api/webhooks/brand-stripe); Payment Links accept it as a URL param.
+export function paymentLink(envVar: string, email: string, clientReferenceId?: string | null): string | null {
   const base = process.env[envVar];
   if (!base) return null;
   try {
     const url = new URL(base);
     url.searchParams.set("prefilled_email", email);
+    if (clientReferenceId) url.searchParams.set("client_reference_id", clientReferenceId);
     return url.toString();
   } catch {
     return null;
@@ -41,7 +44,8 @@ export type PaymentOption = { label: string; price: string; url: string };
 export function paymentOptionsFor(
   type: AccountType,
   email: string,
-  requestedTier?: string | null
+  requestedTier?: string | null,
+  brandAccountId?: string | null
 ): PaymentOption[] {
   const plans =
     type === "stylist"
@@ -53,7 +57,7 @@ export function paymentOptionsFor(
           : Object.values(BRAND_TIERS);
   const options: PaymentOption[] = [];
   for (const plan of plans) {
-    const url = paymentLink(plan.envVar, email);
+    const url = paymentLink(plan.envVar, email, brandAccountId);
     if (url) options.push({ label: plan.label, price: plan.price, url });
   }
   return options;

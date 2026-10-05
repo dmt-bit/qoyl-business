@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
 import { BrandSessionProvider, useBrandSession } from "@/lib/brandSession";
 
@@ -18,9 +18,53 @@ export default function BrandLayout({ children }: { children: ReactNode }) {
     <BrandSessionProvider>
       <div className="min-h-screen flex">
         <Sidebar />
-        <main className="flex-1 min-w-0">{children}</main>
+        <main className="flex-1 min-w-0">
+          <BrandGate>{children}</BrandGate>
+        </main>
       </div>
     </BrandSessionProvider>
+  );
+}
+
+// Dashboard access follows brand_accounts.status: only 'active' (a paid
+// subscription, set by the Stripe webhook) sees the pages. Anything else gets
+// a plain status message - nothing is deleted.
+function BrandGate({ children }: { children: ReactNode }) {
+  const { loading, session, account } = useBrandSession();
+  const heartbeatSent = useRef(false);
+  const active = account?.status === "active";
+
+  // Records dashboard_last_viewed_at once per page load for paid accounts.
+  // Best-effort - a failure here never blocks the dashboard.
+  useEffect(() => {
+    if (!active || !session || heartbeatSent.current) return;
+    heartbeatSent.current = true;
+    fetch("/api/brand/heartbeat", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    }).catch(() => {});
+  }, [active, session]);
+
+  if (loading || !account) return null;
+  if (active) return <>{children}</>;
+
+  const cancelled = account.status === "cancelled";
+  return (
+    <div className="px-6 py-12 sm:px-12">
+      <div className="mx-auto max-w-xl">
+        <p className="font-mono text-xs uppercase tracking-wider text-muted">
+          {cancelled ? "subscription ended" : "pending payment"}
+        </p>
+        <h1 className="mt-2 font-serif text-3xl text-cream">
+          {cancelled ? "your dashboard access is paused." : "complete payment to open your dashboard."}
+        </h1>
+        <p className="mt-4 text-sm leading-relaxed text-cream/70">
+          {cancelled
+            ? "your subscription has ended. your data is kept - reply to the email we sent you and we'll set you back up."
+            : "your score report and payment link are in your approval email. once payment goes through, your dashboard unlocks automatically."}
+        </p>
+      </div>
+    </div>
   );
 }
 

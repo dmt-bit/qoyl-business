@@ -278,9 +278,17 @@ export default function AdminTabs({
                   </td>
                   <td className="px-4 py-3">
                     {app.status === "pending" ? (
-                      <form action={approveApplication}>
+                      <form action={approveApplication} className="flex flex-col gap-2">
                         <input type="hidden" name="id" value={app.id} />
                         <input type="hidden" name="password" value={password} />
+                        {/* Product to score for the approval email's score preview.
+                            Blank = approve without a preview. Must be in the catalog
+                            (add it at /admin/products on qoyl-beta first). */}
+                        <input
+                          name="product_name"
+                          placeholder="product to score"
+                          className="rounded border border-bronze/30 bg-transparent px-2 py-1 text-xs text-cream placeholder:text-muted"
+                        />
                         <button
                           type="submit"
                           className="rounded-full bg-bronze px-4 py-2 text-xs font-medium uppercase tracking-wider text-dark transition-colors hover:bg-bronze2"

@@ -3,8 +3,33 @@
 import { redirect } from "next/navigation";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendEmail } from "@/lib/email";
-import { approvalEmail, type EmailContent } from "@/lib/emailTemplates";
+import { approvalEmail, type EmailContent, type ScorePreviewInput } from "@/lib/emailTemplates";
 import { paymentOptionsFor } from "@/lib/accountTypes";
+import { fetchScoreReport } from "@/lib/scoreReportClient";
+
+// Score preview for a brand approval email - the product the admin entered,
+// scored by qoyl-beta. Returns null (email goes out without a preview) when
+// the product isn't in the catalog yet or the bridge is unavailable; both are
+// logged so the admin can see why.
+async function buildScorePreview(
+  productName: string | null,
+  brandName: string
+): Promise<ScorePreviewInput | null> {
+  if (!productName?.trim()) return null;
+  const report = await fetchScoreReport(productName.trim(), brandName);
+  if (!report) return null;
+  if (report.status !== "ok") {
+    console.error("[approveApplication] score preview skipped:", report.message);
+    return null;
+  }
+  const top = report.topSegments.slice(0, 3);
+  const bottom = report.bottomSegments.filter((b) => !top.some((t) => t.label === b.label)).slice(0, 2);
+  return {
+    productName: report.product.name,
+    rows: [...top, ...bottom].map((s) => ({ label: s.label, score: s.score })),
+    keyFinding: report.keyFinding,
+  };
+}
 
 function generateTempPassword(): string {
   return "Qoyl" + Math.random().toString(36).slice(2, 8).toUpperCase() + "!";
@@ -33,6 +58,8 @@ type ApprovalStatus = "ok" | "email_failed" | "auth_failed" | "account_failed" |
 export async function approveApplication(formData: FormData) {
   const id = formData.get("id");
   const password = formData.get("password");
+  // Optional: the product the admin wants scored for the approval email.
+  const productName = formData.get("product_name");
 
   if (typeof password !== "string" || password !== process.env.ADMIN_PASSWORD) {
     throw new Error("Unauthorized");
@@ -91,15 +118,22 @@ export async function approveApplication(formData: FormData) {
       // Always persist the approval, regardless of the auth/email outcome
       // above -- an admin shouldn't be stuck re-clicking Approve forever
       // because Resend or GoTrue had a bad moment.
-      const { error: insertError } = await supabaseAdmin.from("brand_accounts").insert({
-        company_name: application.company_name,
-        contact_name: application.contact_name,
-        email: application.email,
-        website: application.website,
-        instagram_handle: application.instagram_handle,
-        status: "approved",
-        approved_at: new Date().toISOString(),
-      });
+      // Starts as 'pending_payment' - the brand dashboard stays gated until
+      // the Stripe webhook (app/api/webhooks/brand-stripe) flips it to 'active'.
+      const { data: insertedAccount, error: insertError } = await supabaseAdmin
+        .from("brand_accounts")
+        .insert({
+          company_name: application.company_name,
+          contact_name: application.contact_name,
+          email: application.email,
+          website: application.website,
+          instagram_handle: application.instagram_handle,
+          status: "pending_payment",
+          approved_at: new Date().toISOString(),
+        })
+        .select("id")
+        .single();
+      const brandAccountId = insertedAccount?.id ?? null;
 
       const { error: updateError } = await supabaseAdmin
         .from("brand_applications")
@@ -126,7 +160,11 @@ export async function approveApplication(formData: FormData) {
             email: application.email,
             tempPassword,
             siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001",
-            payment: paymentOptionsFor("brand", application.email, application.requested_tier),
+            payment: paymentOptionsFor("brand", application.email, application.requested_tier, brandAccountId),
+            scorePreview: await buildScorePreview(
+              typeof productName === "string" ? productName : null,
+              application.company_name
+            ),
           }),
           applicationId: id,
         });
