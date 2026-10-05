@@ -5,7 +5,7 @@ export type AccountType = "brand" | "stylist" | "hair_seller";
 export type BrandTier = "early_stage" | "growth" | "enterprise";
 
 export const BRAND_TIERS: Record<BrandTier, { label: string; price: string; envVar: string }> = {
-  early_stage: { label: "Early Stage", price: "$35/month", envVar: "STRIPE_LINK_BRAND_EARLY_STAGE" },
+  early_stage: { label: "Early Stage", price: "$50/month", envVar: "STRIPE_LINK_BRAND_EARLY_STAGE" },
   growth: { label: "Growth", price: "$260/month", envVar: "STRIPE_LINK_BRAND_GROWTH" },
   enterprise: { label: "Enterprise", price: "$760/month", envVar: "STRIPE_LINK_BRAND_ENTERPRISE" },
 };

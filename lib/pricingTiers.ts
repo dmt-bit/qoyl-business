@@ -12,7 +12,7 @@ export type PricingTier = {
 export const PRICING_TIERS: PricingTier[] = [
   {
     name: "Early Stage",
-    price: "$35",
+    price: "$50",
     audience: "For indie brands with 1-5 products",
     includes: [
       "Ingredient performance scores for up to 3 products",
