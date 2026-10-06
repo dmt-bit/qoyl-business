@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from "./supabaseAdmin";
 import { sendEmail } from "./email";
 import { BRAND_PLAN, brandPaymentUrl } from "./accountTypes";
 import { brandWelcomeWithPaymentEmail, signInLinkEmail } from "./emailTemplates";
+import { findCatalogBrandId } from "./catalogBrandMatch";
 
 // Self-serve brand signup: no approval step. Applying creates the login and a
 // pending_payment account, and emails the applicant their Payment Link. The
@@ -139,6 +140,18 @@ export async function startBrandSignup(input: BrandSignupInput): Promise<BrandSi
       .from("brand_accounts")
       .insert({ id: accountId, email: input.email, user_id: userId, ...accountFields });
     if (error) throw new Error(`brand_accounts insert failed: ${error.message}`);
+  }
+
+  // Link to the catalog brand when the name matches exactly one. Non-fatal:
+  // an unmatched brand is linked by an admin later.
+  try {
+    const catalogBrandId = await findCatalogBrandId(input.companyName);
+    if (catalogBrandId) {
+      const { error: linkError } = await admin.from("brand_accounts").update({ brand_id: catalogBrandId }).eq("id", accountId);
+      if (linkError) console.error("[brand-signup] catalog link failed:", linkError.message);
+    }
+  } catch (err) {
+    console.error("[brand-signup] catalog match failed:", err instanceof Error ? err.message : err);
   }
 
   // Kept for records only -- the account above is what gates access.

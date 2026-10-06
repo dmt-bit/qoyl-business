@@ -8,6 +8,8 @@ import {
   approveStylistApplication,
   resendBrandPaymentLink,
   cancelBrandAccount,
+  matchBrandAccount,
+  setProductRequestStatus,
 } from "./actions";
 
 // Activates a brand without payment (testing). The API checks the admin login
@@ -46,6 +48,8 @@ function ForceActivateButton({ brandId }: { brandId: string }) {
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "text-bronze2",
+  added: "text-green",
+  declined: "text-red",
   auto_approved: "text-green",
   pending_payment: "text-bronze2",
   cancelled: "text-red",
@@ -76,6 +80,7 @@ type BrandAccount = {
   tier: string;
   status: string;
   created_at: string;
+  brand_id: string | null;
 };
 
 type FakeHairApplication = {
@@ -139,7 +144,16 @@ type StylistAccount = {
   created_at: string;
 };
 
+export type ProductRequest = {
+  id: string;
+  product_name: string;
+  status: string;
+  created_at: string;
+  brand_accounts: { company_name: string } | null;
+};
+
 type TabKey =
+  | "product_requests"
   | "brand_applications"
   | "brand_accounts"
   | "hair_sellers"
@@ -195,12 +209,18 @@ export default function AdminTabs({
   stylistApplications,
   stylistAccounts,
   sellerProducts,
+  catalogBrands,
+  catalogProductCounts,
+  productRequests,
   password,
   initialTab,
   approvedEmail,
   approvalStatus,
   errorDetail,
 }: {
+  catalogBrands: { id: string; name: string }[];
+  catalogProductCounts: Record<string, number>;
+  productRequests: ProductRequest[];
   brandApplications: BrandApplication[];
   brandAccounts: BrandAccount[];
   fakeHairApplications: FakeHairApplication[];
@@ -233,6 +253,7 @@ export default function AdminTabs({
       : null;
 
   const TABS: { key: TabKey; label: string }[] = [
+    { key: "product_requests", label: `Product Requests (${productRequests.filter((r) => r.status === "pending").length})` },
     { key: "brand_applications", label: "Brand Applications" },
     { key: "brand_accounts", label: "Brand Accounts" },
     { key: "hair_sellers", label: "Hair Sellers" },
@@ -271,6 +292,55 @@ export default function AdminTabs({
           </button>
         ))}
       </div>
+
+      {tab === "product_requests" && (
+        <div className="overflow-x-auto rounded-lg border border-warm/10">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-warm/[0.04] text-muted uppercase text-xs tracking-wider">
+              <tr>
+                <th className="px-4 py-3">Brand</th>
+                <th className="px-4 py-3">Product</th>
+                <th className="px-4 py-3">Requested</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productRequests.map((req) => (
+                <tr key={req.id} className="border-t border-warm/10">
+                  <td className="px-4 py-3 text-cream">{req.brand_accounts?.company_name ?? "—"}</td>
+                  <td className="px-4 py-3 text-sand">{req.product_name}</td>
+                  <td className="px-4 py-3 text-muted whitespace-nowrap">{new Date(req.created_at).toLocaleDateString()}</td>
+                  <td className={`px-4 py-3 font-medium ${STATUS_STYLES[req.status] ?? "text-muted"}`}>{req.status}</td>
+                  <td className="px-4 py-3">
+                    {req.status === "pending" && (
+                      <div className="flex gap-3">
+                        {(["added", "declined"] as const).map((next) => (
+                          <form key={next} action={setProductRequestStatus}>
+                            <input type="hidden" name="id" value={req.id} />
+                            <input type="hidden" name="password" value={password} />
+                            <input type="hidden" name="status" value={next} />
+                            <button type="submit" className="text-xs text-bronze2 underline hover:text-bronze">
+                              mark {next}
+                            </button>
+                          </form>
+                        ))}
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {productRequests.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted">
+                    No product requests yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {tab === "brand_applications" && (
         <div className="overflow-x-auto rounded-lg border border-warm/10">
@@ -328,6 +398,7 @@ export default function AdminTabs({
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Joined</th>
+                <th className="px-4 py-3">Catalog brand</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
@@ -342,6 +413,30 @@ export default function AdminTabs({
                   </td>
                   <td className="px-4 py-3 text-muted whitespace-nowrap">
                     {new Date(account.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    {account.brand_id ? (
+                      <p style={{ fontFamily: "Space Mono, monospace", fontSize: "10px", color: "#2D7A3D" }}>
+                        matched to {catalogBrands.find((b) => b.id === account.brand_id)?.name ?? "brand"} ·{" "}
+                        {catalogProductCounts[account.brand_id] ?? 0} products in catalog
+                      </p>
+                    ) : (
+                      <form action={matchBrandAccount} className="flex flex-col gap-1">
+                        <input type="hidden" name="id" value={account.id} />
+                        <input type="hidden" name="password" value={password} />
+                        <select name="catalogBrandId" className="rounded border border-warm/20 bg-transparent px-2 py-1 text-xs text-cream">
+                          <option value="">match to brand…</option>
+                          {catalogBrands.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              {b.name}
+                            </option>
+                          ))}
+                        </select>
+                        <button type="submit" className="text-xs text-bronze2 underline hover:text-bronze">
+                          save match
+                        </button>
+                      </form>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col items-start gap-1">
@@ -379,7 +474,7 @@ export default function AdminTabs({
               ))}
               {brandAccounts.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted">
                     No brand accounts yet.
                   </td>
                 </tr>

@@ -1,103 +1,66 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 import { useBrandSession } from "@/lib/brandSession";
+import BrandDashboard, { type DashboardData } from "@/components/brand/BrandDashboard";
+import { grotesk, mono } from "@/lib/brandFonts";
 
-type Product = {
-  id: string;
-  product_name: string;
-  category: string | null;
-};
-
+// The brand dashboard. Data comes from /api/business/brand/dashboard, which
+// resolves the brand from the login token. The admin preview reuses this page
+// with the same API and passes brandId.
 export default function DashboardPage() {
-  const { loading: sessionLoading, account } = useBrandSession();
-  const [products, setProducts] = useState<Product[] | null>(null);
+  const { loading: sessionLoading, account, session } = useBrandSession();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!account) return;
+    if (!account || !session) return;
     let cancelled = false;
-
-    supabase
-      .from("brand_products")
-      .select("id, product_name, category")
-      .eq("brand_id", account.id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        if (!cancelled) setProducts(data ?? []);
-      });
-
+    fetch(`/api/business/brand/dashboard?brandId=${account.id}`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then(async (res) => {
+        const body = await res.json();
+        if (!res.ok) throw new Error(body.message ?? "Could not load the dashboard.");
+        return body as DashboardData;
+      })
+      .then((d) => !cancelled && setData(d))
+      .catch((err: Error) => !cancelled && setError(err.message));
     return () => {
       cancelled = true;
     };
-  }, [account]);
+  }, [account, session]);
 
-  if (sessionLoading || !account) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted">Loading...</p>
-      </div>
-    );
+  async function requestProduct(name: string): Promise<string> {
+    if (!session) return "Sign in again to send a request.";
+    const res = await fetch("/api/business/brand/request-product", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ product_name: name }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body.success) return body.message ?? "Something went wrong.";
+    return `request received. we'll add ${name} within 24 hours.`;
   }
 
+  if (sessionLoading || !account) return null;
+
   return (
-    <div className="px-6 py-12 sm:px-12">
-      <div className="mx-auto max-w-5xl">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
-          <h1 className="font-serif text-3xl sm:text-4xl text-cream">
-            Welcome, {account.company_name}
-          </h1>
-          <Link
-            href="/products/add"
-            className="rounded-full bg-bronze px-6 py-3 text-sm font-medium uppercase tracking-wider text-dark transition-colors hover:bg-bronze2"
-          >
-            + Add a product
-          </Link>
+    <div className={`${grotesk.variable} ${mono.variable}`} style={{ fontFamily: "var(--font-grotesk), sans-serif" }}>
+      {error ? (
+        <p className="p-8 font-[family-name:var(--font-mono-apply)] text-xs text-[#B03030]">{error}</p>
+      ) : !data ? (
+        <div className="min-h-screen bg-white p-6">
+          <div className="h-40 animate-pulse bg-[#f5f5f5]" />
+          <div className="mt-6 grid grid-cols-2 gap-px bg-[#0a0a0a] sm:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-36 animate-pulse bg-[#f5f5f5]" />
+            ))}
+          </div>
         </div>
-
-        <span className="inline-block bg-black px-3 py-1 font-mono text-[9px] lowercase tracking-wider text-white">
-          brand intelligence · $50/month
-        </span>
-
-        <div className="mt-10">
-          {products === null ? (
-            <p className="text-muted">Loading products...</p>
-          ) : products.length === 0 ? (
-            <div className="rounded-lg border border-warm/10 bg-warm/[0.03] px-8 py-16 text-center">
-              <p className="font-serif text-xl text-sand">
-                Add your first product to see how it scores with consumers
-                across all hair textures{" "}
-                <Link href="/products/add" className="text-bronze2 hover:text-bronze">
-                  →
-                </Link>
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="rounded-lg border border-warm/10 bg-warm/[0.03] p-6"
-                >
-                  <h2 className="font-serif text-lg text-cream">
-                    {product.product_name}
-                  </h2>
-                  <p className="mt-1 text-xs uppercase tracking-wider text-muted">
-                    {product.category ?? "Uncategorized"}
-                  </p>
-                  <Link
-                    href={`/products/${product.id}`}
-                    className="mt-4 inline-block text-sm text-bronze2 hover:text-bronze transition-colors"
-                  >
-                    View analysis →
-                  </Link>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      ) : (
+        <BrandDashboard data={data} onRequestProduct={requestProduct} />
+      )}
     </div>
   );
 }

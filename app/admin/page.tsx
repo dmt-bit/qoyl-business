@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import AdminTabs from "./AdminTabs";
+import AdminTabs, { type ProductRequest } from "./AdminTabs";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +71,21 @@ export default async function AdminPage({
       .order("product_name"),
   ]);
 
+  const [{ data: catalogBrands }, { data: catalogProductRows }, { data: productRequests }] = await Promise.all([
+    supabaseAdmin.from("catalog_brands").select("id, name").order("name"),
+    supabaseAdmin.from("catalog_products").select("brand_id"),
+    supabaseAdmin
+      .from("brand_product_requests")
+      .select("id, product_name, status, created_at, brand_accounts(company_name)")
+      .order("created_at", { ascending: false }),
+  ]);
+  const catalogProductCounts: Record<string, number> = {};
+  for (const row of catalogProductRows ?? []) {
+    if (row.brand_id) catalogProductCounts[row.brand_id] = (catalogProductCounts[row.brand_id] ?? 0) + 1;
+  }
+
   const VALID_TABS = new Set([
+    "product_requests",
     "brand_applications",
     "brand_accounts",
     "hair_sellers",
@@ -80,6 +94,7 @@ export default async function AdminPage({
   ]);
   const initialTab = VALID_TABS.has(searchParams.tab ?? "")
     ? (searchParams.tab as
+        | "product_requests"
         | "brand_applications"
         | "brand_accounts"
         | "hair_sellers"
@@ -99,6 +114,9 @@ export default async function AdminPage({
         stylistApplications={stylistApplications ?? []}
         stylistAccounts={stylistAccounts ?? []}
         sellerProducts={sellerProducts ?? []}
+        catalogBrands={catalogBrands ?? []}
+        catalogProductCounts={catalogProductCounts}
+        productRequests={(productRequests ?? []) as unknown as ProductRequest[]}
         password={password}
         initialTab={initialTab}
         approvedEmail={searchParams.approved_email ?? null}

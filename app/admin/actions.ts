@@ -337,3 +337,36 @@ export async function cancelBrandAccount(formData: FormData) {
   if (error) console.error("[cancelBrandAccount] update failed", { id, error: error.message });
   redirect(`/admin?password=${encodeURIComponent(password)}&tab=brand_accounts`);
 }
+
+// Admin's main job now: attach each brand account to its catalog brand, so its
+// products show on the dashboard. An empty catalogBrandId unlinks it.
+export async function matchBrandAccount(formData: FormData) {
+  const id = formData.get("id");
+  const catalogBrandId = formData.get("catalogBrandId");
+  const password = formData.get("password");
+  if (typeof password !== "string" || password !== process.env.ADMIN_PASSWORD) {
+    throw new Error("Unauthorized");
+  }
+  if (typeof id !== "string") throw new Error("Missing account id");
+
+  const brandId = typeof catalogBrandId === "string" && catalogBrandId ? catalogBrandId : null;
+  const { error } = await getSupabaseAdmin().from("brand_accounts").update({ brand_id: brandId }).eq("id", id);
+  if (error) console.error("[matchBrandAccount] update failed", { id, error: error.message });
+  redirect(`/admin?password=${encodeURIComponent(password)}&tab=brand_accounts`);
+}
+
+export async function setProductRequestStatus(formData: FormData) {
+  const id = formData.get("id");
+  const status = formData.get("status");
+  const password = formData.get("password");
+  if (typeof password !== "string" || password !== process.env.ADMIN_PASSWORD) {
+    throw new Error("Unauthorized");
+  }
+  if (typeof id !== "string" || (status !== "added" && status !== "declined")) {
+    throw new Error("Invalid request update");
+  }
+
+  const { error } = await getSupabaseAdmin().from("brand_product_requests").update({ status }).eq("id", id);
+  if (error) console.error("[setProductRequestStatus] update failed", { id, error: error.message });
+  redirect(`/admin?password=${encodeURIComponent(password)}&tab=product_requests`);
+}

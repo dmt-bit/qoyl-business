@@ -27,6 +27,7 @@ export default function BrandLayout({ children }: { children: ReactNode }) {
 // focused status page instead -- no sidebar, nothing is deleted.
 function BrandGate({ children }: { children: ReactNode }) {
   const { loading, session, account } = useBrandSession();
+  const pathname = usePathname();
   const heartbeatSent = useRef(false);
   const active = account?.status === "active";
 
@@ -44,6 +45,8 @@ function BrandGate({ children }: { children: ReactNode }) {
   if (loading || !account) return null;
 
   if (active) {
+    // The dashboard is a full-width white page (no sidebar). Other brand pages keep it.
+    if (pathname === "/dashboard") return <main className="min-h-screen">{children}</main>;
     return (
       <div className="min-h-screen flex">
         <Sidebar />
