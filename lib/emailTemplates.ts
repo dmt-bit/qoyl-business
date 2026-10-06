@@ -211,9 +211,7 @@ export function approvalEmail(params: {
   email: string;
   tempPassword: string;
   siteUrl: string;
-  // One option when the plan is known; several (brand w/o a recorded tier)
-  // lets the applicant pick theirs. Empty = Payment Links aren't configured
-  // yet, so the payment block is omitted.
+  // Empty = Payment Links aren't configured yet, so the payment block is omitted.
   payment: PaymentOption[];
   // Brand approvals with a score report: adds the preview and the
   // "after payment" list, and makes the subject name the product.
@@ -308,14 +306,12 @@ ${params.payment
 export function brandWelcomeWithPaymentEmail(params: {
   firstName: string;
   brandName: string;
-  tierLabel: string; // "early stage" | "growth" | "enterprise"
-  price: string; // "$50"
   productToScore: string | null;
   paymentUrl: string;
 }): EmailContent {
-  const subject = `welcome to qoyl — complete your ${params.tierLabel} brand setup`;
+  const subject = "welcome to qoyl — complete your brand setup";
   const productLabel = params.productToScore?.trim() || "your first product";
-  const cta = `complete setup — ${params.price}/month →`;
+  const cta = "complete setup — $50/month →";
 
   const text = `hey ${params.firstName},
 
@@ -324,7 +320,7 @@ your qoyl brand account is ready. ${params.brandName} is one step away from your
 WHAT HAPPENS NEXT
 
 01  complete your payment
-    ${params.price}/month · cancel any time
+    $50/month · cancel any time
 
 02  we score ${productLabel}
     you'll see your product scored across 6 hair profiles immediately after setup
@@ -369,7 +365,7 @@ questions? reply here — every message read personally.
       p(`hey ${esc(params.firstName)},`) +
       p(`your qoyl brand account is ready. <strong>${esc(params.brandName)}</strong> is one step away from your full ingredient intelligence dashboard.`) +
       `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 0;">
-${step("01", "complete your payment", `${esc(params.price)}/month · cancel any time`)}
+${step("01", "complete your payment", "$50/month · cancel any time")}
 ${step("02", `we score ${esc(productLabel)}`, "you'll see your product scored across 6 hair profiles immediately after setup")}
 ${step("03", "your dashboard goes live", "scores, segments, ingredient flags, and reformulation signals — all on day one")}
 <tr><td colspan="2" style="border-top:1px solid #e8e8e8;"></td></tr>

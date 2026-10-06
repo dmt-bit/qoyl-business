@@ -2,12 +2,6 @@
 
 import { useBrandSession } from "@/lib/brandSession";
 
-const TIER_LABELS: Record<string, string> = {
-  early_stage: "Early Stage",
-  growth: "Growth",
-  enterprise: "Enterprise",
-};
-
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between border-t border-warm/10 py-4 first:border-t-0">
@@ -39,7 +33,7 @@ export default function AccountPage() {
           <Row label="Email" value={account.email} />
           <Row label="Website" value={account.website || "—"} />
           <Row label="Instagram" value={account.instagram_handle || "—"} />
-          <Row label="Tier" value={TIER_LABELS[account.tier] ?? account.tier} />
+          <Row label="Plan" value="Brand intelligence · $50/month" />
           <Row label="Status" value={account.status} />
           <Row
             label="Member since"

@@ -5,7 +5,6 @@ import {
   approveFakeHairBrandApplication,
   rejectFakeHairBrandApplication,
   approveStylistApplication,
-  updateBrandTier,
   resendBrandPaymentLink,
   cancelBrandAccount,
 } from "./actions";
@@ -21,12 +20,6 @@ const STATUS_STYLES: Record<string, string> = {
   suspended: "text-red",
 };
 
-const TIERS = [
-  { value: "early_stage", label: "Early Stage" },
-  { value: "growth", label: "Growth" },
-  { value: "enterprise", label: "Enterprise" },
-];
-
 type BrandApplication = {
   id: string;
   company_name: string;
@@ -34,8 +27,7 @@ type BrandApplication = {
   email: string;
   website: string | null;
   instagram_handle: string | null;
-  product_count: string | null;
-  annual_revenue: string | null;
+  source: string | null;
   why_qoyl: string | null;
   status: string;
   created_at: string;
@@ -255,8 +247,7 @@ export default function AdminTabs({
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Website</th>
                 <th className="px-4 py-3">Instagram</th>
-                <th className="px-4 py-3">Products</th>
-                <th className="px-4 py-3">Revenue</th>
+                <th className="px-4 py-3">Heard via</th>
                 <th className="px-4 py-3">Why Qoyl</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Applied</th>
@@ -270,8 +261,7 @@ export default function AdminTabs({
                   <td className="px-4 py-3 text-sand">{app.email}</td>
                   <td className="px-4 py-3 text-sand">{app.website || "—"}</td>
                   <td className="px-4 py-3 text-sand">{app.instagram_handle || "—"}</td>
-                  <td className="px-4 py-3 text-sand">{app.product_count || "—"}</td>
-                  <td className="px-4 py-3 text-sand">{app.annual_revenue || "—"}</td>
+                  <td className="px-4 py-3 text-sand">{app.source?.replace(/_/g, " ") || "—"}</td>
                   <td className="px-4 py-3 text-sand max-w-xs">{app.why_qoyl || "—"}</td>
                   <td className={`px-4 py-3 font-medium ${STATUS_STYLES[app.status] ?? "text-muted"}`}>
                     {app.status}
@@ -283,7 +273,7 @@ export default function AdminTabs({
               ))}
               {brandApplications.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={9} className="px-4 py-8 text-center text-muted">
                     No applications yet.
                   </td>
                 </tr>
@@ -303,7 +293,6 @@ export default function AdminTabs({
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Joined</th>
-                <th className="px-4 py-3">Tier</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
@@ -318,28 +307,6 @@ export default function AdminTabs({
                   </td>
                   <td className="px-4 py-3 text-muted whitespace-nowrap">
                     {new Date(account.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-1">
-                      {TIERS.map((t) => (
-                        <form key={t.value} action={updateBrandTier}>
-                          <input type="hidden" name="id" value={account.id} />
-                          <input type="hidden" name="password" value={password} />
-                          <input type="hidden" name="tier" value={t.value} />
-                          <button
-                            type="submit"
-                            disabled={account.tier === t.value}
-                            className={`rounded-full px-3 py-1.5 text-xs uppercase tracking-wider transition-colors ${
-                              account.tier === t.value
-                                ? "bg-bronze text-dark"
-                                : "bg-warm/[0.05] text-muted hover:bg-warm/10 hover:text-sand"
-                            }`}
-                          >
-                            {t.label}
-                          </button>
-                        </form>
-                      ))}
-                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col items-start gap-1">
@@ -367,7 +334,7 @@ export default function AdminTabs({
               ))}
               {brandAccounts.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={6} className="px-4 py-8 text-center text-muted">
                     No brand accounts yet.
                   </td>
                 </tr>

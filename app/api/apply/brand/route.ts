@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import { NOTIFY_EMAIL, sendEmail } from "@/lib/email";
 import { applicationAlertEmail } from "@/lib/emailTemplates";
-import { BRAND_TIERS, isBrandTier, type BrandTier } from "@/lib/accountTypes";
+import { BRAND_PLAN } from "@/lib/accountTypes";
 import { PaymentNotConfiguredError, startBrandSignup } from "@/lib/brandSignup";
 import { str, validEmail } from "@/lib/applications";
 
 export const dynamic = "force-dynamic";
 
-// Self-serve brand signup. There's no approval queue: a valid application
-// creates the account (pending_payment) and emails the applicant a payment
-// link. hey@qoyl.live gets an alert for every submission.
+const SOURCE_OPTIONS = new Set(["instagram", "tiktok", "friend_or_referral", "search", "other"]);
+
+// Self-serve brand signup. One plan ($50/month), so no tier in the request.
+// A valid application creates the account (pending_payment) and emails the
+// applicant the payment link. hey@qoyl.live gets an alert for every submission.
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
   try {
@@ -21,23 +23,34 @@ export async function POST(request: Request) {
   const companyName = str(body, "company_name", 200);
   const contactName = str(body, "contact_name", 200);
   const email = str(body, "email", 254).toLowerCase();
+  const website = str(body, "website", 300) || null;
+  const instagram = str(body, "instagram_handle", 100) || null;
   if (!companyName || !contactName || !validEmail(email)) {
     return NextResponse.json(
-      { success: false, message: "Company name, contact name and a valid email are required." },
+      { success: false, message: "Brand name, your name and a valid email are required." },
       { status: 400 }
     );
   }
-  if (!isBrandTier(body.requested_tier)) {
-    return NextResponse.json({ success: false, message: "Choose a plan to continue." }, { status: 400 });
+  if (!website && !instagram) {
+    return NextResponse.json(
+      { success: false, message: "Add a website or an instagram handle." },
+      { status: 400 }
+    );
   }
-  const tier: BrandTier = body.requested_tier;
 
-  const website = str(body, "website", 300) || null;
-  const instagram = str(body, "instagram_handle", 100) || null;
-  const catalogSize = str(body, "product_count", 20) || null;
-  const revenue = str(body, "annual_revenue", 50) || null;
+  const stripeUrl = process.env.STRIPE_LINK_BRAND_EARLY_STAGE;
+  if (!stripeUrl) {
+    console.error("STRIPE_LINK_BRAND_EARLY_STAGE is not set");
+    return NextResponse.json(
+      { success: false, message: "Payment configuration error. Contact hey@qoyl.live." },
+      { status: 500 }
+    );
+  }
+
   const about = str(body, "why_qoyl", 3000) || null;
   const productToScore = str(body, "product_to_score", 200) || null;
+  const sourceRaw = str(body, "source", 50);
+  const source = SOURCE_OPTIONS.has(sourceRaw) ? sourceRaw : null;
 
   let result;
   try {
@@ -47,20 +60,16 @@ export async function POST(request: Request) {
       email,
       website,
       instagram,
-      catalogSize,
       about,
       productToScore,
-      tier,
+      source,
     });
   } catch (err) {
     if (err instanceof PaymentNotConfiguredError) {
       console.error("[apply/brand] payment link missing:", err.message);
       return NextResponse.json(
-        {
-          success: false,
-          message: "Payment isn't set up for this plan yet. Email hey@qoyl.live and we'll get you started.",
-        },
-        { status: 503 }
+        { success: false, message: "Payment configuration error. Contact hey@qoyl.live." },
+        { status: 500 }
       );
     }
     console.error("[apply/brand] signup failed:", err);
@@ -70,7 +79,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const plan = BRAND_TIERS[tier];
   const notes = [
     result.alreadyActive
       ? "email already has an active account - sent a sign-in link instead"
@@ -85,16 +93,15 @@ export async function POST(request: Request) {
     name: companyName,
     note: notes,
     fields: [
-      ["COMPANY", companyName],
+      ["BRAND", companyName],
       ["CONTACT", contactName],
       ["EMAIL", email],
-      ["PLAN", `${plan.label} (${plan.price})`],
+      ["PLAN", BRAND_PLAN.price],
       ["WEBSITE", website ?? ""],
       ["INSTAGRAM", instagram ?? ""],
-      ["PRODUCTS", catalogSize ?? ""],
-      ["REVENUE", revenue ?? ""],
       ["PRODUCT TO SCORE", productToScore ?? ""],
-      ["WHY QOYL", about ?? ""],
+      ["HEARD ABOUT QOYL VIA", source ?? ""],
+      ["ABOUT", about ?? ""],
     ],
   });
   const alertResult = await sendEmail({ to: NOTIFY_EMAIL, replyTo: email, ...alert });

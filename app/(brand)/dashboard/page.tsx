@@ -5,12 +5,6 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useBrandSession } from "@/lib/brandSession";
 
-const TIER_LABELS: Record<string, string> = {
-  early_stage: "Early Stage",
-  growth: "Growth",
-  enterprise: "Enterprise",
-};
-
 type Product = {
   id: string;
   product_name: string;
@@ -62,8 +56,8 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <span className="inline-block rounded-full border border-bronze/40 bg-bronze/10 px-3 py-1 text-xs uppercase tracking-wider text-bronze2">
-          {TIER_LABELS[account.tier] ?? account.tier}
+        <span className="inline-block bg-black px-3 py-1 font-mono text-[9px] lowercase tracking-wider text-white">
+          brand intelligence · $50/month
         </span>
 
         <div className="mt-10">

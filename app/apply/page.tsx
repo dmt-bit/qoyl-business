@@ -1,28 +1,18 @@
 "use client";
 
-import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { BRAND_TIERS, isBrandTier, type BrandTier } from "@/lib/accountTypes";
+import { useState } from "react";
 import { ApplyError, ApplyShell, Field, SubmitButton, inputClass, useApplication } from "@/components/apply/ui";
 
-const PRODUCT_COUNT_OPTIONS = ["1-5", "6-15", "16-30", "30+"];
-const REVENUE_OPTIONS = ["Under $100K", "$100K - $500K", "$500K - $1M", "$1M - $5M", "$5M+"];
-const TIER_ORDER: BrandTier[] = ["early_stage", "growth", "enterprise"];
+const SOURCE_OPTIONS = [
+  { value: "instagram", label: "instagram" },
+  { value: "tiktok", label: "tiktok" },
+  { value: "friend_or_referral", label: "a friend or referral" },
+  { value: "search", label: "search" },
+  { value: "other", label: "other" },
+];
 
 export default function ApplyPage() {
-  return (
-    <Suspense fallback={null}>
-      <ApplyForm />
-    </Suspense>
-  );
-}
-
-function ApplyForm() {
-  const searchParams = useSearchParams();
-  const tierParam = searchParams.get("tier");
-  const [tier, setTier] = useState<BrandTier | null>(isBrandTier(tierParam) ? tierParam : null);
-
   const { submit, submitting, submitted, error } = useApplication("/api/apply/brand");
   const [form, setForm] = useState({
     company_name: "",
@@ -30,10 +20,9 @@ function ApplyForm() {
     email: "",
     website: "",
     instagram_handle: "",
-    product_count: "",
-    annual_revenue: "",
     product_to_score: "",
     why_qoyl: "",
+    source: "",
   });
 
   function update<K extends keyof typeof form>(key: K, value: string) {
@@ -66,84 +55,71 @@ function ApplyForm() {
   }
 
   return (
-    <ApplyShell
-      label="brand application"
-      title="apply for brand access"
-      intro="pick a plan and tell us about your brand. you'll get a payment link straight away — once you pay, your dashboard is live."
-    >
-      <form
-        onSubmit={(e) => submit(e, { ...form, requested_tier: tier })}
-        className="space-y-6"
-      >
-        <div>
-          <span className="mb-2 block font-mono text-[10px] lowercase tracking-[0.12em] text-[#666]">
-            choose your plan *
-          </span>
-          <div className="grid gap-2 sm:grid-cols-3">
-            {TIER_ORDER.map((t) => {
-              const plan = BRAND_TIERS[t];
-              const selected = tier === t;
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => setTier(t)}
-                  className={`border border-[#0a0a0a] px-4 py-3 text-left transition-colors ${
-                    selected ? "bg-[#0a0a0a] text-white" : "bg-white text-[#0a0a0a] hover:bg-[#f5f5f5]"
-                  }`}
-                >
-                  <span className="block text-sm font-medium lowercase">{plan.label}</span>
-                  <span className="mt-1 block font-mono text-[11px]">{plan.price}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+    <ApplyShell label="brand application" title="apply for brand access">
+      <div className="mb-10">
+        <p className="font-mono text-[32px] font-bold leading-none text-[#0a0a0a]">$50/month</p>
+        <p className="mt-1 font-mono text-[10px] tracking-[0.12em] text-[#888]">
+          full brand intelligence · cancel any time
+        </p>
+      </div>
 
-        <Field label="company name" required>
-          <input type="text" required value={form.company_name} onChange={(e) => update("company_name", e.target.value)} className={inputClass} />
-        </Field>
-        <Field label="contact name" required>
-          <input type="text" required value={form.contact_name} onChange={(e) => update("contact_name", e.target.value)} className={inputClass} />
-        </Field>
-        <Field label="email" required>
-          <input type="email" required value={form.email} onChange={(e) => update("email", e.target.value)} className={inputClass} />
-        </Field>
-        <Field label="website">
-          <input type="text" placeholder="https://" value={form.website} onChange={(e) => update("website", e.target.value)} className={inputClass} />
-        </Field>
-        <Field label="instagram handle">
-          <input type="text" placeholder="@yourbrand" value={form.instagram_handle} onChange={(e) => update("instagram_handle", e.target.value)} className={inputClass} />
-        </Field>
-        <Field label="how many products do you sell?">
-          <select value={form.product_count} onChange={(e) => update("product_count", e.target.value)} className={inputClass}>
-            <option value="">select one</option>
-            {PRODUCT_COUNT_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-        </Field>
-        <Field label="annual revenue">
-          <select value={form.annual_revenue} onChange={(e) => update("annual_revenue", e.target.value)} className={inputClass}>
-            <option value="">select one</option>
-            {REVENUE_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-        </Field>
-        <Field label="which product should we score first?">
-          <input
-            type="text"
-            placeholder="e.g. your best-selling leave-in"
-            value={form.product_to_score}
-            onChange={(e) => update("product_to_score", e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="why qoyl?">
-          <textarea rows={4} value={form.why_qoyl} onChange={(e) => update("why_qoyl", e.target.value)} className={inputClass} />
-        </Field>
+      <form onSubmit={(e) => submit(e, form)} className="space-y-8">
+        <section className="space-y-6">
+          <p className="font-mono text-[10px] lowercase tracking-[0.12em] text-[#888]">step 1 — the basics</p>
+          <Field label="brand name" required>
+            <input type="text" required value={form.company_name} onChange={(e) => update("company_name", e.target.value)} className={inputClass} />
+          </Field>
+          <Field label="your name" required>
+            <input type="text" required value={form.contact_name} onChange={(e) => update("contact_name", e.target.value)} className={inputClass} />
+          </Field>
+          <Field label="email" required>
+            <input type="email" required value={form.email} onChange={(e) => update("email", e.target.value)} className={inputClass} />
+          </Field>
+          <Field label="website or instagram" required>
+            <div className="space-y-2">
+              <input
+                type="text"
+                required={!form.instagram_handle}
+                placeholder="https://"
+                value={form.website}
+                onChange={(e) => update("website", e.target.value)}
+                className={inputClass}
+              />
+              <input
+                type="text"
+                required={!form.website}
+                placeholder="@yourbrand"
+                value={form.instagram_handle}
+                onChange={(e) => update("instagram_handle", e.target.value)}
+                className={inputClass}
+              />
+            </div>
+          </Field>
+        </section>
+
+        <section className="space-y-6">
+          <p className="font-mono text-[10px] lowercase tracking-[0.12em] text-[#888]">step 2 — your brand</p>
+          <Field label="which product should we score first?">
+            <input
+              type="text"
+              placeholder="e.g. your best-selling leave-in"
+              value={form.product_to_score}
+              onChange={(e) => update("product_to_score", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="about your brand">
+            <textarea rows={4} value={form.why_qoyl} onChange={(e) => update("why_qoyl", e.target.value)} className={inputClass} />
+          </Field>
+          <Field label="how did you find qoyl?">
+            <select value={form.source} onChange={(e) => update("source", e.target.value)} className={inputClass}>
+              <option value="">select one</option>
+              {SOURCE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </Field>
+        </section>
 
         <ApplyError message={error} />
         <SubmitButton submitting={submitting} />

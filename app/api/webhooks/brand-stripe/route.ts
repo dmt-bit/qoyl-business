@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendEmail } from "@/lib/email";
-import type { BrandTier } from "@/lib/accountTypes";
+import { BRAND_PLAN } from "@/lib/accountTypes";
 import { brandActivationEmail } from "@/lib/emailTemplates";
 import { firstNameOf, generateSignInLink, siteUrl } from "@/lib/brandSignup";
 
@@ -14,20 +14,14 @@ import { firstNameOf, generateSignInLink, siteUrl } from "@/lib/brandSignup";
 //
 // Matching a payment to a brand account goes through client_reference_id,
 // which the approval email appends to each Payment Link URL (see
-// lib/accountTypes.ts). Amounts identify the tier.
+// lib/accountTypes.ts). The amount identifies the plan.
 
 export const dynamic = "force-dynamic";
 
-// Price amounts in cents -> tier. $50 / $260 / $760 (see lib/pricingTiers.ts).
-const TIER_BY_AMOUNT_CENTS: Record<number, BrandTier> = {
-  5000: "early_stage",
-  26000: "growth",
-  76000: "enterprise",
-};
-
-function tierForAmount(cents: number | null | undefined): BrandTier | null {
+// The one brand plan ($50/month) in cents. Anything else is not a brand plan.
+function tierForAmount(cents: number | null | undefined): string | null {
   if (cents == null) return null;
-  return TIER_BY_AMOUNT_CENTS[cents] ?? null;
+  return cents === BRAND_PLAN.cents ? BRAND_PLAN.dbTier : null;
 }
 
 async function logEvent(eventType: string, brandAccountId: string | null, metadata: Record<string, unknown>) {

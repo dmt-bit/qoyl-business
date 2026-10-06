@@ -31,30 +31,6 @@ async function sendApprovalEmail(params: {
 
 type ApprovalStatus = "ok" | "email_failed" | "auth_failed" | "account_failed" | "not_found";
 
-const VALID_TIERS = new Set(["early_stage", "growth", "enterprise"]);
-
-export async function updateBrandTier(formData: FormData) {
-  const id = formData.get("id");
-  const tier = formData.get("tier");
-  const password = formData.get("password");
-
-  if (typeof password !== "string" || password !== process.env.ADMIN_PASSWORD) {
-    throw new Error("Unauthorized");
-  }
-  if (typeof id !== "string" || typeof tier !== "string" || !VALID_TIERS.has(tier)) {
-    throw new Error("Invalid tier update");
-  }
-
-  const supabaseAdmin = getSupabaseAdmin();
-  const { error } = await supabaseAdmin.from("brand_accounts").update({ tier }).eq("id", id);
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  redirect(`/admin?password=${encodeURIComponent(password)}&tab=brand_accounts`);
-}
-
 export async function approveFakeHairBrandApplication(formData: FormData) {
   const id = formData.get("id");
   const password = formData.get("password");

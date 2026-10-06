@@ -33,11 +33,11 @@ export default function PricingPage() {
             Simple, transparent pricing
           </h1>
           <p className="mt-4 text-lg text-sand leading-relaxed">
-            Choose the tier that matches where your brand is today.
+            One plan. Everything included. Cancel any time.
           </p>
         </div>
 
-        <div className="mx-auto mt-16 grid max-w-5xl gap-6 sm:grid-cols-3">
+        <div className="mx-auto mt-16 grid max-w-md gap-6">
           {PRICING_TIERS.map((tier) => (
             <div
               key={tier.name}

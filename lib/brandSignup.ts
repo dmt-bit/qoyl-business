@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { getSupabaseAdmin } from "./supabaseAdmin";
 import { sendEmail } from "./email";
-import { BRAND_TIERS, brandPaymentUrl, type BrandTier } from "./accountTypes";
+import { BRAND_PLAN, brandPaymentUrl } from "./accountTypes";
 import { brandWelcomeWithPaymentEmail, signInLinkEmail } from "./emailTemplates";
 
 // Self-serve brand signup: no approval step. Applying creates the login and a
@@ -15,7 +15,6 @@ export type BrandAccountRow = {
   email: string;
   company_name: string;
   contact_name: string;
-  tier: string;
   status: string;
   payment_url: string | null;
   product_to_score: string | null;
@@ -58,17 +57,13 @@ async function createAuthUser(email: string, companyName: string): Promise<strin
 // Sends (or re-sends) the payment email for a pending brand account. Returns
 // false when the email couldn't be sent; never throws for a send failure.
 export async function sendBrandPaymentEmail(account: BrandAccountRow): Promise<boolean> {
-  const tier = account.tier as BrandTier;
-  const paymentUrl = account.payment_url ?? brandPaymentUrl(tier, account.email, account.id);
+  const paymentUrl = account.payment_url ?? brandPaymentUrl(account.email, account.id);
   if (!paymentUrl) return false;
-  const plan = BRAND_TIERS[tier];
   const result = await sendEmail({
     to: account.email,
     ...brandWelcomeWithPaymentEmail({
       firstName: firstNameOf(account.contact_name),
       brandName: account.company_name,
-      tierLabel: plan.label.toLowerCase(),
-      price: plan.price.replace("/month", ""),
       productToScore: account.product_to_score,
       paymentUrl,
     }),
@@ -83,10 +78,9 @@ export type BrandSignupInput = {
   email: string;
   website: string | null;
   instagram: string | null;
-  catalogSize: string | null;
   about: string | null;
   productToScore: string | null;
-  tier: BrandTier;
+  source: string | null;
 };
 
 export type BrandSignupResult = {
@@ -117,23 +111,21 @@ export async function startBrandSignup(input: BrandSignupInput): Promise<BrandSi
 
   // Id is fixed before insert so the Payment Link can carry it as client_reference_id.
   const accountId: string = existing?.id ?? randomUUID();
-  const paymentUrl = brandPaymentUrl(input.tier, input.email, accountId);
+  const paymentUrl = brandPaymentUrl(input.email, accountId);
   if (!paymentUrl) {
-    throw new PaymentNotConfiguredError(`no Payment Link configured for ${input.tier}`);
+    throw new PaymentNotConfiguredError("STRIPE_LINK_BRAND_EARLY_STAGE is not set or invalid");
   }
 
-  const plan = BRAND_TIERS[input.tier];
   const accountFields = {
     company_name: input.companyName,
     contact_name: input.contactName,
     website: input.website,
     instagram_handle: input.instagram,
-    tier: input.tier,
-    plan_tier: input.tier,
-    plan_price_cents: plan.cents,
+    tier: BRAND_PLAN.dbTier,
+    plan_tier: BRAND_PLAN.dbTier,
+    plan_price_cents: BRAND_PLAN.cents,
     status: "pending_payment",
     payment_url: paymentUrl,
-    catalog_size: input.catalogSize,
     product_to_score: input.productToScore,
     about: input.about,
   };
@@ -156,10 +148,10 @@ export async function startBrandSignup(input: BrandSignupInput): Promise<BrandSi
     email: input.email,
     website: input.website,
     instagram_handle: input.instagram,
-    product_count: input.catalogSize,
     why_qoyl: input.about,
-    requested_tier: input.tier,
     product_to_score: input.productToScore,
+    source: input.source,
+    requested_tier: BRAND_PLAN.dbTier,
     status: "auto_approved",
   });
   if (applicationError) console.error("[brand-signup] brand_applications insert failed:", applicationError.message);
@@ -169,7 +161,6 @@ export async function startBrandSignup(input: BrandSignupInput): Promise<BrandSi
     email: input.email,
     company_name: input.companyName,
     contact_name: input.contactName,
-    tier: input.tier,
     status: "pending_payment",
     payment_url: paymentUrl,
     product_to_score: input.productToScore,

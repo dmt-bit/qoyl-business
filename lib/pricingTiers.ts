@@ -9,53 +9,23 @@ export type PricingTier = {
   highlight?: boolean;
 };
 
+// Brands have one plan: $50/month with everything included.
 export const PRICING_TIERS: PricingTier[] = [
   {
-    name: "Early Stage",
+    name: "Brand intelligence",
     price: "$50",
-    audience: "For indie brands with 1-5 products",
+    audience: "For any brand selling hair products",
     includes: [
-      "Ingredient performance scores for up to 3 products",
-      "Monthly insight report",
-      "Consumer demand signals access",
-      "Email support",
-    ],
-    bestFor:
-      "Small Black-owned and indie hair care brands scaling their first product line",
-    cta: "Apply for Early Stage →",
-    ctaHref: "/apply?tier=early_stage",
-  },
-  {
-    name: "Growth",
-    price: "$260",
-    audience: "For established brands with 6-20 products",
-    includes: [
-      "Everything in Early Stage",
-      "Scores for up to 10 products",
+      "Full product score matrix across 6 hair profiles",
+      "Segment breakdown by curl type and porosity",
+      "Ingredient flag analysis",
       "Reformulation signals",
-      "Bi-weekly insight reports",
-      "Priority support",
-    ],
-    bestFor:
-      "Brands actively developing new SKUs or reformulating existing products",
-    cta: "Apply for Growth →",
-    ctaHref: "/apply?tier=growth",
-    highlight: true,
-  },
-  {
-    name: "Enterprise",
-    price: "$760",
-    audience: "For large catalogs and custom needs",
-    includes: [
-      "Everything in Growth",
+      "Geographic demand data",
+      "Style match placement tracking",
       "Unlimited products",
-      "Custom integration",
-      "Weekly insight calls",
-      "Dedicated account support",
-      "API access",
     ],
-    bestFor: "Larger brands or investors who want deep ongoing intelligence",
-    cta: "Contact us →",
-    ctaHref: "mailto:hello@qoyl.live",
+    bestFor: "Brands that want to know how their formulas perform across real hair types",
+    cta: "Apply for brand access →",
+    ctaHref: "/apply",
   },
 ];

@@ -17,7 +17,7 @@ export function ApplyShell({
 }: {
   label: string;
   title: string;
-  intro: string;
+  intro?: string;
   price?: string;
   children: ReactNode;
 }) {
@@ -45,7 +45,7 @@ export function ApplyShell({
             {price}
           </p>
         )}
-        <p className="mt-5 text-sm font-light leading-relaxed text-[#666]">{intro}</p>
+        {intro && <p className="mt-5 text-sm font-light leading-relaxed text-[#666]">{intro}</p>}
         <div className="mt-10">{children}</div>
       </main>
     </div>

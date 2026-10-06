@@ -197,22 +197,13 @@ nav{
 }
 .pricing-h{font-size:clamp(20px,2.5vw,32px);font-weight:700;letter-spacing:-1px;text-transform:lowercase}
 .pricing-note{font-size:12px;color:var(--g6);max-width:340px;line-height:1.65;text-align:right}
-.pricing-tiers{display:grid;grid-template-columns:repeat(3,1fr)}
-.tier{padding:40px 32px;border-right:1px solid var(--k)}
-.tier:last-child{border-right:none}
-.tier.mid{background:var(--k)}
-.tier-name{font-family:var(--m);font-size:9px;letter-spacing:.14em;color:var(--g4);margin-bottom:16px;text-transform:lowercase}
-.tier.mid .tier-name{color:#555}
-.tier-price{font-family:var(--m);font-size:44px;font-weight:700;color:var(--k);line-height:1;margin-bottom:4px}
-.tier.mid .tier-price{color:var(--w)}
-.tier-per{font-family:var(--m);font-size:10px;color:var(--g4);margin-bottom:24px;text-transform:lowercase}
-.tier.mid .tier-per{color:#555}
-.tier-features{list-style:none;margin-bottom:32px}
-.tier-features li{font-size:11px;color:var(--g6);padding:8px 0;border-top:1px solid var(--g2);display:flex;gap:8px;text-transform:lowercase;line-height:1.5}
-.tier.mid .tier-features li{color:#888;border-top-color:#222}
-.tier-features li::before{content:'+';flex-shrink:0}
-.tier-btn{display:block;text-align:center;padding:11px;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:lowercase;font-family:var(--f);text-decoration:none;cursor:pointer;border:1px solid var(--k);color:var(--k);background:transparent}
-.tier.mid .tier-btn{background:var(--w);border-color:var(--w);color:var(--k)}
+.price-single{padding:56px 32px;text-align:center}
+.price-single-amt{font-family:var(--m);font-size:56px;font-weight:700;color:var(--k);line-height:1}
+.price-single-sub{font-family:var(--m);font-size:10px;letter-spacing:.14em;color:var(--g4);margin:10px 0 32px;text-transform:lowercase}
+.price-single-feats{list-style:none;max-width:460px;margin:0 auto 36px;text-align:left}
+.price-single-feats li{font-size:12px;color:var(--g6);padding:9px 0;border-top:1px solid var(--g2);display:flex;gap:8px;text-transform:lowercase;line-height:1.5}
+.price-single-feats li::before{content:'+';flex-shrink:0}
+.price-single-btn{display:inline-block;background:var(--k);color:var(--w);padding:14px 32px;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:lowercase;text-decoration:none;font-family:var(--f)}
 .founding{
   padding:20px 32px;background:var(--g1);
   font-size:12px;color:var(--g6);line-height:1.7;
@@ -252,9 +243,7 @@ nav{
   .ir:nth-last-child(-n+2){border-bottom:1px solid var(--g2)}
   .ir:last-child{border-bottom:none}
   .pricing-header{padding:32px 20px}
-  .pricing-tiers{grid-template-columns:1fr}
-  .tier{border-right:none;border-bottom:1px solid var(--k)}
-  .tier:last-child{border-bottom:none}
+  .price-single{padding:40px 20px}
   .founding{padding:16px 20px}
   .footer-nav{grid-template-columns:1fr}
   .fn-col{border-right:none;border-bottom:1px solid var(--g2);padding:24px 20px}
@@ -304,12 +293,12 @@ nav{
     <span class="ticker-item"><span>850+</span> ingredients scored</span>
     <span class="ticker-item"><span>8</span> scoring variables per product</span>
     <span class="ticker-item"><span>porosity</span> · <span>curl type</span> · <span>scalp</span> · <span>climate</span> · <span>water hardness</span> · <span>age</span> · <span>concerns</span> · <span>season</span></span>
-    <span class="ticker-item"><span>$5,000</span> focus group → <span>$260</span>/month dashboard</span>
+    <span class="ticker-item"><span>$5,000</span> focus group → <span>$50</span>/month dashboard</span>
     <span class="ticker-item"><span>82%</span> ingredient coverage</span>
     <span class="ticker-item"><span>850+</span> ingredients scored</span>
     <span class="ticker-item"><span>8</span> scoring variables per product</span>
     <span class="ticker-item"><span>porosity</span> · <span>curl type</span> · <span>scalp</span> · <span>climate</span> · <span>water hardness</span> · <span>age</span> · <span>concerns</span> · <span>season</span></span>
-    <span class="ticker-item"><span>$5,000</span> focus group → <span>$260</span>/month dashboard</span>
+    <span class="ticker-item"><span>$5,000</span> focus group → <span>$50</span>/month dashboard</span>
   </div>
 </div>
 
@@ -417,53 +406,23 @@ nav{
 
 <section class="pricing" id="pricing">
   <div class="pricing-header">
-    <h2 class="pricing-h">pricing that reflects where you are</h2>
+    <h2 class="pricing-h">one plan. everything included.</h2>
     <p class="pricing-note">flat monthly rate. no platform fees. no percentage of revenue. data that improves your formula.</p>
   </div>
-  <div class="pricing-tiers">
-    <div class="tier">
-      <div class="tier-name">early stage · 1-5 products</div>
-      <div class="tier-price">$50<span style="font-size:16px;font-weight:400">/mo</span></div>
-      <div class="tier-per">$50/month · founding partner rate</div>
-      <ul class="tier-features">
-        <li>ingredient performance scores across all hair profiles</li>
-        <li>top and bottom performing consumer segments</li>
-        <li>monthly demand signal report by city</li>
-        <li>products featured in style match shopping lists</li>
-        <li>founding partner badge on consumer profile</li>
-      </ul>
-      <a href="/apply" class="tier-btn">apply as founding partner</a>
-    </div>
-    <div class="tier mid">
-      <div class="tier-name">growth · 6-20 products</div>
-      <div class="tier-price">$260<span style="font-size:16px;font-weight:400">/mo</span></div>
-      <div class="tier-per">for established brands</div>
-      <ul class="tier-features">
-        <li>everything in early stage</li>
-        <li>reformulation signals — specific ingredient swap suggestions</li>
-        <li>competitor comparison data</li>
-        <li>priority product listing in search and recommendations</li>
-        <li>quarterly strategy call</li>
-        <li>featured placement in style match results</li>
-      </ul>
-      <a href="/apply" class="tier-btn">apply for access</a>
-    </div>
-    <div class="tier">
-      <div class="tier-name">enterprise · custom</div>
-      <div class="tier-price">$760<span style="font-size:16px;font-weight:400">/mo</span></div>
-      <div class="tier-per">full catalog · api access</div>
-      <ul class="tier-features">
-        <li>everything in growth</li>
-        <li>full catalog scored — unlimited skus</li>
-        <li>custom segment reports by request</li>
-        <li>api access to scoring data</li>
-        <li>co-marketing on qoyl consumer platform</li>
-        <li>monthly executive briefing</li>
-      </ul>
-      <a href="mailto:hey@qoyl.live" class="tier-btn">contact us</a>
-    </div>
+  <div class="price-single">
+    <div class="price-single-amt">$50<span style="font-size:18px;font-weight:400">/month</span></div>
+    <div class="price-single-sub">everything included · no setup fee · cancel any time</div>
+    <ul class="price-single-feats">
+      <li>full product score matrix across 6 hair profiles</li>
+      <li>segment breakdown by curl type and porosity</li>
+      <li>ingredient flag analysis</li>
+      <li>reformulation signals</li>
+      <li>geographic demand data</li>
+      <li>style match placement tracking</li>
+      <li>unlimited products</li>
+    </ul>
+    <a href="https://business.qoyl.live/apply" class="price-single-btn">apply for brand access →</a>
   </div>
-  <div class="founding"><strong>founding partner rate:</strong> the first 10 brand partners lock in at $35/month for 12 months. by the time the platform reaches 10,000 consumers, you will have 12 months of your products scored against real profiles while competitors have zero data.</div>
 </section>
 
 <div class="footer-nav">
