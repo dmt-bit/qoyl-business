@@ -13,6 +13,10 @@ const SOURCE_OPTIONS = new Set(["instagram", "tiktok", "friend_or_referral", "se
 // A valid application creates the account (pending_payment) and emails the
 // applicant the payment link. hey@qoyl.live gets an alert for every submission.
 export async function POST(request: Request) {
+  // TEMP (remove after confirming the Vercel deploy picked up the env var):
+  // reads the link on every request and logs only its first 30 characters.
+  console.log("stripe url:", (process.env.STRIPE_LINK_BRAND_EARLY_STAGE?.slice(0, 30) ?? "NOT SET") + "...");
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
