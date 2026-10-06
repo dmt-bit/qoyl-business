@@ -6,15 +6,19 @@ import { BRAND_PLAN } from "@/lib/accountTypes";
 import { brandActivationEmail } from "@/lib/emailTemplates";
 import { firstNameOf, generateSignInLink, siteUrl } from "@/lib/brandSignup";
 
-// Brand subscription webhook (Payment Links from the approval email).
+// Brand subscription webhook (Payment Links from the self-serve signup email).
 // Verifies the Stripe signature with STRIPE_BRAND_WEBHOOK_SECRET - the
 // signature check needs no Stripe API key, since every field we use is in
 // the event payload. Separate endpoint from qoyl-beta's routine webhook so
 // the two Stripe destinations can't affect each other.
 //
 // Matching a payment to a brand account goes through client_reference_id,
-// which the approval email appends to each Payment Link URL (see
+// which startBrandSignup appends to each Payment Link URL (see
 // lib/accountTypes.ts). The amount identifies the plan.
+//
+// Response policy: anything that means the account is still unpaid returns
+// 500 so Stripe retries. Once the account is active, nothing downstream (magic
+// link, email, analytics) can make Stripe retry -- those failures are logged.
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +43,41 @@ async function emailBrand(to: string, subject: string, text: string) {
   if (!result.sent) console.error("[brand-stripe] email failed:", to, result.error);
 }
 
+// Runs after the account is active. Never throws: every failure is logged and
+// the webhook still answers 200.
+async function sendActivationEmail(account: {
+  email: string;
+  contact_name: string;
+  company_name: string;
+  product_to_score: string | null;
+}) {
+  const loginUrl = `${siteUrl()}/login`;
+  let magicLinkUrl = loginUrl;
+  let magicLinkGenerated = false;
+  try {
+    magicLinkUrl = await generateSignInLink(account.email, "/dashboard");
+    magicLinkGenerated = true;
+  } catch (err) {
+    console.error("Magic link generation failed:", err instanceof Error ? err.message : err);
+  }
+  console.log("Magic link generated:", magicLinkGenerated);
+
+  try {
+    const mail = brandActivationEmail({
+      firstName: firstNameOf(account.contact_name),
+      brandName: account.company_name,
+      productToScore: account.product_to_score?.trim() || "your product",
+      magicLinkUrl,
+      loginUrl,
+    });
+    const result = await sendEmail({ to: account.email, ...mail });
+    console.log("Activation email sent:", result.sent ? "yes" : `no: ${result.error}`);
+    if (!result.sent) console.error("[brand-stripe] activation email failed:", result.error);
+  } catch (err) {
+    console.error("Activation email error:", err);
+  }
+}
+
 export async function POST(request: Request) {
   const secret = process.env.STRIPE_BRAND_WEBHOOK_SECRET;
   if (!secret) {
@@ -59,18 +98,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid signature." }, { status: 400 });
   }
 
+  console.log("Webhook received:", event.type);
+
+  try {
+    return await handleEvent(event);
+  } catch (err) {
+    // Reached only before the account is activated (activation errors are
+    // handled inside handleEvent), so Stripe should retry.
+    console.error("Webhook handler error:", err);
+    return NextResponse.json({ error: "Webhook handler error." }, { status: 500 });
+  }
+}
+
+async function handleEvent(event: Stripe.Event): Promise<NextResponse> {
   const admin = getSupabaseAdmin();
 
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
       const brandAccountId = session.client_reference_id;
+      console.log("client_reference_id:", brandAccountId);
+
       if (!brandAccountId) {
-        // Not one of ours (no approval-email link) - acknowledge so Stripe
+        // Not one of ours (no signup-email link) - acknowledge so Stripe
         // doesn't retry forever.
         console.error("[brand-stripe] checkout without client_reference_id:", session.id);
         return NextResponse.json({ received: true, skipped: "no_client_reference_id" });
       }
+      console.log("Brand account id:", brandAccountId);
 
       const tier = tierForAmount(session.amount_total);
       const { data: account, error } = await admin
@@ -89,34 +144,25 @@ export async function POST(request: Request) {
 
       if (error) {
         // 500 so Stripe retries - the account must not stay unpaid.
-        console.error("[brand-stripe] activation update failed:", error.message);
+        console.error("Status update result: error:", error.message);
         return NextResponse.json({ error: "Activation update failed." }, { status: 500 });
       }
       if (!account) {
-        console.error("[brand-stripe] no brand account for client_reference_id:", brandAccountId);
+        console.log("Status update result: no matching row");
+        console.error("Brand account not found after activation:", brandAccountId);
         return NextResponse.json({ received: true, skipped: "unknown_brand_account" });
       }
+      console.log("Status update result: active");
 
-      // One-time sign-in link straight into the dashboard. If generating it
-      // fails, the email still goes out with the login page instead.
-      const magicLinkUrl = await generateSignInLink(account.email, "/dashboard").catch((err) => {
-        console.error("[brand-stripe] magic link failed:", err instanceof Error ? err.message : err);
-        return `${siteUrl()}/login`;
-      });
-      const mail = brandActivationEmail({
-        firstName: firstNameOf(account.contact_name),
-        email: account.email,
-        productToScore: account.product_to_score ?? null,
-        magicLinkUrl,
-      });
-      const sent = await sendEmail({ to: account.email, ...mail });
-      if (!sent.sent) console.error("[brand-stripe] activation email failed:", account.email, sent.error);
+      // The account is active. From here on, failures are logged, not retried.
+      await sendActivationEmail(account);
+
       await logEvent("brand_subscription_activated", brandAccountId, {
         stripe_session_id: session.id,
         amount_cents: session.amount_total,
         tier,
       });
-      break;
+      return NextResponse.json({ received: true });
     }
 
     case "customer.subscription.updated": {
@@ -137,7 +183,7 @@ export async function POST(request: Request) {
         console.error("[brand-stripe] plan update failed:", error.message);
         return NextResponse.json({ error: "Plan update failed." }, { status: 500 });
       }
-      break;
+      return NextResponse.json({ received: true });
     }
 
     case "customer.subscription.deleted": {
@@ -168,13 +214,11 @@ Founder, Qoyl`
         );
         await logEvent("brand_subscription_cancelled", account.id, { stripe_subscription_id: sub.id });
       }
-      break;
+      return NextResponse.json({ received: true });
     }
 
     default:
       // Other events aren't used by the brand flow.
-      break;
+      return NextResponse.json({ received: true });
   }
-
-  return NextResponse.json({ received: true });
 }

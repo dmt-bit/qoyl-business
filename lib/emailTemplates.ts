@@ -382,38 +382,40 @@ ${step("03", "your dashboard goes live", "scores, segments, ingredient flags, an
 }
 
 // Sent by the Stripe webhook once payment clears. Carries a one-time sign-in link.
+// Sent by the Stripe webhook once payment clears. Carries a one-time sign-in link.
 export function brandActivationEmail(params: {
   firstName: string;
-  email: string;
-  productToScore: string | null;
+  brandName: string;
+  productToScore: string;
   magicLinkUrl: string;
+  loginUrl: string;
 }): EmailContent {
   const subject = "your qoyl dashboard is live — sign in now";
-  const scoreLine = params.productToScore?.trim()
-    ? `your ${params.productToScore.trim()} score report is waiting inside.`
-    : "your score report is waiting inside.";
-  const loginUrl = "business.qoyl.live/login";
   const text = `hey ${params.firstName},
 
-payment confirmed. your qoyl brand dashboard is live.
+payment confirmed. your ${params.brandName} brand dashboard is live.
 
-sign in to your dashboard: ${params.magicLinkUrl}
+sign in here:
+${params.magicLinkUrl}
 
-this link works once and expires shortly. if it has expired, sign in at ${loginUrl} with your email ${params.email} and we'll send a fresh one.
+this link works once and expires shortly. if it has expired, sign in at ${params.loginUrl} with your email.
 
-${scoreLine}
+your ${params.productToScore} score report is waiting inside.
 
-questions? reply here — every message read personally.
-— d · founder, qoyl`;
+— d · founder, qoyl
+hey@qoyl.live`;
 
   const html = layout(
     "payment confirmed — your dashboard is live.",
     h1("your dashboard is live.") +
       p(`hey ${esc(params.firstName)},`) +
-      p("payment confirmed. your qoyl brand dashboard is live.") +
+      p(`payment confirmed. your <strong>${esc(params.brandName)}</strong> brand dashboard is live.`) +
       button(params.magicLinkUrl, "sign in to your dashboard →") +
-      `<p style="margin:0 0 12px;font-family:${FONT};font-size:11px;font-weight:300;color:#888888;line-height:1.6;">this link works once and expires shortly. if it has expired, sign in at ${esc(loginUrl)} with your email ${esc(params.email)} and we'll send a fresh one.</p>` +
-      `<p style="margin:0 0 16px;font-family:${FONT};font-size:13px;font-weight:300;color:#666666;">${esc(scoreLine)}</p>` +
+      fieldTable([
+        ["FIRST UP", `${params.productToScore} score report`],
+        ["PLAN", "brand intelligence · $50/month"],
+      ]) +
+      `<p style="margin:16px 0 0;font-family:${FONT};font-size:11px;font-weight:300;color:#888888;line-height:1.6;">this sign-in link works once and expires shortly. if it has expired, sign in at <a href="${esc(params.loginUrl)}" style="color:#0a0a0a;">${esc(params.loginUrl.replace(/^https?:\/\//, ""))}</a> with your email.</p>` +
       sign
   );
 
