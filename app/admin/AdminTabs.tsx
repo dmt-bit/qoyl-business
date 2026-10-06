@@ -2,6 +2,7 @@
 
 import { Fragment, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { ReportReviewQueue, GenerateAllReportsButton, GenerateBrandReportsButton, type AdminReport } from "@/components/admin/ReportReview";
 import {
   approveFakeHairBrandApplication,
   rejectFakeHairBrandApplication,
@@ -153,6 +154,7 @@ export type ProductRequest = {
 };
 
 type TabKey =
+  | "rd_reports"
   | "product_requests"
   | "brand_applications"
   | "brand_accounts"
@@ -212,6 +214,7 @@ export default function AdminTabs({
   catalogBrands,
   catalogProductCounts,
   productRequests,
+  rdReports,
   password,
   initialTab,
   approvedEmail,
@@ -221,6 +224,7 @@ export default function AdminTabs({
   catalogBrands: { id: string; name: string }[];
   catalogProductCounts: Record<string, number>;
   productRequests: ProductRequest[];
+  rdReports: AdminReport[];
   brandApplications: BrandApplication[];
   brandAccounts: BrandAccount[];
   fakeHairApplications: FakeHairApplication[];
@@ -253,6 +257,7 @@ export default function AdminTabs({
       : null;
 
   const TABS: { key: TabKey; label: string }[] = [
+    { key: "rd_reports", label: `R&D Reports (${rdReports.filter((r) => r.status === "draft" || r.status === "reviewed").length})` },
     { key: "product_requests", label: `Product Requests (${productRequests.filter((r) => r.status === "pending").length})` },
     { key: "brand_applications", label: "Brand Applications" },
     { key: "brand_accounts", label: "Brand Accounts" },
@@ -292,6 +297,18 @@ export default function AdminTabs({
           </button>
         ))}
       </div>
+
+      {tab === "rd_reports" && (
+        <div>
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-muted">
+              r&amp;d reports ({rdReports.filter((r) => r.status === "draft" || r.status === "reviewed").length} pending review)
+            </p>
+            <GenerateAllReportsButton password={password} />
+          </div>
+          <ReportReviewQueue reports={rdReports} password={password} />
+        </div>
+      )}
 
       {tab === "product_requests" && (
         <div className="overflow-x-auto rounded-lg border border-warm/10">
@@ -459,6 +476,7 @@ export default function AdminTabs({
                         preview dashboard →
                       </a>
                       {account.status !== "active" && <ForceActivateButton brandId={account.id} />}
+                      {account.status === "active" && <GenerateBrandReportsButton brandAccountId={account.id} password={password} />}
                       {account.status !== "cancelled" && (
                         <form action={cancelBrandAccount}>
                           <input type="hidden" name="id" value={account.id} />

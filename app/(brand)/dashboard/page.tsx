@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useBrandSession } from "@/lib/brandSession";
 import BrandDashboard, { type DashboardData } from "@/components/brand/BrandDashboard";
+import type { SentReport } from "@/components/brand/ReportsSection";
 import { grotesk, mono } from "@/lib/brandFonts";
 
 // The brand dashboard. Data comes from /api/business/brand/dashboard, which
@@ -11,14 +12,14 @@ import { grotesk, mono } from "@/lib/brandFonts";
 export default function DashboardPage() {
   const { loading: sessionLoading, account, session } = useBrandSession();
   const [data, setData] = useState<DashboardData | null>(null);
+  const [reports, setReports] = useState<{ surveyCompleted: boolean; reports: SentReport[] }>({ surveyCompleted: false, reports: [] });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!account || !session) return;
     let cancelled = false;
-    fetch(`/api/business/brand/dashboard?brandId=${account.id}`, {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    })
+    const headers = { Authorization: `Bearer ${session.access_token}` };
+    fetch(`/api/business/brand/dashboard?brandId=${account.id}`, { headers })
       .then(async (res) => {
         const body = await res.json();
         if (!res.ok) throw new Error(body.message ?? "Could not load the dashboard.");
@@ -26,6 +27,11 @@ export default function DashboardPage() {
       })
       .then((d) => !cancelled && setData(d))
       .catch((err: Error) => !cancelled && setError(err.message));
+    // Reports are optional: if they fail to load, the rest of the dashboard still shows.
+    fetch(`/api/business/brand/reports?brandId=${account.id}`, { headers })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((r) => r && !cancelled && setReports({ surveyCompleted: r.surveyCompleted, reports: r.reports }))
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -59,7 +65,7 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : (
-        <BrandDashboard data={data} onRequestProduct={requestProduct} />
+        <BrandDashboard data={data} onRequestProduct={requestProduct} reports={reports} />
       )}
     </div>
   );

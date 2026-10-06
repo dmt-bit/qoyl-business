@@ -2,6 +2,7 @@
 
 import { Fragment, useState, type FormEvent } from "react";
 import Link from "next/link";
+import ReportsSection, { type SentReport } from "./ReportsSection";
 
 // Shapes returned by GET /api/business/brand/dashboard (see lib/scoreReportClient.ts).
 export type ScoreProfile = {
@@ -98,9 +99,11 @@ function insightFor(product: string, profiles: ScoreProfile[]): string {
 export default function BrandDashboard({
   data,
   onRequestProduct,
+  reports,
 }: {
   data: DashboardData;
   onRequestProduct: (name: string) => Promise<string>;
+  reports: { surveyCompleted: boolean; reports: SentReport[] };
 }) {
   const [active, setActive] = useState(0);
 
@@ -203,6 +206,8 @@ export default function BrandDashboard({
         <Section eyebrow="06 · add products" title="add more products to your dashboard">
           <AddProductForm onSubmit={onRequestProduct} />
         </Section>
+
+        <ReportsSection surveyCompleted={reports.surveyCompleted} reports={reports.reports} />
       </div>
     </Shell>
   );

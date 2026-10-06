@@ -444,3 +444,86 @@ this link works once and expires shortly. if you didn't ask for it, you can igno
   );
   return { subject, text, html };
 }
+
+// ---------------------------------------------------------------------------
+// Monthly R&D report email. Renders the report content generically: strings
+// become paragraphs, string arrays become lists, and object arrays become
+// cards. The same shape is rendered on the dashboard and in admin review.
+// ---------------------------------------------------------------------------
+
+const REPORT_TYPE_NAMES: Record<string, string> = {
+  reformulation: "reformulation",
+  segment_targeting: "segment targeting",
+  competitive: "competitive positioning",
+  trend_signals: "trend signals",
+};
+
+function labelFor(key: string): string {
+  return key.replace(/_/g, " ").toLowerCase();
+}
+
+export function reportBodyHtml(content: Record<string, unknown>): string {
+  const parts: string[] = [];
+  for (const [key, value] of Object.entries(content)) {
+    if (value === null || value === undefined || value === "") continue;
+    if (key === "executive_summary") {
+      parts.push(`<p style="margin:0 0 20px;font-family:${FONT};font-size:16px;line-height:1.85;color:#0a0a0a;">${esc(String(value))}</p>`);
+      continue;
+    }
+    parts.push(`<p style="margin:24px 0 8px;font-family:${MONO};font-size:10px;letter-spacing:1px;color:#888888;">${esc(labelFor(key).toUpperCase())}</p>`);
+    if (typeof value === "string") {
+      parts.push(`<p style="margin:0 0 12px;color:#444444;">${esc(value)}</p>`);
+    } else if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
+      parts.push(`<ul style="margin:0 0 12px;padding-left:18px;color:#444444;">${value.map((v) => `<li style="margin:4px 0;">${esc(v as string)}</li>`).join("")}</ul>`);
+    } else if (Array.isArray(value)) {
+      for (const item of value as Record<string, unknown>[]) {
+        const rows = Object.entries(item)
+          .filter(([, v]) => v !== null && v !== undefined && v !== "")
+          .map(([k, v]) => `<div style="margin:4px 0;"><span style="font-family:${MONO};font-size:10px;color:#888888;">${esc(labelFor(k))}</span><br/>${esc(String(v))}</div>`)
+          .join("");
+        parts.push(`<div style="margin:0 0 12px;border:1px solid #e8e8e8;padding:14px 16px;color:#0a0a0a;">${rows}</div>`);
+      }
+    }
+  }
+  return parts.join("\n");
+}
+
+export function reportEmail(params: {
+  reportMonth: string;
+  reportType: string;
+  productName: string;
+  firstName: string;
+  content: Record<string, unknown>;
+  dashboardUrl: string;
+  preferencesUrl: string;
+}): EmailContent {
+  const [y, m] = params.reportMonth.split("-").map(Number);
+  const month = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("en-US", { month: "long", timeZone: "UTC" }).toLowerCase();
+  const typeName = REPORT_TYPE_NAMES[params.reportType] ?? params.reportType;
+  const subject = `your ${month} ${typeName} report — ${params.productName.toLowerCase()} · qoyl`;
+
+  const text = `hi ${params.firstName},
+
+your ${month} ${typeName} report for ${params.productName.toLowerCase()} is ready.
+
+${String(params.content.executive_summary ?? "")}
+
+view your full interactive dashboard: ${params.dashboardUrl}
+update your report preferences: ${params.preferencesUrl}
+
+questions? reply to this email.
+— d · founder, qoyl`;
+
+  const html = layout(
+    `your ${month} ${typeName} report is ready.`,
+    h1(`r&d report · ${month}`) +
+      `<div style="margin:0 0 24px;background:#0a0a0a;color:#ffffff;padding:10px 16px;font-family:${MONO};font-size:11px;letter-spacing:1px;">${esc(params.productName.toLowerCase())} · ${esc(typeName)}</div>` +
+      reportBodyHtml(params.content) +
+      `<p style="margin:28px 0 8px;"><a href="${esc(params.dashboardUrl)}" style="color:#0a0a0a;">view your full interactive dashboard →</a></p>` +
+      `<p style="margin:0 0 16px;font-family:${MONO};font-size:10px;color:#888888;"><a href="${esc(params.preferencesUrl)}" style="color:#888888;">update your report preferences</a></p>` +
+      p("questions? reply to this email.") +
+      sign
+  );
+  return { subject, text, html };
+}
+

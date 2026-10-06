@@ -11,3 +11,8 @@ export async function isAdminRequest(request: Request): Promise<boolean> {
   if (error || !data.user) return false;
   return data.user.email?.toLowerCase() === ADMIN_EMAIL;
 }
+
+// Same password check as the /admin server actions, for JSON API routes.
+export function isAdminPassword(value: unknown): boolean {
+  return typeof value === "string" && value.length > 0 && value === process.env.ADMIN_PASSWORD;
+}

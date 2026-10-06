@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import AdminTabs, { type ProductRequest } from "./AdminTabs";
+import type { AdminReport } from "@/components/admin/ReportReview";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,11 @@ export default async function AdminPage({
       .select("id, product_name, status, created_at, brand_accounts(company_name)")
       .order("created_at", { ascending: false }),
   ]);
+  const { data: rdReports } = await supabaseAdmin
+    .from("brand_rd_reports")
+    .select("id, brand_account_id, report_type, report_month, title, summary, content, status, claude_generated_at, product_id, brand_accounts(company_name), catalog_products(name)")
+    .in("status", ["draft", "reviewed"])
+    .order("created_at", { ascending: false });
   const catalogProductCounts: Record<string, number> = {};
   for (const row of catalogProductRows ?? []) {
     if (row.brand_id) catalogProductCounts[row.brand_id] = (catalogProductCounts[row.brand_id] ?? 0) + 1;
@@ -117,6 +123,7 @@ export default async function AdminPage({
         catalogBrands={catalogBrands ?? []}
         catalogProductCounts={catalogProductCounts}
         productRequests={(productRequests ?? []) as unknown as ProductRequest[]}
+        rdReports={(rdReports ?? []) as unknown as AdminReport[]}
         password={password}
         initialTab={initialTab}
         approvedEmail={searchParams.approved_email ?? null}
