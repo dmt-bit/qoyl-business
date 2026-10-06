@@ -3,6 +3,8 @@ import Stripe from "stripe";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendEmail } from "@/lib/email";
 import type { BrandTier } from "@/lib/accountTypes";
+import { brandActivationEmail } from "@/lib/emailTemplates";
+import { firstNameOf, generateSignInLink, siteUrl } from "@/lib/brandSignup";
 
 // Brand subscription webhook (Payment Links from the approval email).
 // Verifies the Stripe signature with STRIPE_BRAND_WEBHOOK_SECRET - the
@@ -88,7 +90,7 @@ export async function POST(request: Request) {
           ...(tier ? { plan_tier: tier, plan_price_cents: session.amount_total } : {}),
         })
         .eq("id", brandAccountId)
-        .select("email, company_name, contact_name")
+        .select("email, company_name, contact_name, product_to_score")
         .maybeSingle();
 
       if (error) {
@@ -101,21 +103,20 @@ export async function POST(request: Request) {
         return NextResponse.json({ received: true, skipped: "unknown_brand_account" });
       }
 
-      await emailBrand(
-        account.email,
-        "your qoyl brand dashboard is live",
-        `Hi ${account.contact_name},
-
-Payment received - your qoyl brand dashboard is now active for ${account.company_name}.
-
-Log in to see your scores across hair profiles, segment breakdown, and ingredient flags:
-${process.env.NEXT_PUBLIC_SITE_URL ?? "https://business.qoyl.live"}/login
-
-Questions? Reply to this email.
-
-D
-Founder, Qoyl`
-      );
+      // One-time sign-in link straight into the dashboard. If generating it
+      // fails, the email still goes out with the login page instead.
+      const magicLinkUrl = await generateSignInLink(account.email, "/dashboard").catch((err) => {
+        console.error("[brand-stripe] magic link failed:", err instanceof Error ? err.message : err);
+        return `${siteUrl()}/login`;
+      });
+      const mail = brandActivationEmail({
+        firstName: firstNameOf(account.contact_name),
+        email: account.email,
+        productToScore: account.product_to_score ?? null,
+        magicLinkUrl,
+      });
+      const sent = await sendEmail({ to: account.email, ...mail });
+      if (!sent.sent) console.error("[brand-stripe] activation email failed:", account.email, sent.error);
       await logEvent("brand_subscription_activated", brandAccountId, {
         stripe_session_id: session.id,
         amount_cents: session.amount_total,

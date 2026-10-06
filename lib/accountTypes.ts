@@ -4,10 +4,12 @@
 export type AccountType = "brand" | "stylist" | "hair_seller";
 export type BrandTier = "early_stage" | "growth" | "enterprise";
 
-export const BRAND_TIERS: Record<BrandTier, { label: string; price: string; envVar: string }> = {
-  early_stage: { label: "Early Stage", price: "$50/month", envVar: "STRIPE_LINK_BRAND_EARLY_STAGE" },
-  growth: { label: "Growth", price: "$260/month", envVar: "STRIPE_LINK_BRAND_GROWTH" },
-  enterprise: { label: "Enterprise", price: "$760/month", envVar: "STRIPE_LINK_BRAND_ENTERPRISE" },
+// cents must match brand_accounts.plan_price_cents and TIER_BY_AMOUNT_CENTS in
+// app/api/webhooks/brand-stripe. envVar is the Stripe Payment Link for the plan.
+export const BRAND_TIERS: Record<BrandTier, { label: string; price: string; cents: number; envVar: string }> = {
+  early_stage: { label: "Early Stage", price: "$50/month", cents: 5000, envVar: "STRIPE_LINK_BRAND_EARLY_STAGE" },
+  growth: { label: "Growth", price: "$260/month", cents: 26000, envVar: "STRIPE_LINK_BRAND_260_LINK" },
+  enterprise: { label: "Enterprise", price: "$760/month", cents: 76000, envVar: "STRIPE_LINK_BRAND_760_LINK" },
 };
 
 export const STYLIST_PLAN = { label: "Stylist listing", price: "$35/month", envVar: "STRIPE_LINK_STYLIST" };
@@ -61,4 +63,10 @@ export function paymentOptionsFor(
     if (url) options.push({ label: plan.label, price: plan.price, url });
   }
   return options;
+}
+
+// The brand's own Payment Link, with client_reference_id = brand_accounts.id so
+// the webhook can match the payment to the account.
+export function brandPaymentUrl(tier: BrandTier, email: string, brandAccountId: string): string | null {
+  return paymentLink(BRAND_TIERS[tier].envVar, email, brandAccountId);
 }

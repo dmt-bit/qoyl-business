@@ -2,15 +2,19 @@
 
 import { Fragment, useState } from "react";
 import {
-  approveApplication,
   approveFakeHairBrandApplication,
   rejectFakeHairBrandApplication,
   approveStylistApplication,
   updateBrandTier,
+  resendBrandPaymentLink,
+  cancelBrandAccount,
 } from "./actions";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "text-bronze2",
+  auto_approved: "text-green",
+  pending_payment: "text-bronze2",
+  cancelled: "text-red",
   approved: "text-green",
   rejected: "text-red",
   active: "text-green",
@@ -256,7 +260,6 @@ export default function AdminTabs({
                 <th className="px-4 py-3">Why Qoyl</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Applied</th>
-                <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -276,33 +279,11 @@ export default function AdminTabs({
                   <td className="px-4 py-3 text-muted whitespace-nowrap">
                     {new Date(app.created_at).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-3">
-                    {app.status === "pending" ? (
-                      <form action={approveApplication} className="flex flex-col gap-2">
-                        <input type="hidden" name="id" value={app.id} />
-                        <input type="hidden" name="password" value={password} />
-                        {/* Product to score for the approval email's score preview.
-                            Blank = approve without a preview. Must be in the catalog
-                            (add it at /admin/products on qoyl-beta first). */}
-                        <input
-                          name="product_name"
-                          placeholder="product to score"
-                          className="rounded border border-bronze/30 bg-transparent px-2 py-1 text-xs text-cream placeholder:text-muted"
-                        />
-                        <button
-                          type="submit"
-                          className="rounded-full bg-bronze px-4 py-2 text-xs font-medium uppercase tracking-wider text-dark transition-colors hover:bg-bronze2"
-                        >
-                          Approve
-                        </button>
-                      </form>
-                    ) : null}
-                  </td>
                 </tr>
               ))}
               {brandApplications.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={10} className="px-4 py-8 text-center text-muted">
                     No applications yet.
                   </td>
                 </tr>
@@ -323,6 +304,7 @@ export default function AdminTabs({
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Joined</th>
                 <th className="px-4 py-3">Tier</th>
+                <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -359,11 +341,33 @@ export default function AdminTabs({
                       ))}
                     </div>
                   </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col items-start gap-1">
+                      {account.status === "pending_payment" && (
+                        <form action={resendBrandPaymentLink}>
+                          <input type="hidden" name="id" value={account.id} />
+                          <input type="hidden" name="password" value={password} />
+                          <button type="submit" className="text-xs text-bronze2 underline hover:text-bronze">
+                            resend payment link
+                          </button>
+                        </form>
+                      )}
+                      {account.status !== "cancelled" && (
+                        <form action={cancelBrandAccount}>
+                          <input type="hidden" name="id" value={account.id} />
+                          <input type="hidden" name="password" value={password} />
+                          <button type="submit" className="text-xs text-muted underline hover:text-red">
+                            cancel
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
               {brandAccounts.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted">
                     No brand accounts yet.
                   </td>
                 </tr>

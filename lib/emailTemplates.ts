@@ -14,8 +14,8 @@ export function esc(v: string): string {
     .replace(/'/g, "&#39;");
 }
 
-const FONT = "'Helvetica Neue',Helvetica,Arial,sans-serif";
-const MONO = "'SFMono-Regular',Menlo,Consolas,monospace";
+const FONT = "'Space Grotesk',Helvetica,Arial,sans-serif";
+const MONO = "'Space Mono',Menlo,Consolas,monospace";
 
 export const TYPE_LABEL: Record<AccountType, string> = {
   brand: "brand",
@@ -70,16 +70,19 @@ export function applicationAlertEmail(params: {
   type: AccountType;
   name: string;
   fields: [string, string][];
+  note?: string;
 }): EmailContent {
   const label = TYPE_LABEL[params.type];
   const subject = `new ${label} application — ${params.name}`;
-  const text = `A new ${label} application was submitted.\n\n${fieldText(params.fields)}\n\nReview it in /admin.`;
+  const noteText = params.note ? `\n\nNOTE: ${params.note}` : "";
+  const text = `A new ${label} application was submitted.${noteText}\n\n${fieldText(params.fields)}\n\nReview it in /admin.`;
   const html = layout(
     subject,
     h1(`new ${label} application`) +
+      (params.note ? p(`<strong>note:</strong> ${esc(params.note)}`) : "") +
       p(`<strong>${esc(params.name)}</strong> just applied. Reply to this email to reach them directly.`) +
       fieldTable(params.fields) +
-      p("Review and approve it in the admin dashboard.")
+      p("Review it in the admin dashboard.")
   );
   return { subject, text, html };
 }
@@ -293,5 +296,153 @@ ${params.payment
   );
 
   const subject = sp ? `your ${sp.productName} score report — qoyl brand access approved` : copy.subject;
+  return { subject, text, html };
+}
+
+// ---------------------------------------------------------------------------
+// Self-serve brand flow (no approval step). See lib/brandSignup.ts.
+// ---------------------------------------------------------------------------
+
+
+// Sent right after a brand applies. Carries the Payment Link for their plan.
+export function brandWelcomeWithPaymentEmail(params: {
+  firstName: string;
+  brandName: string;
+  tierLabel: string; // "early stage" | "growth" | "enterprise"
+  price: string; // "$50"
+  productToScore: string | null;
+  paymentUrl: string;
+}): EmailContent {
+  const subject = `welcome to qoyl — complete your ${params.tierLabel} brand setup`;
+  const productLabel = params.productToScore?.trim() || "your first product";
+  const cta = `complete setup — ${params.price}/month →`;
+
+  const text = `hey ${params.firstName},
+
+your qoyl brand account is ready. ${params.brandName} is one step away from your full ingredient intelligence dashboard.
+
+WHAT HAPPENS NEXT
+
+01  complete your payment
+    ${params.price}/month · cancel any time
+
+02  we score ${productLabel}
+    you'll see your product scored across 6 hair profiles immediately after setup
+
+03  your dashboard goes live
+    scores, segments, ingredient flags, and reformulation signals — all on day one
+
+${cta}
+${params.paymentUrl}
+
+after payment you'll receive a login link to access your dashboard.
+
+WHAT YOU'LL SEE ON DAY ONE
+· product scores across 6 representative hair profiles
+· segment breakdown — which curl types and porosity levels your formula wins with
+· ingredient flags with reformulation recommendations
+· geographic demand — which cities are searching your products
+· style match placement tracking
+
+questions? reply here — every message read personally.
+— d · founder, qoyl`;
+
+  const step = (n: string, title: string, sub: string) =>
+    `<tr>
+<td style="padding:14px 16px 14px 0;border-top:1px solid #e8e8e8;vertical-align:top;font-family:${MONO};font-size:18px;font-weight:700;color:#0a0a0a;width:48px;">${n}</td>
+<td style="padding:14px 0;border-top:1px solid #e8e8e8;vertical-align:top;">
+<div style="font-family:${FONT};font-size:14px;font-weight:500;color:#0a0a0a;">${title}</div>
+<div style="font-family:${FONT};font-size:12px;font-weight:300;color:#888888;margin-top:4px;line-height:1.6;">${sub}</div>
+</td></tr>`;
+
+  const features = [
+    "product scores across 6 representative hair profiles",
+    "segment breakdown — which curl types and porosity levels your formula wins with",
+    "ingredient flags with reformulation recommendations",
+    "geographic demand — which cities are searching your products",
+    "style match placement tracking",
+  ];
+
+  const html = layout(
+    "one step away — complete your payment to open your dashboard.",
+    h1("welcome to qoyl.") +
+      p(`hey ${esc(params.firstName)},`) +
+      p(`your qoyl brand account is ready. <strong>${esc(params.brandName)}</strong> is one step away from your full ingredient intelligence dashboard.`) +
+      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 0;">
+${step("01", "complete your payment", `${esc(params.price)}/month · cancel any time`)}
+${step("02", `we score ${esc(productLabel)}`, "you'll see your product scored across 6 hair profiles immediately after setup")}
+${step("03", "your dashboard goes live", "scores, segments, ingredient flags, and reformulation signals — all on day one")}
+<tr><td colspan="2" style="border-top:1px solid #e8e8e8;"></td></tr>
+</table>` +
+      `<a href="${esc(params.paymentUrl)}" style="display:block;margin:24px 0 8px;background:#0a0a0a;color:#ffffff;text-align:center;text-decoration:none;padding:16px;font-family:${FONT};font-size:14px;font-weight:600;letter-spacing:.3px;">${esc(cta)}</a>` +
+      `<p style="margin:0 0 28px;text-align:center;font-family:${FONT};font-size:11px;font-weight:300;color:#888888;">after payment you'll receive a login link to access your dashboard.</p>` +
+      `<p style="margin:0 0 8px;font-family:${MONO};font-size:10px;letter-spacing:1px;color:#888888;">WHAT YOU'LL SEE ON DAY ONE</p>` +
+      `<div style="font-family:${FONT};font-size:12px;font-weight:300;color:#666666;line-height:1.8;">${features.map((f) => `· ${esc(f)}`).join("<br/>")}</div>` +
+      `<p style="margin:28px 0 0;color:#444444;">questions? reply here — every message read personally.</p>` +
+      `<p style="margin:8px 0 0;color:#0a0a0a;">— d · founder, qoyl</p>`
+  );
+
+  return { subject, text, html };
+}
+
+// Sent by the Stripe webhook once payment clears. Carries a one-time sign-in link.
+export function brandActivationEmail(params: {
+  firstName: string;
+  email: string;
+  productToScore: string | null;
+  magicLinkUrl: string;
+}): EmailContent {
+  const subject = "your qoyl dashboard is live — sign in now";
+  const scoreLine = params.productToScore?.trim()
+    ? `your ${params.productToScore.trim()} score report is waiting inside.`
+    : "your score report is waiting inside.";
+  const loginUrl = "business.qoyl.live/login";
+  const text = `hey ${params.firstName},
+
+payment confirmed. your qoyl brand dashboard is live.
+
+sign in to your dashboard: ${params.magicLinkUrl}
+
+this link works once and expires shortly. if it has expired, sign in at ${loginUrl} with your email ${params.email} and we'll send a fresh one.
+
+${scoreLine}
+
+questions? reply here — every message read personally.
+— d · founder, qoyl`;
+
+  const html = layout(
+    "payment confirmed — your dashboard is live.",
+    h1("your dashboard is live.") +
+      p(`hey ${esc(params.firstName)},`) +
+      p("payment confirmed. your qoyl brand dashboard is live.") +
+      button(params.magicLinkUrl, "sign in to your dashboard →") +
+      `<p style="margin:0 0 12px;font-family:${FONT};font-size:11px;font-weight:300;color:#888888;line-height:1.6;">this link works once and expires shortly. if it has expired, sign in at ${esc(loginUrl)} with your email ${esc(params.email)} and we'll send a fresh one.</p>` +
+      `<p style="margin:0 0 16px;font-family:${FONT};font-size:13px;font-weight:300;color:#666666;">${esc(scoreLine)}</p>` +
+      sign
+  );
+
+  return { subject, text, html };
+}
+
+// Sign-in link requested from /login.
+export function signInLinkEmail(params: { firstName: string; magicLinkUrl: string }): EmailContent {
+  const subject = "your qoyl sign-in link";
+  const text = `hey ${params.firstName},
+
+here's your sign-in link:
+${params.magicLinkUrl}
+
+this link works once and expires shortly. if you didn't ask for it, you can ignore this email.
+
+— d · founder, qoyl`;
+  const html = layout(
+    "your sign-in link — works once.",
+    h1("sign in to qoyl.") +
+      p(`hey ${esc(params.firstName)},`) +
+      p("here's your sign-in link.") +
+      button(params.magicLinkUrl, "sign in →") +
+      `<p style="margin:0 0 12px;font-family:${FONT};font-size:11px;font-weight:300;color:#888888;line-height:1.6;">this link works once and expires shortly. if you didn't ask for it, you can ignore this email.</p>` +
+      sign
+  );
   return { subject, text, html };
 }

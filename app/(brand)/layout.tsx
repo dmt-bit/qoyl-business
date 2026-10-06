@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
-import { BrandSessionProvider, useBrandSession } from "@/lib/brandSession";
+import { BrandSessionProvider, useBrandSession, type BrandAccount } from "@/lib/brandSession";
+import { grotesk, mono as monoFont } from "@/lib/brandFonts";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: GridIcon },
@@ -16,19 +17,14 @@ const NAV_ITEMS = [
 export default function BrandLayout({ children }: { children: ReactNode }) {
   return (
     <BrandSessionProvider>
-      <div className="min-h-screen flex">
-        <Sidebar />
-        <main className="flex-1 min-w-0">
-          <BrandGate>{children}</BrandGate>
-        </main>
-      </div>
+      <BrandGate>{children}</BrandGate>
     </BrandSessionProvider>
   );
 }
 
-// Dashboard access follows brand_accounts.status: only 'active' (a paid
-// subscription, set by the Stripe webhook) sees the pages. Anything else gets
-// a plain status message - nothing is deleted.
+// Dashboard access follows brand_accounts.status: only 'active' (set by the
+// Stripe webhook once payment clears) sees the pages. Everything else gets a
+// focused status page instead -- no sidebar, nothing is deleted.
 function BrandGate({ children }: { children: ReactNode }) {
   const { loading, session, account } = useBrandSession();
   const heartbeatSent = useRef(false);
@@ -46,23 +42,76 @@ function BrandGate({ children }: { children: ReactNode }) {
   }, [active, session]);
 
   if (loading || !account) return null;
-  if (active) return <>{children}</>;
 
-  const cancelled = account.status === "cancelled";
+  if (active) {
+    return (
+      <div className="min-h-screen flex">
+        <Sidebar />
+        <main className="flex-1 min-w-0">{children}</main>
+      </div>
+    );
+  }
+
+  if (account.status === "cancelled") return <StatusPage kind="cancelled" account={account} />;
+  return <StatusPage kind="pending_payment" account={account} />;
+}
+
+const PENDING_FEATURES = [
+  "product scores across 6 representative hair profiles",
+  "segment breakdown — which curl types and porosity levels your formula wins with",
+  "ingredient flags with reformulation recommendations",
+  "geographic demand — which cities are searching your products",
+  "style match placement tracking",
+];
+
+function StatusPage({ kind, account }: { kind: "pending_payment" | "cancelled"; account: BrandAccount }) {
+  const mono = "font-[family-name:var(--font-mono-apply)]";
+  const cancelled = kind === "cancelled";
+  const cents = account.plan_price_cents ?? null;
+  const price = cents ? `$${Math.round(cents / 100)}` : null;
+
   return (
-    <div className="px-6 py-12 sm:px-12">
-      <div className="mx-auto max-w-xl">
-        <p className="font-mono text-xs uppercase tracking-wider text-muted">
+    <div className={`${grotesk.variable} ${monoFont.variable} min-h-screen bg-white px-6 py-16 text-[#0a0a0a]`}>
+      <div className="mx-auto max-w-[400px]">
+        <p className={`${mono} text-[10px] lowercase tracking-[0.12em] text-[#888]`}>
           {cancelled ? "subscription ended" : "pending payment"}
         </p>
-        <h1 className="mt-2 font-serif text-3xl text-cream">
-          {cancelled ? "your dashboard access is paused." : "complete payment to open your dashboard."}
+        <h1 className="mt-3 text-[28px] font-bold lowercase leading-tight tracking-[-1px]">
+          {cancelled ? "your dashboard access is paused." : "one step away."}
         </h1>
-        <p className="mt-4 text-sm leading-relaxed text-cream/70">
+        <p className="mt-2 text-sm font-light text-[#666]">
           {cancelled
-            ? "your subscription has ended. your data is kept - reply to the email we sent you and we'll set you back up."
-            : "your score report and payment link are in your approval email. once payment goes through, your dashboard unlocks automatically."}
+            ? `your subscription for ${account.company_name} has ended. your data is kept — reply to hey@qoyl.live and we'll set you back up.`
+            : `complete your payment to unlock your ${account.company_name} brand dashboard.`}
         </p>
+
+        {!cancelled && (
+          <div className="mt-8">
+            {account.payment_url ? (
+              <a
+                href={account.payment_url}
+                className="block w-full bg-[#0a0a0a] px-6 py-4 text-center text-sm font-semibold lowercase tracking-[0.02em] text-white hover:opacity-80"
+              >
+                complete setup{price ? ` — ${price}/month` : ""} →
+              </a>
+            ) : (
+              <p className="border border-[#0a0a0a] px-4 py-3 text-sm">
+                we couldn&apos;t find your payment link. email hey@qoyl.live and we&apos;ll send it over.
+              </p>
+            )}
+            <p className={`${mono} mt-3 text-center text-[10px] text-[#888]`}>
+              {price ? `${price}/month · ` : ""}cancel any time · full dashboard on day one
+            </p>
+          </div>
+        )}
+
+        <div className="my-10 border-t border-[#e8e8e8]" />
+        <p className={`${mono} text-[10px] lowercase tracking-[0.12em] text-[#888]`}>what&apos;s waiting for you</p>
+        <ul className="mt-4 space-y-2 text-[13px] font-light leading-[1.7] text-[#666]">
+          {PENDING_FEATURES.map((f) => (
+            <li key={f}>· {f}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );

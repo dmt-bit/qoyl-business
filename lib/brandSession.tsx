@@ -21,6 +21,8 @@ export type BrandAccount = {
   tier: string;
   status: string;
   created_at: string;
+  payment_url: string | null;
+  plan_price_cents: number | null;
 };
 
 type BrandSessionState = {

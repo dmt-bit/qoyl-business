@@ -1,8 +1,6 @@
 import { grotesk, mono } from "@/lib/brandFonts";
 
-// The apply forms use the same stark black-on-white look as the marketing
-// pages rather than the dark bronze portal theme.
-export default function ApplyLayout({ children }: { children: React.ReactNode }) {
+export default function LoginLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={`${grotesk.variable} ${mono.variable} min-h-screen bg-white text-[#0a0a0a]`}

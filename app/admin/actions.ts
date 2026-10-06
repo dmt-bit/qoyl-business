@@ -3,33 +3,9 @@
 import { redirect } from "next/navigation";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendEmail } from "@/lib/email";
-import { approvalEmail, type EmailContent, type ScorePreviewInput } from "@/lib/emailTemplates";
+import { approvalEmail, type EmailContent } from "@/lib/emailTemplates";
 import { paymentOptionsFor } from "@/lib/accountTypes";
-import { fetchScoreReport } from "@/lib/scoreReportClient";
-
-// Score preview for a brand approval email - the product the admin entered,
-// scored by qoyl-beta. Returns null (email goes out without a preview) when
-// the product isn't in the catalog yet or the bridge is unavailable; both are
-// logged so the admin can see why.
-async function buildScorePreview(
-  productName: string | null,
-  brandName: string
-): Promise<ScorePreviewInput | null> {
-  if (!productName?.trim()) return null;
-  const report = await fetchScoreReport(productName.trim(), brandName);
-  if (!report) return null;
-  if (report.status !== "ok") {
-    console.error("[approveApplication] score preview skipped:", report.message);
-    return null;
-  }
-  const top = report.topSegments.slice(0, 3);
-  const bottom = report.bottomSegments.filter((b) => !top.some((t) => t.label === b.label)).slice(0, 2);
-  return {
-    productName: report.product.name,
-    rows: [...top, ...bottom].map((s) => ({ label: s.label, score: s.score })),
-    keyFinding: report.keyFinding,
-  };
-}
+import { sendBrandPaymentEmail, type BrandAccountRow } from "@/lib/brandSignup";
 
 function generateTempPassword(): string {
   return "Qoyl" + Math.random().toString(36).slice(2, 8).toUpperCase() + "!";
@@ -54,146 +30,6 @@ async function sendApprovalEmail(params: {
 }
 
 type ApprovalStatus = "ok" | "email_failed" | "auth_failed" | "account_failed" | "not_found";
-
-export async function approveApplication(formData: FormData) {
-  const id = formData.get("id");
-  const password = formData.get("password");
-  // Optional: the product the admin wants scored for the approval email.
-  const productName = formData.get("product_name");
-
-  if (typeof password !== "string" || password !== process.env.ADMIN_PASSWORD) {
-    throw new Error("Unauthorized");
-  }
-  if (typeof id !== "string") {
-    throw new Error("Missing application id");
-  }
-
-  let approvalStatus: ApprovalStatus = "ok";
-  let approvedEmail: string | null = null;
-  let errorDetail: string | null = null;
-
-  // Every risky step below is isolated so one failure (a flaky Resend call,
-  // GoTrue rejecting a duplicate email, etc.) can't crash the whole action
-  // with Next's generic digest error -- which is what was happening in
-  // production. redirect() is only ever called once, at the very end,
-  // outside of any try/catch (it throws internally to perform the
-  // navigation, and a surrounding catch would swallow that).
-  try {
-    const supabaseAdmin = getSupabaseAdmin();
-
-    const { data: application, error: fetchError } = await supabaseAdmin
-      .from("brand_applications")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (fetchError || !application) {
-      console.error("[approveApplication] application not found", {
-        id,
-        error: fetchError?.message,
-      });
-      approvalStatus = "not_found";
-    } else {
-      approvedEmail = application.email;
-      const tempPassword = generateTempPassword();
-      let authCreated = false;
-
-      try {
-        const { error: authError } = await supabaseAdmin.auth.admin.createUser({
-          email: application.email,
-          password: tempPassword,
-          email_confirm: true,
-        });
-        if (authError) throw authError;
-        authCreated = true;
-      } catch (err) {
-        errorDetail = err instanceof Error ? err.message : String(err);
-        console.error("[approveApplication] auth.admin.createUser failed", {
-          applicationId: id,
-          email: application.email,
-          error: errorDetail,
-        });
-      }
-
-      // Always persist the approval, regardless of the auth/email outcome
-      // above -- an admin shouldn't be stuck re-clicking Approve forever
-      // because Resend or GoTrue had a bad moment.
-      // Starts as 'pending_payment' - the brand dashboard stays gated until
-      // the Stripe webhook (app/api/webhooks/brand-stripe) flips it to 'active'.
-      const { data: insertedAccount, error: insertError } = await supabaseAdmin
-        .from("brand_accounts")
-        .insert({
-          company_name: application.company_name,
-          contact_name: application.contact_name,
-          email: application.email,
-          website: application.website,
-          instagram_handle: application.instagram_handle,
-          status: "pending_payment",
-          approved_at: new Date().toISOString(),
-        })
-        .select("id")
-        .single();
-      const brandAccountId = insertedAccount?.id ?? null;
-
-      const { error: updateError } = await supabaseAdmin
-        .from("brand_applications")
-        .update({ status: "approved" })
-        .eq("id", id);
-
-      if (insertError || updateError) {
-        errorDetail = insertError?.message ?? updateError?.message ?? errorDetail;
-        console.error("[approveApplication] brand_accounts/brand_applications write failed", {
-          applicationId: id,
-          email: application.email,
-          insertError: insertError?.message,
-          updateError: updateError?.message,
-        });
-        approvalStatus = "account_failed";
-      } else if (!authCreated) {
-        approvalStatus = "auth_failed";
-      } else {
-        const { sent, error: emailError } = await sendApprovalEmail({
-          email: application.email,
-          content: approvalEmail({
-            type: "brand",
-            contactName: application.contact_name,
-            email: application.email,
-            tempPassword,
-            siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001",
-            payment: paymentOptionsFor("brand", application.email, application.requested_tier, brandAccountId),
-            scorePreview: await buildScorePreview(
-              typeof productName === "string" ? productName : null,
-              application.company_name
-            ),
-          }),
-          applicationId: id,
-        });
-
-        if (!sent) {
-          errorDetail = emailError;
-          // The account and login both work -- just log the temp password
-          // server-side so the admin can pull it from the logs and hand
-          // it over manually, since it can't be shown in the URL/UI.
-          console.error("[approveApplication] manual credential handoff needed", {
-            applicationId: id,
-            email: application.email,
-            tempPassword,
-          });
-          approvalStatus = "email_failed";
-        }
-      }
-    }
-  } catch (err) {
-    errorDetail = err instanceof Error ? err.message : String(err);
-    console.error("[approveApplication] unexpected error", { id, error: errorDetail });
-    approvalStatus = "account_failed";
-  }
-
-  const redirectParams = new URLSearchParams({ password, approval_status: approvalStatus });
-  if (approvedEmail) redirectParams.set("approved_email", approvedEmail);
-  if (errorDetail) redirectParams.set("error_detail", errorDetail.slice(0, 300));
-  redirect(`/admin?${redirectParams.toString()}`);
-}
 
 const VALID_TIERS = new Set(["early_stage", "growth", "enterprise"]);
 
@@ -490,4 +326,38 @@ export async function approveStylistApplication(formData: FormData) {
   if (approvedEmail) redirectParams.set("approved_email", approvedEmail);
   if (errorDetail) redirectParams.set("error_detail", errorDetail.slice(0, 300));
   redirect(`/admin?${redirectParams.toString()}`);
+}
+
+// Brands no longer go through approval. The admin's job is support: re-send a
+// payment link to someone stuck in pending_payment, or cancel an account.
+export async function resendBrandPaymentLink(formData: FormData) {
+  const id = formData.get("id");
+  const password = formData.get("password");
+  if (typeof password !== "string" || password !== process.env.ADMIN_PASSWORD) {
+    throw new Error("Unauthorized");
+  }
+  if (typeof id !== "string") throw new Error("Missing account id");
+
+  const { data: account } = await getSupabaseAdmin()
+    .from("brand_accounts")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (account?.status === "pending_payment") {
+    await sendBrandPaymentEmail(account as BrandAccountRow);
+  }
+  redirect(`/admin?password=${encodeURIComponent(password)}&tab=brand_accounts`);
+}
+
+export async function cancelBrandAccount(formData: FormData) {
+  const id = formData.get("id");
+  const password = formData.get("password");
+  if (typeof password !== "string" || password !== process.env.ADMIN_PASSWORD) {
+    throw new Error("Unauthorized");
+  }
+  if (typeof id !== "string") throw new Error("Missing account id");
+
+  const { error } = await getSupabaseAdmin().from("brand_accounts").update({ status: "cancelled" }).eq("id", id);
+  if (error) console.error("[cancelBrandAccount] update failed", { id, error: error.message });
+  redirect(`/admin?password=${encodeURIComponent(password)}&tab=brand_accounts`);
 }
