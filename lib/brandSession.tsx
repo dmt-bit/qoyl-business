@@ -37,7 +37,9 @@ const BrandSessionContext = createContext<BrandSessionState>({
   account: null,
 });
 
-export function BrandSessionProvider({ children }: { children: ReactNode }) {
+// brandId: load that brand instead of the logged-in user's own account. Used
+// by the admin preview; the database's admin read policy is what allows it.
+export function BrandSessionProvider({ children, brandId }: { children: ReactNode; brandId?: string }) {
   const router = useRouter();
   const [state, setState] = useState<BrandSessionState>({
     loading: true,
@@ -58,11 +60,11 @@ export function BrandSessionProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const { data: account } = await supabase
-        .from("brand_accounts")
-        .select("*")
-        .eq("email", session.user.email)
-        .single();
+      const accountQuery = supabase.from("brand_accounts").select("*");
+      const { data: account } = await (brandId
+        ? accountQuery.eq("id", brandId)
+        : accountQuery.eq("email", session.user.email)
+      ).single();
 
       if (!cancelled) {
         setState({ loading: false, session, account: account ?? null });
@@ -73,7 +75,7 @@ export function BrandSessionProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, brandId]);
 
   return (
     <BrandSessionContext.Provider value={state}>

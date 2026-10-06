@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import {
   approveFakeHairBrandApplication,
   rejectFakeHairBrandApplication,
@@ -8,6 +9,40 @@ import {
   resendBrandPaymentLink,
   cancelBrandAccount,
 } from "./actions";
+
+// Activates a brand without payment (testing). The API checks the admin login
+// token server-side, so this only works in a browser signed in as hey@qoyl.live.
+function ForceActivateButton({ brandId }: { brandId: string }) {
+  const [busy, setBusy] = useState(false);
+
+  async function run() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      alert("Sign in as hey@qoyl.live first (open /login in this browser), then try again.");
+      return;
+    }
+    if (!confirm("Activate this brand without payment?")) return;
+    setBusy(true);
+    const res = await fetch(`/api/admin/brands/${brandId}/force-activate`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    setBusy(false);
+    if (res.ok) window.location.reload();
+    else alert(`Force activate failed (HTTP ${res.status}).`);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={run}
+      disabled={busy}
+      className="text-xs text-muted underline hover:text-green disabled:opacity-50"
+    >
+      {busy ? "activating…" : "force activate"}
+    </button>
+  );
+}
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "text-bronze2",
@@ -319,6 +354,16 @@ export default function AdminTabs({
                           </button>
                         </form>
                       )}
+                      <a
+                        href={`/admin-preview/${account.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontFamily: "Space Mono, monospace", fontSize: "10px", color: "#888" }}
+                        className="underline hover:text-cream"
+                      >
+                        preview dashboard →
+                      </a>
+                      {account.status !== "active" && <ForceActivateButton brandId={account.id} />}
                       {account.status !== "cancelled" && (
                         <form action={cancelBrandAccount}>
                           <input type="hidden" name="id" value={account.id} />
