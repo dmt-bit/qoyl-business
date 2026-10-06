@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/email";
 import { signInLinkEmail } from "@/lib/emailTemplates";
 import { firstNameOf, generateSignInLink, sendBrandPaymentEmail, type BrandAccountRow } from "@/lib/brandSignup";
 import { validEmail } from "@/lib/applications";
+import { ADMIN_EMAIL } from "@/lib/adminConfig";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,13 @@ async function sendSignInLink(email: string, contactName: string, path: string) 
 }
 
 async function sendLinkIfAccount(email: string) {
+  // The admin login has no brand/stylist/seller row, so it's checked first.
+  // The link goes to /admin (generateSignInLink builds it from NEXT_PUBLIC_SITE_URL).
+  if (email === ADMIN_EMAIL) {
+    await sendSignInLink(email, "there", "/admin");
+    return;
+  }
+
   const admin = getSupabaseAdmin();
 
   const { data: brand } = await admin.from("brand_accounts").select("*").eq("email", email).maybeSingle();

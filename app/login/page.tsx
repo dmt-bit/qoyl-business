@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { ADMIN_EMAIL } from "@/lib/adminConfig";
 
 const mono = { fontFamily: "var(--font-mono-apply), monospace" } as const;
 const inputClass =
@@ -51,10 +52,17 @@ export default function LoginPage() {
     setSubmitting(true);
     setError(null);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     if (signInError) {
       setSubmitting(false);
       setError("Invalid email or password.");
+      return;
+    }
+
+    // Admin first: the admin login never checks the brand/stylist/seller tables.
+    if (signInData.user?.email === ADMIN_EMAIL) {
+      setSubmitting(false);
+      router.push("/admin");
       return;
     }
 
