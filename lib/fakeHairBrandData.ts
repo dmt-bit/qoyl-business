@@ -10,6 +10,14 @@ export type FakeHairProductWithStyle = {
   productUrl: string | null;
   styleName: string | null;
   clickCount: number;
+  // Catalog table columns (dashboard Section 2) and the real field the
+  // matcher uses (lib/fakeHairMatcher.ts in qoyl-beta) - styleName above
+  // comes from a styles(name) FK join that isn't what matching actually
+  // runs on; compatibleStyles (free text the seller typed) is.
+  availableColors: string[];
+  packsNeededByLength: Record<string, number> | null;
+  inStock: boolean;
+  compatibleStyles: string[];
 };
 
 export type FakeHairBrandDashboardData = {
@@ -22,6 +30,10 @@ type ProductRow = {
   product_name: string;
   product_url: string | null;
   styles: { name: string } | null;
+  available_colors: string[] | null;
+  packs_needed_by_length: Record<string, number> | null;
+  in_stock: boolean | null;
+  compatible_styles: string[] | null;
 };
 
 // accessToken is verified server-side rather than trusting a client-
@@ -43,7 +55,9 @@ export async function getFakeHairBrandDashboardData(
 
   const { data: products } = await supabaseAdmin
     .from("fake_hair_products")
-    .select("id, product_name, product_url, styles(name)")
+    .select(
+      "id, product_name, product_url, styles(name), available_colors, packs_needed_by_length, in_stock, compatible_styles"
+    )
     .eq("brand_id", brand.id)
     .order("created_at", { ascending: false });
 
@@ -73,6 +87,10 @@ export async function getFakeHairBrandDashboardData(
       productUrl: p.product_url,
       styleName: p.styles?.name ?? null,
       clickCount: clickCounts.get(p.id) ?? 0,
+      availableColors: p.available_colors ?? [],
+      packsNeededByLength: p.packs_needed_by_length ?? null,
+      inStock: p.in_stock !== false,
+      compatibleStyles: p.compatible_styles ?? [],
     })),
     cityDemand,
   };

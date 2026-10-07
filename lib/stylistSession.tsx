@@ -27,6 +27,8 @@ export type StylistAccount = {
   booking_url: string | null;
   status: string;
   created_at: string;
+  accepting_new_clients: boolean;
+  services_structured: unknown;
 };
 
 type StylistSessionState = {
