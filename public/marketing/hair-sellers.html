@@ -306,6 +306,32 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
   .mk-row2{grid-template-columns:1fr}
   .mk-phones{flex-direction:column;align-items:center}
 }
+
+/* ===== FULL-BLEED VIDEO BREAK =====
+   Plain <video> (autoplay/muted/loop/playsinline, no controls) -- these
+   pages are static HTML, not the React/Tailwind stack, so the same look
+   is built with plain CSS instead of Tailwind utility classes. */
+.mk-video-section{position:relative;width:100%;overflow:hidden}
+.mk-video-section video{display:block;width:100%;height:100%;object-fit:cover}
+.mk-video-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding:28px;text-align:center;z-index:2}
+.mk-video-eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:lowercase;color:#b5814a;margin-bottom:10px;text-shadow:0 1px 12px rgba(0,0,0,.85),0 1px 3px rgba(0,0,0,.9)}
+.mk-video-headline{font-family:'Space Grotesk',sans-serif;font-weight:700;color:#fff;text-transform:lowercase;line-height:1.15;font-size:clamp(26px,4.5vw,48px);max-width:720px;text-shadow:0 2px 24px rgba(0,0,0,.85),0 1px 4px rgba(0,0,0,.9)}
+
+/* brands: landscape cinematic band */
+.mk-video-section.landscape{height:60vh}
+.mk-video-section.landscape .mk-video-overlay{justify-content:center}
+.mk-video-gradient{position:absolute;inset:0;z-index:1;background:linear-gradient(to bottom, rgba(0,0,0,.6), rgba(0,0,0,0) 35%, rgba(0,0,0,0) 65%, rgba(0,0,0,.6))}
+
+/* stylists / hair-sellers: portrait, phone-framed, flanked by black */
+.mk-video-section.portrait{height:70vh;background:#0a0a0a;display:flex;justify-content:center}
+.mk-video-portrait-frame{position:relative;height:100%;width:100%;max-width:420px;border:2px solid #0a0a0a;overflow:hidden}
+.mk-video-section.portrait .mk-video-overlay{justify-content:flex-end;padding-bottom:28px}
+.mk-video-section.portrait .mk-video-gradient{position:absolute;inset:0;z-index:1;background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,0) 45%)}
+
+@media(max-width:768px){
+  .mk-video-section.landscape{height:40vh}
+  .mk-video-portrait-frame{max-width:none;border:none}
+}
 </style>
 </head>
 <body>
@@ -394,6 +420,20 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 <!-- THREE PROBLEMS -->
 <!-- PROOF BAR -->
 <div class="proof-bar"><p>color matched · pack count recommended · no commission on sales</p></div>
+
+<!-- Full-bleed video break -- autoplay/muted/loop/playsinline, no controls -->
+<section class="mk-video-section portrait">
+  <div class="mk-video-portrait-frame">
+    <video autoplay muted loop playsinline preload="metadata">
+      <source src="https://res.cloudinary.com/kumxntij/video/upload/v1790791845/6922998-uhd_2160_3840_24fps.mp4" type="video/mp4">
+    </video>
+    <div class="mk-video-gradient"></div>
+    <div class="mk-video-overlay">
+      <p class="mk-video-eyebrow">color matched · pack count recommended</p>
+      <h2 class="mk-video-headline">seen instead of a generic amazon link</h2>
+    </div>
+  </div>
+</section>
 
 <!-- Inline interactive mockup -- no iframe. hair seller order + browse screens (illustrative data). -->
 <section class="mockup-section">
