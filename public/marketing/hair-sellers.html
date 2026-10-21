@@ -245,6 +245,13 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 
 /* order card (hair sellers, phone 1) */
 .mk-order-card{padding:14px 16px}
+.mk-order-swatch-row{display:flex;align-items:flex-start;gap:10px}
+.mk-color-swatch{width:28px;height:28px;border-radius:50%;flex-shrink:0;margin-top:3px;border:1px solid var(--mk-g2)}
+.mk-order-rows{margin-top:12px}
+.mk-order-row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--mk-g1);font-size:10px}
+.mk-order-row span:first-child{color:var(--mk-g6);flex-shrink:0}
+.mk-order-row span:last-child{text-align:right}
+.mk-compat-explain{margin-top:10px;font-size:10px;color:var(--mk-g6);line-height:1.55}
 .mk-order-title{font-size:15px;font-weight:600;margin-top:10px}
 .mk-order-sub{font-size:10px;color:var(--mk-g6);margin-top:2px}
 .mk-score-row{display:flex;align-items:center;gap:8px;margin-top:14px}
@@ -259,6 +266,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 /* browse screen (hair sellers, phone 2) */
 .mk-browse{padding:14px 16px}
 .mk-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.mk-type-subtitle{font-size:9px;color:var(--mk-g6);margin-top:6px}
 .mk-type-tab{border:1px solid var(--mk-g2);text-align:center;padding:8px 0;font-size:11px;border-radius:8px;cursor:pointer}
 .mk-type-tab.active{background:var(--mk-k);color:#fff;border-color:var(--mk-k)}
 .mk-vibe-row{display:flex;gap:6px;overflow-x:auto;margin:12px 0 14px}
@@ -266,9 +274,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 .mk-vibe-pill.active{background:var(--mk-k);color:#fff;border-color:var(--mk-k)}
 .mk-inspo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .mk-inspo-card{border:1px solid var(--mk-g2);border-radius:10px;overflow:hidden}
-.mk-inspo-img{height:78px;background:linear-gradient(135deg,var(--mk-g1),var(--mk-g2))}
+.mk-inspo-img{height:78px;background:linear-gradient(135deg,var(--mk-g1),var(--mk-g2));background-size:cover;background-position:center}
 .mk-inspo-body{padding:8px}
 .mk-inspo-name{font-size:10px;line-height:1.3}
+.mk-inspo-meta{font-size:9px;color:var(--mk-g6);margin-top:2px}
 .mk-inspo-score{font-size:11px;font-weight:700;margin-top:4px}
 
 /* appointment confirm (stylists, phone 1) */
@@ -444,12 +453,26 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
         <div class="mk-phone-screen">
           <div class="mk-screen-label">incoming order</div>
           <div class="mk-order-card">
-            <div class="mk-order-title">2b wavy · #30 light brown · 18&quot; sew-in</div>
-            <div class="mk-order-sub">requested 2 hours ago · chicago, il</div>
+            <div class="mk-order-swatch-row">
+              <span class="mk-color-swatch" style="background:linear-gradient(135deg, #1a1a1a, #d4a843)"></span>
+              <div>
+                <div class="mk-order-title" style="margin-top:0">4a coily · ombré #1b to #613 blonde</div>
+                <div class="mk-order-sub">yaki straight u-part wig · requested 2 hours ago</div>
+              </div>
+            </div>
+            <div class="mk-order-rows">
+              <div class="mk-order-row"><span>bundle type</span><span>yaki straight u-part wig</span></div>
+              <div class="mk-order-row"><span>length</span><span>20&quot; · u-part wig · leave-out ready</span></div>
+              <div class="mk-order-row"><span>closure</span><span>u-part opening · center part</span></div>
+              <div class="mk-order-row"><span>install type</span><span>u-part · leave-out blend</span></div>
+              <div class="mk-order-row"><span>ship to</span><span>chicago, il</span></div>
+              <div class="mk-order-row"><span>order total</span><span>$210.00</span></div>
+            </div>
             <div class="mk-score-row">
-              <span class="mk-score-badge" style="background:var(--mk-green)">91</span>
+              <span class="mk-score-badge" style="background:var(--mk-green)">88</span>
               <span class="mk-score-cap">compat score</span>
             </div>
+            <p class="mk-compat-explain">buyer&rsquo;s 4a coily texture blends well with yaki straight. ombré #1b to #613 matches their goal of a blonde look while keeping natural roots. u-part allows their edges and leave-out to blend seamlessly.</p>
             <div class="mk-order-actions">
               <div class="mk-btn mk-btn-accept" data-mk-action="accept">accept</div>
               <div class="mk-btn mk-btn-msg" data-mk-action="message">message</div>
@@ -464,32 +487,40 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
           <div class="mk-browse">
             <div class="mk-type-grid">
               <div class="mk-type-tab" data-mk-type>type 1</div>
-              <div class="mk-type-tab active" data-mk-type>type 2</div>
+              <div class="mk-type-tab" data-mk-type>type 2</div>
               <div class="mk-type-tab" data-mk-type>type 3</div>
-              <div class="mk-type-tab" data-mk-type>type 4</div>
+              <div class="mk-type-tab active" data-mk-type>type 4</div>
             </div>
+            <div class="mk-type-subtitle">coily — 4a · 4b · 4c</div>
             <div class="mk-vibe-row">
-              <div class="mk-vibe-pill active" data-mk-vibe>all</div>
+              <div class="mk-vibe-pill active" data-mk-vibe>natural blend</div>
+              <div class="mk-vibe-pill" data-mk-vibe>all</div>
               <div class="mk-vibe-pill" data-mk-vibe>protective</div>
               <div class="mk-vibe-pill" data-mk-vibe>sleek</div>
               <div class="mk-vibe-pill" data-mk-vibe>voluminous</div>
             </div>
+            <!-- Inspo photos: queried Supabase styles for hair_types_compatible
+                 containing 4a/coily. No style named "wig"/"u-part" exists in
+                 the catalog (it's protective/natural styles, not seller
+                 install types), so those 3 cards keep the placeholder image.
+                 "blow out + yaki press" matches the catalog's "Silk Press"
+                 (intermediate, same concept), so it uses that real photo. -->
             <div class="mk-inspo-grid">
               <div class="mk-inspo-card">
                 <div class="mk-inspo-img"></div>
-                <div class="mk-inspo-body"><div class="mk-inspo-name">beach waves</div><div class="mk-inspo-score" style="color:var(--mk-green)">94</div></div>
+                <div class="mk-inspo-body"><div class="mk-inspo-name">u-part wig install</div><div class="mk-inspo-meta">1&ndash;2 hrs · beginner</div><div class="mk-inspo-score" style="color:var(--mk-green)">88</div></div>
+              </div>
+              <div class="mk-inspo-card">
+                <div class="mk-inspo-img" style="background-image:url('https://res.cloudinary.com/kumxntij/image/upload/v1789748010/pexels-dudumatik-3916358.jpg')"></div>
+                <div class="mk-inspo-body"><div class="mk-inspo-name">blow out + yaki press</div><div class="mk-inspo-meta">2&ndash;3 hrs · intermediate</div><div class="mk-inspo-score" style="color:var(--mk-green)">84</div></div>
               </div>
               <div class="mk-inspo-card">
                 <div class="mk-inspo-img"></div>
-                <div class="mk-inspo-body"><div class="mk-inspo-name">body wave sew-in</div><div class="mk-inspo-score" style="color:var(--mk-green)">91</div></div>
+                <div class="mk-inspo-body"><div class="mk-inspo-name">half up u-part</div><div class="mk-inspo-meta">45 min · beginner</div><div class="mk-inspo-score" style="color:var(--mk-green)">91</div></div>
               </div>
               <div class="mk-inspo-card">
                 <div class="mk-inspo-img"></div>
-                <div class="mk-inspo-body"><div class="mk-inspo-name">loose wave wig</div><div class="mk-inspo-score" style="color:var(--mk-green)">78</div></div>
-              </div>
-              <div class="mk-inspo-card">
-                <div class="mk-inspo-img"></div>
-                <div class="mk-inspo-body"><div class="mk-inspo-name">deep wave</div><div class="mk-inspo-score" style="color:var(--mk-green)">88</div></div>
+                <div class="mk-inspo-body"><div class="mk-inspo-name">full wig install</div><div class="mk-inspo-meta">1&ndash;2 hrs · beginner</div><div class="mk-inspo-score" style="color:var(--mk-green)">79</div></div>
               </div>
             </div>
           </div>
