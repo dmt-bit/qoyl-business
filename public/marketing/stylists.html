@@ -288,6 +288,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 .mk-phone.pulse{box-shadow:0 0 0 4px var(--mk-bronze)}
 
 /* client brief (stylists, phone 2) */
+.mk-req-style{display:flex;align-items:center;gap:10px;margin:10px 16px;padding:8px 10px;border:1px solid var(--mk-bronze);border-radius:8px}
+.mk-req-style img{width:50px;height:50px;object-fit:cover;border-radius:6px;flex-shrink:0;display:block}
+.mk-req-style-label{font-size:8px;color:var(--mk-g6)}
+.mk-req-style-name{font-size:12px;font-weight:600;margin-top:2px}
 .mk-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px}
 .mk-profile-cell{background:var(--mk-g1);border-radius:8px;padding:8px 10px}
 .mk-profile-label{font-size:8px;color:var(--mk-g6)}
@@ -417,6 +421,15 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
         <div class="mk-phone-notch"></div>
         <div class="mk-phone-screen">
           <div class="mk-screen-label">client style brief</div>
+          <!-- Requested style reference photo. Sourced from Supabase styles.image_url
+               (name ilike '%knotless%') -- see supabase/query used, in the commit notes. -->
+          <div class="mk-req-style">
+            <img src="https://res.cloudinary.com/kumxntij/image/upload/v1789764019/pexels-mikhail-nilov-7624555.jpg" alt="knotless braids reference" loading="lazy">
+            <div>
+              <div class="mk-req-style-label">requested style</div>
+              <div class="mk-req-style-name">knotless braids · boho ends</div>
+            </div>
+          </div>
           <div class="mk-profile-grid">
             <div class="mk-profile-cell"><div class="mk-profile-label">curl type</div><div class="mk-profile-value">4b coily</div></div>
             <div class="mk-profile-cell"><div class="mk-profile-label">porosity</div><div class="mk-profile-value">high</div></div>
