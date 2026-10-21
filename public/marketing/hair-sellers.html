@@ -337,6 +337,17 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 .mk-video-section.portrait .mk-video-overlay{justify-content:flex-end;padding-bottom:28px}
 .mk-video-section.portrait .mk-video-gradient{position:absolute;inset:0;z-index:1;background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,0) 45%)}
 
+/* three-video flush row (hair sellers only) */
+.mk-video-row{display:flex;width:100%;height:70vh}
+.mk-video-cell{position:relative;overflow:hidden;width:33.3334%;height:100%}
+.mk-video-cell .mk-video-overlay{justify-content:flex-end;padding-bottom:28px}
+.mk-video-cell .mk-video-gradient{position:absolute;inset:0;z-index:1;background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,0) 45%)}
+@media(max-width:768px){
+  .mk-video-row{height:50vh}
+  .mk-video-cell.mk-video-flank{display:none}
+  .mk-video-cell.mk-video-center{width:100%}
+}
+
 @media(max-width:768px){
   .mk-video-section.landscape{height:40vh}
   .mk-video-portrait-frame{max-width:none;border:none}
@@ -431,15 +442,30 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 <div class="proof-bar"><p>color matched · pack count recommended · no commission on sales</p></div>
 
 <!-- Full-bleed video break -- autoplay/muted/loop/playsinline, no controls -->
-<section class="mk-video-section portrait">
-  <div class="mk-video-portrait-frame">
-    <video autoplay muted loop playsinline preload="metadata">
-      <source src="https://res.cloudinary.com/kumxntij/video/upload/v1790791845/6922998-uhd_2160_3840_24fps.mp4" type="video/mp4">
-    </video>
-    <div class="mk-video-gradient"></div>
-    <div class="mk-video-overlay">
-      <p class="mk-video-eyebrow">your bundles. their perfect match.</p>
-      <h2 class="mk-video-headline">get suggested in every style match</h2>
+<!-- Full-bleed 3-video panel: flush edge to edge, no gap. Text overlay sits
+     over the center video only; the two flanking videos are hidden below the
+     mobile breakpoint, leaving just the center one. -->
+<section class="mk-video-section">
+  <div class="mk-video-row">
+    <div class="mk-video-cell mk-video-flank">
+      <video autoplay muted loop playsinline preload="metadata">
+        <source src="https://res.cloudinary.com/kumxntij/video/upload/v1792623326/5109926-hd_1080_1920_30fps.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="mk-video-cell mk-video-center">
+      <video autoplay muted loop playsinline preload="metadata">
+        <source src="https://res.cloudinary.com/kumxntij/video/upload/v1790791845/6922998-uhd_2160_3840_24fps.mp4" type="video/mp4">
+      </video>
+      <div class="mk-video-gradient"></div>
+      <div class="mk-video-overlay">
+        <p class="mk-video-eyebrow">your bundles. their perfect match.</p>
+        <h2 class="mk-video-headline">get suggested in every style match</h2>
+      </div>
+    </div>
+    <div class="mk-video-cell mk-video-flank">
+      <video autoplay muted loop playsinline preload="metadata">
+        <source src="https://res.cloudinary.com/kumxntij/video/upload/v1792623337/8628055-hd_1080_1920_25fps.mp4" type="video/mp4">
+      </video>
     </div>
   </div>
 </section>
@@ -479,52 +505,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
           </div>
         </div>
       </div>
-      <div class="mk-phone">
-        <div class="mk-phone-notch"></div>
-        <div class="mk-phone-screen">
-          <div class="mk-screen-label">style match · browse</div>
-          <div class="mk-browse">
-            <div class="mk-type-grid">
-              <div class="mk-type-tab" data-mk-type>type 1</div>
-              <div class="mk-type-tab" data-mk-type>type 2</div>
-              <div class="mk-type-tab" data-mk-type>type 3</div>
-              <div class="mk-type-tab active" data-mk-type>type 4</div>
-            </div>
-            <div class="mk-type-subtitle">coily — 4a · 4b · 4c</div>
-            <div class="mk-vibe-row">
-              <div class="mk-vibe-pill active" data-mk-vibe>natural blend</div>
-              <div class="mk-vibe-pill" data-mk-vibe>all</div>
-              <div class="mk-vibe-pill" data-mk-vibe>protective</div>
-              <div class="mk-vibe-pill" data-mk-vibe>sleek</div>
-              <div class="mk-vibe-pill" data-mk-vibe>voluminous</div>
-            </div>
-            <!-- Inspo photos: queried Supabase styles for hair_types_compatible
-                 containing 4a/coily. No style named "wig"/"u-part" exists in
-                 the catalog (it's protective/natural styles, not seller
-                 install types), so those 3 cards keep the placeholder image.
-                 "blow out + yaki press" matches the catalog's "Silk Press"
-                 (intermediate, same concept), so it uses that real photo. -->
-            <div class="mk-inspo-grid">
-              <div class="mk-inspo-card">
-                <div class="mk-inspo-img"></div>
-                <div class="mk-inspo-body"><div class="mk-inspo-name">u-part wig install</div><div class="mk-inspo-meta">1&ndash;2 hrs · beginner</div><div class="mk-inspo-score" style="color:var(--mk-green)">88</div></div>
-              </div>
-              <div class="mk-inspo-card">
-                <div class="mk-inspo-img" style="background-image:url('https://res.cloudinary.com/kumxntij/image/upload/v1789748010/pexels-dudumatik-3916358.jpg')"></div>
-                <div class="mk-inspo-body"><div class="mk-inspo-name">blow out + yaki press</div><div class="mk-inspo-meta">2&ndash;3 hrs · intermediate</div><div class="mk-inspo-score" style="color:var(--mk-green)">84</div></div>
-              </div>
-              <div class="mk-inspo-card">
-                <div class="mk-inspo-img"></div>
-                <div class="mk-inspo-body"><div class="mk-inspo-name">half up u-part</div><div class="mk-inspo-meta">45 min · beginner</div><div class="mk-inspo-score" style="color:var(--mk-green)">91</div></div>
-              </div>
-              <div class="mk-inspo-card">
-                <div class="mk-inspo-img"></div>
-                <div class="mk-inspo-body"><div class="mk-inspo-name">full wig install</div><div class="mk-inspo-meta">1&ndash;2 hrs · beginner</div><div class="mk-inspo-score" style="color:var(--mk-green)">79</div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </section>
@@ -532,11 +512,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 (function(){
   var root = document.getElementById('mk-sellers');
   if (!root) return;
-  function selectOne(list, el){ list.forEach(function(x){ x.classList.remove('active'); }); el.classList.add('active'); }
-  var types = root.querySelectorAll('[data-mk-type]');
-  types.forEach(function(t){ t.addEventListener('click', function(){ selectOne(types, t); }); });
-  var vibes = root.querySelectorAll('[data-mk-vibe]');
-  vibes.forEach(function(v){ v.addEventListener('click', function(){ selectOne(vibes, v); }); });
   root.querySelectorAll('[data-mk-action]').forEach(function(btn){
     btn.addEventListener('click', function(){
       if (btn.classList.contains('done')) return;
