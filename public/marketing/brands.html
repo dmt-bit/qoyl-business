@@ -252,15 +252,123 @@ nav{
   .demo-right{padding:32px 20px}
 }
 
-/* ===== PROOF BAR + EMBEDDED PRODUCT MOCKUP =====
-   Live interactive mockup, embedded via iframe. No surrounding labels --
-   the mockup is the content. */
+/* ===== PROOF BAR ===== */
 .proof-bar{width:100%;border-top:1px solid var(--g2);border-bottom:1px solid var(--k);background:var(--g1);padding:12px 16px;text-align:center}
 .proof-bar p{font-family:var(--m);font-size:11px;color:var(--g6);text-transform:lowercase;letter-spacing:.02em}
-.mockup-section{padding:0;border-bottom:1px solid var(--k)}
-.mockup-iframe{display:block;width:100%;height:700px;border:none}
+/* ===== INLINE INTERACTIVE MOCKUP (no iframe / external embed) =====
+   Self-contained design tokens so this renders identically regardless of
+   the host page's own --vars. All-lowercase UI copy, no dark mode. */
+.mockup-section{padding:56px 20px;background:#fafafa;border-bottom:1px solid #0a0a0a}
+.mk-wrap{
+  --mk-k:#0a0a0a;--mk-w:#ffffff;--mk-g1:#f5f5f5;--mk-g2:#e5e2df;--mk-g4:#9a9389;--mk-g6:#6b6560;
+  --mk-bronze:#b5814a;--mk-green:#2D7A3D;--mk-amber:#C4831A;--mk-red:#B03030;
+  font-family:'Space Grotesk',sans-serif;color:var(--mk-k);text-transform:lowercase;
+}
+.mk-mono{font-family:'Space Mono',monospace}
+
+/* --- browser chrome (brands dashboard) --- */
+.mk-browser{max-width:960px;margin:0 auto;border:2px solid var(--mk-k);border-radius:10px;overflow:hidden;background:var(--mk-w);box-shadow:0 24px 60px rgba(0,0,0,.08)}
+.mk-browser-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--mk-g2);background:var(--mk-g1)}
+.mk-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.mk-url{margin-left:8px;flex:1;background:var(--mk-w);border:1px solid var(--mk-g2);border-radius:6px;padding:4px 12px;font-size:11px;color:var(--mk-g6)}
+.mk-app{display:flex;min-height:500px}
+.mk-side{width:160px;flex-shrink:0;background:var(--mk-k);color:var(--mk-w);padding:20px 12px}
+.mk-side-logo{font-weight:700;font-size:13px;margin-bottom:22px;letter-spacing:-.02em}
+.mk-side-nav div{display:block;padding:9px 10px;border-radius:6px;font-size:12px;color:#b8b8b8;margin-bottom:2px;cursor:pointer}
+.mk-side-nav div.active{background:rgba(255,255,255,.1);color:var(--mk-w)}
+.mk-side-nav div:hover{color:var(--mk-w)}
+.mk-main{flex:1;padding:20px;overflow:auto}
+.mk-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--mk-g2);border:1px solid var(--mk-g2);margin-bottom:18px}
+.mk-kpi{background:var(--mk-w);padding:12px 14px}
+.mk-kpi-label{font-size:9px;letter-spacing:.05em;color:var(--mk-g6)}
+.mk-kpi-num{font-size:21px;font-weight:700;margin-top:4px}
+.mk-row2{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-bottom:18px}
+.mk-box{border:1px solid var(--mk-g2);padding:12px 14px}
+.mk-box-title{font-size:9px;letter-spacing:.05em;color:var(--mk-g6);margin-bottom:10px}
+.mk-map-svg{width:100%;height:150px;display:block}
+.mk-city-row{display:flex;align-items:center;gap:8px;font-size:11px;margin-bottom:7px}
+.mk-city-name{width:70px;flex-shrink:0}
+.mk-city-bar-bg{flex:1;background:var(--mk-g1);height:6px;border-radius:3px;overflow:hidden}
+.mk-city-bar-fill{height:100%;background:var(--mk-k)}
+.mk-city-num{font-size:10px;color:var(--mk-g6);width:44px;text-align:right}
+.mk-chart{display:flex;align-items:flex-end;gap:8px;height:96px;padding-bottom:18px;position:relative}
+.mk-bar{flex:1;background:var(--mk-g2);border-radius:3px 3px 0 0;position:relative}
+.mk-bar.peak{background:var(--mk-bronze)}
+.mk-bar-label{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:8px;color:var(--mk-g6)}
+.mk-table{width:100%;border-collapse:collapse;font-size:11px}
+.mk-table th{text-align:left;font-size:9px;color:var(--mk-g6);padding:6px 8px;border-bottom:1px solid var(--mk-g2)}
+.mk-table td{padding:7px 8px;border-bottom:1px solid var(--mk-g1)}
+.mk-pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;color:#fff}
+
+/* --- phone frame system (hair sellers / stylists) --- */
+.mk-phones{display:flex;gap:26px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.mk-phone{width:264px;border:2px solid var(--mk-k);border-radius:42px;padding:9px;background:var(--mk-k);flex-shrink:0}
+.mk-phone-notch{height:16px;width:84px;background:var(--mk-k);border-radius:999px;margin:0 auto 6px;position:relative;z-index:2}
+.mk-phone-screen{background:var(--mk-w);border-radius:32px;height:520px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.mk-screen-label{font-size:9px;letter-spacing:.05em;color:var(--mk-g6);padding:12px 16px 0}
+
+/* order card (hair sellers, phone 1) */
+.mk-order-card{padding:14px 16px}
+.mk-order-title{font-size:15px;font-weight:600;margin-top:10px}
+.mk-order-sub{font-size:10px;color:var(--mk-g6);margin-top:2px}
+.mk-score-row{display:flex;align-items:center;gap:8px;margin-top:14px}
+.mk-score-badge{font-size:11px;font-weight:700;color:#fff;border-radius:999px;padding:4px 12px}
+.mk-score-cap{font-size:9px;color:var(--mk-g6)}
+.mk-order-actions{display:flex;gap:8px;margin-top:18px}
+.mk-btn{flex:1;text-align:center;padding:10px 0;border-radius:8px;font-size:11px;cursor:pointer;border:1px solid var(--mk-k);transition:opacity .15s}
+.mk-btn-accept{background:var(--mk-k);color:#fff}
+.mk-btn-msg{background:var(--mk-w);color:var(--mk-k)}
+.mk-btn.done{opacity:.55;pointer-events:none}
+
+/* browse screen (hair sellers, phone 2) */
+.mk-browse{padding:14px 16px}
+.mk-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.mk-type-tab{border:1px solid var(--mk-g2);text-align:center;padding:8px 0;font-size:11px;border-radius:8px;cursor:pointer}
+.mk-type-tab.active{background:var(--mk-k);color:#fff;border-color:var(--mk-k)}
+.mk-vibe-row{display:flex;gap:6px;overflow-x:auto;margin:12px 0 14px}
+.mk-vibe-pill{white-space:nowrap;border:1px solid var(--mk-g2);border-radius:999px;padding:5px 12px;font-size:10px;cursor:pointer;flex-shrink:0}
+.mk-vibe-pill.active{background:var(--mk-k);color:#fff;border-color:var(--mk-k)}
+.mk-inspo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mk-inspo-card{border:1px solid var(--mk-g2);border-radius:10px;overflow:hidden}
+.mk-inspo-img{height:78px;background:linear-gradient(135deg,var(--mk-g1),var(--mk-g2))}
+.mk-inspo-body{padding:8px}
+.mk-inspo-name{font-size:10px;line-height:1.3}
+.mk-inspo-score{font-size:11px;font-weight:700;margin-top:4px}
+
+/* appointment confirm (stylists, phone 1) */
+.mk-appt-hero{background:var(--mk-k);color:#fff;padding:20px 16px 16px}
+.mk-appt-service{font-size:15px;font-weight:600;line-height:1.3}
+.mk-appt-meta{font-size:10px;color:#b8b8b8;margin-top:6px}
+.mk-confirmed{display:inline-block;margin-top:10px;background:var(--mk-green);color:#fff;font-size:9px;font-weight:700;padding:3px 10px;border-radius:999px}
+.mk-appt-rows{padding:10px 16px}
+.mk-appt-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--mk-g1);font-size:11px}
+.mk-appt-row span:first-child{color:var(--mk-g6)}
+.mk-brief-btn{margin:16px;display:block;text-align:center;border:1px solid var(--mk-k);padding:11px;border-radius:8px;font-size:11px;cursor:pointer}
+.mk-phone.pulse{box-shadow:0 0 0 4px var(--mk-bronze)}
+
+/* client brief (stylists, phone 2) */
+.mk-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px}
+.mk-profile-cell{background:var(--mk-g1);border-radius:8px;padding:8px 10px}
+.mk-profile-label{font-size:8px;color:var(--mk-g6)}
+.mk-profile-value{font-size:11px;font-weight:600;margin-top:2px}
+.mk-recs{padding:4px 16px 0}
+.mk-rec-row{display:flex;align-items:center;gap:8px;border:1px solid var(--mk-bronze);border-left:3px solid var(--mk-bronze);border-radius:6px;padding:8px 10px;margin-bottom:8px}
+.mk-rec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mk-rec-name{font-size:10px;flex:1}
+.mk-rec-score{font-size:10px;color:var(--mk-g6)}
+.mk-share-card{margin:10px 16px 16px;border:1px solid var(--mk-g2);border-radius:10px;padding:12px}
+.mk-share-label{font-size:9px;color:var(--mk-g6);margin-bottom:8px}
+.mk-share-btn{display:block;width:100%;text-align:center;padding:9px;margin-top:6px;border-radius:8px;font-size:10px;cursor:pointer;background:var(--mk-k);color:#fff;border:none;font-family:inherit;text-transform:lowercase}
+
 @media(max-width:768px){
-  .mockup-iframe{height:480px}
+  .mk-app{flex-direction:column;min-height:0}
+  .mk-side{width:100%;display:flex;gap:4px;padding:12px;overflow-x:auto}
+  .mk-side-logo{display:none}
+  .mk-side-nav{display:flex;gap:4px}
+  .mk-side-nav div{white-space:nowrap;margin-bottom:0}
+  .mk-kpis{grid-template-columns:repeat(2,1fr)}
+  .mk-row2{grid-template-columns:1fr}
+  .mk-phones{flex-direction:column;align-items:center}
 }
 </style>
 </head>
@@ -301,10 +409,95 @@ nav{
 <!-- PROOF BAR -->
 <div class="proof-bar"><p>850+ ingredients scored · 8 scoring variables · algorithmic — not pay-to-win</p></div>
 
-<!-- Embedded interactive mockup (claude.ai artifact). No caption/label by design. -->
+<!-- Inline interactive mockup -- no iframe. qoyl brand dashboard (illustrative data). -->
 <section class="mockup-section">
-  <iframe src="https://claude.ai/artifact/LdvAqq2f7wtjySBhMnNPjc#brands" class="mockup-iframe" allow="clipboard-write" loading="lazy"></iframe>
+  <div class="mk-wrap" id="mk-brands">
+    <div class="mk-browser">
+      <div class="mk-browser-bar">
+        <span class="mk-dot" style="background:#ff5f57"></span>
+        <span class="mk-dot" style="background:#febc2e"></span>
+        <span class="mk-dot" style="background:#28c840"></span>
+        <span class="mk-url mk-mono">business.qoyl.live/dashboard/skala</span>
+      </div>
+      <div class="mk-app">
+        <div class="mk-side">
+          <div class="mk-side-logo">skala</div>
+          <div class="mk-side-nav">
+            <div class="active" data-mk-nav>dashboard</div>
+            <div data-mk-nav>geographic</div>
+            <div data-mk-nav>stylists</div>
+            <div data-mk-nav>products</div>
+            <div data-mk-nav>orders</div>
+          </div>
+        </div>
+        <div class="mk-main">
+          <div class="mk-kpis">
+            <div class="mk-kpi"><div class="mk-kpi-label">total scans</div><div class="mk-kpi-num mk-mono">4,821</div></div>
+            <div class="mk-kpi"><div class="mk-kpi-label">stylist matches</div><div class="mk-kpi-num mk-mono">1,304</div></div>
+            <div class="mk-kpi"><div class="mk-kpi-label">avg compat score</div><div class="mk-kpi-num mk-mono">82</div></div>
+            <div class="mk-kpi"><div class="mk-kpi-label">conversion rate</div><div class="mk-kpi-num mk-mono">27%</div></div>
+          </div>
+          <div class="mk-row2">
+            <div class="mk-box">
+              <div class="mk-box-title">scans by city · illinois</div>
+              <svg class="mk-map-svg" viewBox="0 0 120 150" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <path d="M50,6 L92,6 L92,32 L104,32 L104,54 L92,54 L92,98 L80,140 L58,146 L48,140 L40,98 L34,40 L34,20 Z" fill="var(--mk-g1)" stroke="var(--mk-k)" stroke-width="1.5"/>
+                <circle cx="96" cy="40" r="18" fill="var(--mk-k)" opacity=".82"/>
+                <circle cx="58" cy="88" r="5.5" fill="var(--mk-k)" opacity=".82"/>
+              </svg>
+            </div>
+            <div class="mk-box">
+              <div class="mk-box-title">ranked cities</div>
+              <div class="mk-city-row"><span class="mk-city-name">chicago</span><div class="mk-city-bar-bg"><div class="mk-city-bar-fill" style="width:100%"></div></div><span class="mk-city-num mk-mono">2,214</span></div>
+              <div class="mk-city-row"><span class="mk-city-name">aurora</span><div class="mk-city-bar-bg"><div class="mk-city-bar-fill" style="width:28%"></div></div><span class="mk-city-num mk-mono">612</span></div>
+              <div class="mk-city-row"><span class="mk-city-name">naperville</span><div class="mk-city-bar-bg"><div class="mk-city-bar-fill" style="width:22%"></div></div><span class="mk-city-num mk-mono">498</span></div>
+              <div class="mk-city-row"><span class="mk-city-name">rockford</span><div class="mk-city-bar-bg"><div class="mk-city-bar-fill" style="width:15%"></div></div><span class="mk-city-num mk-mono">341</span></div>
+              <div class="mk-city-row"><span class="mk-city-name">springfield</span><div class="mk-city-bar-bg"><div class="mk-city-bar-fill" style="width:10%"></div></div><span class="mk-city-num mk-mono">227</span></div>
+              <div class="mk-city-row"><span class="mk-city-name">peoria</span><div class="mk-city-bar-bg"><div class="mk-city-bar-fill" style="width:7%"></div></div><span class="mk-city-num mk-mono">164</span></div>
+            </div>
+          </div>
+          <div class="mk-box" style="margin-bottom:18px">
+            <div class="mk-box-title">weekly scans</div>
+            <div class="mk-chart">
+              <div class="mk-bar" style="height:40px"><span class="mk-bar-label">mon</span></div>
+              <div class="mk-bar" style="height:55px"><span class="mk-bar-label">tue</span></div>
+              <div class="mk-bar" style="height:48px"><span class="mk-bar-label">wed</span></div>
+              <div class="mk-bar" style="height:68px"><span class="mk-bar-label">thu</span></div>
+              <div class="mk-bar" style="height:58px"><span class="mk-bar-label">fri</span></div>
+              <div class="mk-bar peak" style="height:90px"><span class="mk-bar-label">sat</span></div>
+              <div class="mk-bar" style="height:32px"><span class="mk-bar-label">sun</span></div>
+            </div>
+          </div>
+          <div class="mk-box">
+            <div class="mk-box-title">product compatibility</div>
+            <table class="mk-table">
+              <thead><tr><th>product</th><th>compat score</th></tr></thead>
+              <tbody>
+                <tr><td>skala intense hydration mask</td><td><span class="mk-pill" style="background:var(--mk-green)">88</span></td></tr>
+                <tr><td>skala pure coconut conditioner</td><td><span class="mk-pill" style="background:var(--mk-green)">81</span></td></tr>
+                <tr><td>skala kids sulfate-free shampoo</td><td><span class="mk-pill" style="background:var(--mk-amber)">63</span></td></tr>
+                <tr><td>skala bamboo charcoal clarifying shampoo</td><td><span class="mk-pill" style="background:var(--mk-amber)">57</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
+<script>
+(function(){
+  var root = document.getElementById('mk-brands');
+  if (!root) return;
+  var navs = root.querySelectorAll('[data-mk-nav]');
+  navs.forEach(function(n){
+    n.addEventListener('click', function(){
+      navs.forEach(function(x){ x.classList.remove('active'); });
+      n.classList.add('active');
+    });
+  });
+})();
+</script>
 
 <div class="ticker" aria-hidden="true">
   <div class="ticker-inner">

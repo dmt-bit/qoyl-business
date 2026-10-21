@@ -193,15 +193,123 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
   .fn-note{padding:14px 20px}
 }
 
-/* ===== PROOF BAR + EMBEDDED PRODUCT MOCKUP =====
-   Live interactive mockup, embedded via iframe. No surrounding labels --
-   the mockup is the content. */
+/* ===== PROOF BAR ===== */
 .proof-bar{width:100%;border-top:1px solid var(--g2);border-bottom:1px solid var(--k);background:var(--g1);padding:12px 16px;text-align:center}
 .proof-bar p{font-family:var(--m);font-size:11px;color:var(--g6);text-transform:lowercase;letter-spacing:.02em}
-.mockup-section{padding:0;border-bottom:1px solid var(--k)}
-.mockup-iframe{display:block;width:100%;height:700px;border:none}
+/* ===== INLINE INTERACTIVE MOCKUP (no iframe / external embed) =====
+   Self-contained design tokens so this renders identically regardless of
+   the host page's own --vars. All-lowercase UI copy, no dark mode. */
+.mockup-section{padding:56px 20px;background:#fafafa;border-bottom:1px solid #0a0a0a}
+.mk-wrap{
+  --mk-k:#0a0a0a;--mk-w:#ffffff;--mk-g1:#f5f5f5;--mk-g2:#e5e2df;--mk-g4:#9a9389;--mk-g6:#6b6560;
+  --mk-bronze:#b5814a;--mk-green:#2D7A3D;--mk-amber:#C4831A;--mk-red:#B03030;
+  font-family:'Space Grotesk',sans-serif;color:var(--mk-k);text-transform:lowercase;
+}
+.mk-mono{font-family:'Space Mono',monospace}
+
+/* --- browser chrome (brands dashboard) --- */
+.mk-browser{max-width:960px;margin:0 auto;border:2px solid var(--mk-k);border-radius:10px;overflow:hidden;background:var(--mk-w);box-shadow:0 24px 60px rgba(0,0,0,.08)}
+.mk-browser-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--mk-g2);background:var(--mk-g1)}
+.mk-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.mk-url{margin-left:8px;flex:1;background:var(--mk-w);border:1px solid var(--mk-g2);border-radius:6px;padding:4px 12px;font-size:11px;color:var(--mk-g6)}
+.mk-app{display:flex;min-height:500px}
+.mk-side{width:160px;flex-shrink:0;background:var(--mk-k);color:var(--mk-w);padding:20px 12px}
+.mk-side-logo{font-weight:700;font-size:13px;margin-bottom:22px;letter-spacing:-.02em}
+.mk-side-nav div{display:block;padding:9px 10px;border-radius:6px;font-size:12px;color:#b8b8b8;margin-bottom:2px;cursor:pointer}
+.mk-side-nav div.active{background:rgba(255,255,255,.1);color:var(--mk-w)}
+.mk-side-nav div:hover{color:var(--mk-w)}
+.mk-main{flex:1;padding:20px;overflow:auto}
+.mk-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--mk-g2);border:1px solid var(--mk-g2);margin-bottom:18px}
+.mk-kpi{background:var(--mk-w);padding:12px 14px}
+.mk-kpi-label{font-size:9px;letter-spacing:.05em;color:var(--mk-g6)}
+.mk-kpi-num{font-size:21px;font-weight:700;margin-top:4px}
+.mk-row2{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-bottom:18px}
+.mk-box{border:1px solid var(--mk-g2);padding:12px 14px}
+.mk-box-title{font-size:9px;letter-spacing:.05em;color:var(--mk-g6);margin-bottom:10px}
+.mk-map-svg{width:100%;height:150px;display:block}
+.mk-city-row{display:flex;align-items:center;gap:8px;font-size:11px;margin-bottom:7px}
+.mk-city-name{width:70px;flex-shrink:0}
+.mk-city-bar-bg{flex:1;background:var(--mk-g1);height:6px;border-radius:3px;overflow:hidden}
+.mk-city-bar-fill{height:100%;background:var(--mk-k)}
+.mk-city-num{font-size:10px;color:var(--mk-g6);width:44px;text-align:right}
+.mk-chart{display:flex;align-items:flex-end;gap:8px;height:96px;padding-bottom:18px;position:relative}
+.mk-bar{flex:1;background:var(--mk-g2);border-radius:3px 3px 0 0;position:relative}
+.mk-bar.peak{background:var(--mk-bronze)}
+.mk-bar-label{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:8px;color:var(--mk-g6)}
+.mk-table{width:100%;border-collapse:collapse;font-size:11px}
+.mk-table th{text-align:left;font-size:9px;color:var(--mk-g6);padding:6px 8px;border-bottom:1px solid var(--mk-g2)}
+.mk-table td{padding:7px 8px;border-bottom:1px solid var(--mk-g1)}
+.mk-pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;color:#fff}
+
+/* --- phone frame system (hair sellers / stylists) --- */
+.mk-phones{display:flex;gap:26px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.mk-phone{width:264px;border:2px solid var(--mk-k);border-radius:42px;padding:9px;background:var(--mk-k);flex-shrink:0}
+.mk-phone-notch{height:16px;width:84px;background:var(--mk-k);border-radius:999px;margin:0 auto 6px;position:relative;z-index:2}
+.mk-phone-screen{background:var(--mk-w);border-radius:32px;height:520px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.mk-screen-label{font-size:9px;letter-spacing:.05em;color:var(--mk-g6);padding:12px 16px 0}
+
+/* order card (hair sellers, phone 1) */
+.mk-order-card{padding:14px 16px}
+.mk-order-title{font-size:15px;font-weight:600;margin-top:10px}
+.mk-order-sub{font-size:10px;color:var(--mk-g6);margin-top:2px}
+.mk-score-row{display:flex;align-items:center;gap:8px;margin-top:14px}
+.mk-score-badge{font-size:11px;font-weight:700;color:#fff;border-radius:999px;padding:4px 12px}
+.mk-score-cap{font-size:9px;color:var(--mk-g6)}
+.mk-order-actions{display:flex;gap:8px;margin-top:18px}
+.mk-btn{flex:1;text-align:center;padding:10px 0;border-radius:8px;font-size:11px;cursor:pointer;border:1px solid var(--mk-k);transition:opacity .15s}
+.mk-btn-accept{background:var(--mk-k);color:#fff}
+.mk-btn-msg{background:var(--mk-w);color:var(--mk-k)}
+.mk-btn.done{opacity:.55;pointer-events:none}
+
+/* browse screen (hair sellers, phone 2) */
+.mk-browse{padding:14px 16px}
+.mk-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.mk-type-tab{border:1px solid var(--mk-g2);text-align:center;padding:8px 0;font-size:11px;border-radius:8px;cursor:pointer}
+.mk-type-tab.active{background:var(--mk-k);color:#fff;border-color:var(--mk-k)}
+.mk-vibe-row{display:flex;gap:6px;overflow-x:auto;margin:12px 0 14px}
+.mk-vibe-pill{white-space:nowrap;border:1px solid var(--mk-g2);border-radius:999px;padding:5px 12px;font-size:10px;cursor:pointer;flex-shrink:0}
+.mk-vibe-pill.active{background:var(--mk-k);color:#fff;border-color:var(--mk-k)}
+.mk-inspo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mk-inspo-card{border:1px solid var(--mk-g2);border-radius:10px;overflow:hidden}
+.mk-inspo-img{height:78px;background:linear-gradient(135deg,var(--mk-g1),var(--mk-g2))}
+.mk-inspo-body{padding:8px}
+.mk-inspo-name{font-size:10px;line-height:1.3}
+.mk-inspo-score{font-size:11px;font-weight:700;margin-top:4px}
+
+/* appointment confirm (stylists, phone 1) */
+.mk-appt-hero{background:var(--mk-k);color:#fff;padding:20px 16px 16px}
+.mk-appt-service{font-size:15px;font-weight:600;line-height:1.3}
+.mk-appt-meta{font-size:10px;color:#b8b8b8;margin-top:6px}
+.mk-confirmed{display:inline-block;margin-top:10px;background:var(--mk-green);color:#fff;font-size:9px;font-weight:700;padding:3px 10px;border-radius:999px}
+.mk-appt-rows{padding:10px 16px}
+.mk-appt-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--mk-g1);font-size:11px}
+.mk-appt-row span:first-child{color:var(--mk-g6)}
+.mk-brief-btn{margin:16px;display:block;text-align:center;border:1px solid var(--mk-k);padding:11px;border-radius:8px;font-size:11px;cursor:pointer}
+.mk-phone.pulse{box-shadow:0 0 0 4px var(--mk-bronze)}
+
+/* client brief (stylists, phone 2) */
+.mk-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px}
+.mk-profile-cell{background:var(--mk-g1);border-radius:8px;padding:8px 10px}
+.mk-profile-label{font-size:8px;color:var(--mk-g6)}
+.mk-profile-value{font-size:11px;font-weight:600;margin-top:2px}
+.mk-recs{padding:4px 16px 0}
+.mk-rec-row{display:flex;align-items:center;gap:8px;border:1px solid var(--mk-bronze);border-left:3px solid var(--mk-bronze);border-radius:6px;padding:8px 10px;margin-bottom:8px}
+.mk-rec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mk-rec-name{font-size:10px;flex:1}
+.mk-rec-score{font-size:10px;color:var(--mk-g6)}
+.mk-share-card{margin:10px 16px 16px;border:1px solid var(--mk-g2);border-radius:10px;padding:12px}
+.mk-share-label{font-size:9px;color:var(--mk-g6);margin-bottom:8px}
+.mk-share-btn{display:block;width:100%;text-align:center;padding:9px;margin-top:6px;border-radius:8px;font-size:10px;cursor:pointer;background:var(--mk-k);color:#fff;border:none;font-family:inherit;text-transform:lowercase}
+
 @media(max-width:768px){
-  .mockup-iframe{height:480px}
+  .mk-app{flex-direction:column;min-height:0}
+  .mk-side{width:100%;display:flex;gap:4px;padding:12px;overflow-x:auto}
+  .mk-side-logo{display:none}
+  .mk-side-nav{display:flex;gap:4px}
+  .mk-side-nav div{white-space:nowrap;margin-bottom:0}
+  .mk-kpis{grid-template-columns:repeat(2,1fr)}
+  .mk-row2{grid-template-columns:1fr}
+  .mk-phones{flex-direction:column;align-items:center}
 }
 </style>
 </head>
@@ -244,10 +352,89 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 <!-- PROOF BAR -->
 <div class="proof-bar"><p>matching by curl type, porosity + climate · chicago · atlanta · new york</p></div>
 
-<!-- Embedded interactive mockup (claude.ai artifact). No caption/label by design. -->
+<!-- Inline interactive mockup -- no iframe. stylist appointment + client brief screens (illustrative data). -->
 <section class="mockup-section">
-  <iframe src="https://claude.ai/artifact/LdvAqq2f7wtjySBhMnNPjc#stylists" class="mockup-iframe" allow="clipboard-write" loading="lazy"></iframe>
+  <div class="mk-wrap" id="mk-stylists">
+    <div class="mk-phones">
+      <div class="mk-phone" id="mk-phone-appt">
+        <div class="mk-phone-notch"></div>
+        <div class="mk-phone-screen">
+          <div class="mk-appt-hero">
+            <div class="mk-appt-service">knotless braids boho ends</div>
+            <div class="mk-appt-meta">amara johnson · oct 25 · $280</div>
+            <span class="mk-confirmed">confirmed</span>
+          </div>
+          <div class="mk-appt-rows">
+            <div class="mk-appt-row"><span>date</span><span>oct 25, 2026</span></div>
+            <div class="mk-appt-row"><span>time</span><span>10:00 am</span></div>
+            <div class="mk-appt-row"><span>duration</span><span>~5 hrs</span></div>
+            <div class="mk-appt-row"><span>location</span><span>the parlour, chicago</span></div>
+          </div>
+          <div class="mk-brief-btn" id="mk-view-brief">view full client brief →</div>
+        </div>
+      </div>
+      <div class="mk-phone" id="mk-phone-brief">
+        <div class="mk-phone-notch"></div>
+        <div class="mk-phone-screen">
+          <div class="mk-screen-label">client style brief</div>
+          <div class="mk-profile-grid">
+            <div class="mk-profile-cell"><div class="mk-profile-label">curl type</div><div class="mk-profile-value">4b coily</div></div>
+            <div class="mk-profile-cell"><div class="mk-profile-label">porosity</div><div class="mk-profile-value">high</div></div>
+            <div class="mk-profile-cell"><div class="mk-profile-label">density</div><div class="mk-profile-value">medium-high</div></div>
+            <div class="mk-profile-cell"><div class="mk-profile-label">length</div><div class="mk-profile-value">bsl</div></div>
+            <div class="mk-profile-cell"><div class="mk-profile-label">scalp</div><div class="mk-profile-value">dry / sensitive</div></div>
+            <div class="mk-profile-cell"><div class="mk-profile-label">chemical</div><div class="mk-profile-value">none</div></div>
+          </div>
+          <div class="mk-recs">
+            <div class="mk-rec-row"><span class="mk-rec-dot" style="background:var(--mk-green)"></span><span class="mk-rec-name">leave-in defining cream</span><span class="mk-rec-score">92</span></div>
+            <div class="mk-rec-row"><span class="mk-rec-dot" style="background:var(--mk-green)"></span><span class="mk-rec-name">daily scalp oil treatment</span><span class="mk-rec-score">85</span></div>
+            <div class="mk-rec-row"><span class="mk-rec-dot" style="background:var(--mk-amber)"></span><span class="mk-rec-name">protein reconstructor mask</span><span class="mk-rec-score">68</span></div>
+            <div class="mk-rec-row"><span class="mk-rec-dot" style="background:var(--mk-green)"></span><span class="mk-rec-name">edge control gel</span><span class="mk-rec-score">90</span></div>
+            <div class="mk-rec-row"><span class="mk-rec-dot" style="background:var(--mk-amber)"></span><span class="mk-rec-name">deep conditioning masque</span><span class="mk-rec-score">61</span></div>
+          </div>
+          <div class="mk-share-card">
+            <div class="mk-share-label">share this brief</div>
+            <button class="mk-share-btn" type="button" data-mk-share="summary">generate summary →</button>
+            <button class="mk-share-btn" type="button" data-mk-share="copy">copy link →</button>
+            <button class="mk-share-btn" type="button" data-mk-share="text">share via text →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
+<script>
+(function(){
+  var root = document.getElementById('mk-stylists');
+  if (!root) return;
+  var viewBrief = document.getElementById('mk-view-brief');
+  var briefPhone = document.getElementById('mk-phone-brief');
+  if (viewBrief && briefPhone) {
+    viewBrief.addEventListener('click', function(){
+      briefPhone.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      briefPhone.classList.add('pulse');
+      setTimeout(function(){ briefPhone.classList.remove('pulse'); }, 1200);
+    });
+  }
+  root.querySelectorAll('[data-mk-share]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var kind = btn.getAttribute('data-mk-share');
+      var original = btn.textContent;
+      if (kind === 'copy') {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText('https://qoyl.live/brief/demo').catch(function(){});
+        }
+        btn.textContent = '✓ copied';
+      } else if (kind === 'text') {
+        btn.textContent = '✓ sent';
+      } else {
+        btn.textContent = '✓ generated';
+      }
+      setTimeout(function(){ btn.textContent = original; }, 1600);
+    });
+  });
+})();
+</script>
 
 <!-- THE CLIENT BRIEF — hero feature -->
 <section class="brief-section">
