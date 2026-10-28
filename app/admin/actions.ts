@@ -370,3 +370,16 @@ export async function setProductRequestStatus(formData: FormData) {
   if (error) console.error("[setProductRequestStatus] update failed", { id, error: error.message });
   redirect(`/admin?password=${encodeURIComponent(password)}&tab=product_requests`);
 }
+
+export async function approveVendorProfile(formData: FormData) {
+  const id = formData.get("id");
+  const password = formData.get("password");
+  if (typeof password !== "string" || password !== process.env.ADMIN_PASSWORD) {
+    throw new Error("Unauthorized");
+  }
+  if (typeof id !== "string") throw new Error("Missing vendor id");
+
+  const { error } = await getSupabaseAdmin().from("vendor_profiles").update({ status: "active" }).eq("id", id);
+  if (error) console.error("[approveVendorProfile] update failed", { id, error: error.message });
+  redirect(`/admin/vendors?password=${encodeURIComponent(password)}`);
+}

@@ -1,6 +1,7 @@
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import AdminTabs, { type ProductRequest } from "./AdminTabs";
 import type { AdminReport } from "@/components/admin/ReportReview";
+import AdminSidebar from "@/components/admin/AdminSidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -108,28 +109,35 @@ export default async function AdminPage({
         | "stylist_accounts")
     : "brand_applications";
 
-  return (
-    <div className="min-h-screen px-6 py-12 sm:px-12">
-      <h1 className="font-serif text-3xl text-cream mb-8">Admin</h1>
+  // "brands" in the sidebar lands here with ?tab=brand_accounts -- highlight
+  // it instead of "overview" whenever a brand_* tab is the active one.
+  const sidebarActive = initialTab.startsWith("brand_") ? "brands" : "overview";
 
-      <AdminTabs
-        brandApplications={brandApplications ?? []}
-        brandAccounts={brandAccounts ?? []}
-        fakeHairApplications={fakeHairApplications ?? []}
-        fakeHairAccounts={fakeHairAccounts ?? []}
-        stylistApplications={stylistApplications ?? []}
-        stylistAccounts={stylistAccounts ?? []}
-        sellerProducts={sellerProducts ?? []}
-        catalogBrands={catalogBrands ?? []}
-        catalogProductCounts={catalogProductCounts}
-        productRequests={(productRequests ?? []) as unknown as ProductRequest[]}
-        rdReports={(rdReports ?? []) as unknown as AdminReport[]}
-        password={password}
-        initialTab={initialTab}
-        approvedEmail={searchParams.approved_email ?? null}
-        approvalStatus={searchParams.approval_status ?? null}
-        errorDetail={searchParams.error_detail ?? null}
-      />
+  return (
+    <div className="flex min-h-screen flex-col sm:flex-row">
+      <AdminSidebar password={password} active={sidebarActive} />
+      <div className="min-w-0 flex-1 px-6 py-12 sm:px-12">
+        <h1 className="font-serif text-3xl text-cream mb-8">Admin</h1>
+
+        <AdminTabs
+          brandApplications={brandApplications ?? []}
+          brandAccounts={brandAccounts ?? []}
+          fakeHairApplications={fakeHairApplications ?? []}
+          fakeHairAccounts={fakeHairAccounts ?? []}
+          stylistApplications={stylistApplications ?? []}
+          stylistAccounts={stylistAccounts ?? []}
+          sellerProducts={sellerProducts ?? []}
+          catalogBrands={catalogBrands ?? []}
+          catalogProductCounts={catalogProductCounts}
+          productRequests={(productRequests ?? []) as unknown as ProductRequest[]}
+          rdReports={(rdReports ?? []) as unknown as AdminReport[]}
+          password={password}
+          initialTab={initialTab}
+          approvedEmail={searchParams.approved_email ?? null}
+          approvalStatus={searchParams.approval_status ?? null}
+          errorDetail={searchParams.error_detail ?? null}
+        />
+      </div>
     </div>
   );
 }
