@@ -7,9 +7,7 @@ import { str, validEmail } from "@/lib/applications";
 export const dynamic = "force-dynamic";
 
 const PLAN_TYPES = new Set(["stylist", "hair-seller", "brand"]);
-// Explicit recipient for new vendor signups, per the task that added this
-// route -- intentionally not lib/email.ts's NOTIFY_EMAIL (hey@qoyl.live).
-const SIGNUP_NOTIFY_EMAIL = "dailydiortwine@gmail.com";
+const SIGNUP_NOTIFY_EMAIL = "hey@qoyl.live";
 
 // Best-effort: resolves the Stripe customer id from the checkout session, so
 // /welcome doesn't have to wait on it. Needs STRIPE_SECRET_KEY (not set in
