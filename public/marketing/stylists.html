@@ -334,6 +334,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 /* stylists / hair-sellers: portrait, phone-framed, flanked by black */
 .mk-video-section.portrait{height:70vh;background:#0a0a0a;display:flex;justify-content:center}
 .mk-video-portrait-frame{position:relative;height:100%;width:100%;max-width:420px;border:2px solid #0a0a0a;overflow:hidden}
+.mk-video-portrait-frame.mk-video-placeholder{background:#0a0a0a}
 .mk-video-section.portrait .mk-video-overlay{justify-content:flex-end;padding-bottom:28px}
 .mk-video-section.portrait .mk-video-gradient{position:absolute;inset:0;z-index:1;background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,0) 45%)}
 
@@ -384,10 +385,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 
 <!-- Full-bleed video break -- autoplay/muted/loop/playsinline, no controls -->
 <section class="mk-video-section portrait">
-  <div class="mk-video-portrait-frame">
-    <video autoplay muted loop playsinline preload="metadata">
-      <source src="https://res.cloudinary.com/kumxntij/video/upload/v1792618442/6501913-hd_1080_1920_30fps.mp4" type="video/mp4">
-    </video>
+  <!-- video not yet uploaded to Supabase storage -- black placeholder until it is -->
+  <div class="mk-video-portrait-frame mk-video-placeholder">
     <div class="mk-video-gradient"></div>
     <div class="mk-video-overlay">
       <p class="mk-video-eyebrow">matching by curl type, porosity + climate</p>

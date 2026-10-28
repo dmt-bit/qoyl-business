@@ -342,6 +342,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 /* three-video flush row (hair sellers only) */
 .mk-video-row{display:flex;width:100%;height:70vh}
 .mk-video-cell{position:relative;overflow:hidden;width:33.3334%;height:100%}
+.mk-video-cell.mk-video-placeholder{background:#0a0a0a}
 .mk-video-cell .mk-video-overlay{justify-content:flex-end;padding-bottom:28px}
 .mk-video-cell .mk-video-gradient{position:absolute;inset:0;z-index:1;background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,0) 45%)}
 @media(max-width:768px){
@@ -457,14 +458,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
      mobile breakpoint, leaving just the center one. -->
 <section class="mk-video-section">
   <div class="mk-video-row">
-    <div class="mk-video-cell mk-video-flank">
-      <video autoplay muted loop playsinline preload="metadata">
-        <source src="https://res.cloudinary.com/kumxntij/video/upload/v1792623326/5109926-hd_1080_1920_30fps.mp4" type="video/mp4">
-      </video>
-    </div>
+    <!-- left flank video not yet uploaded to Supabase storage -- black placeholder until it is -->
+    <div class="mk-video-cell mk-video-flank mk-video-placeholder"></div>
     <div class="mk-video-cell mk-video-center">
       <video autoplay muted loop playsinline preload="metadata">
-        <source src="https://res.cloudinary.com/kumxntij/video/upload/v1790791845/6922998-uhd_2160_3840_24fps.mp4" type="video/mp4">
+        <source src="https://cqpxiassldkmusngqorx.supabase.co/storage/v1/object/public/media/videos/6922998-uhd_2160_3840_24fps.mp4" type="video/mp4">
       </video>
       <div class="mk-video-gradient"></div>
       <div class="mk-video-overlay">
@@ -472,11 +470,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
         <h2 class="mk-video-headline">get suggested in every style match</h2>
       </div>
     </div>
-    <div class="mk-video-cell mk-video-flank">
-      <video autoplay muted loop playsinline preload="metadata">
-        <source src="https://res.cloudinary.com/kumxntij/video/upload/v1792623337/8628055-hd_1080_1920_25fps.mp4" type="video/mp4">
-      </video>
-    </div>
+    <!-- right flank video not yet uploaded to Supabase storage -- black placeholder until it is -->
+    <div class="mk-video-cell mk-video-flank mk-video-placeholder"></div>
   </div>
 </section>
 
