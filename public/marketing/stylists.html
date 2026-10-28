@@ -334,7 +334,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 /* stylists / hair-sellers: portrait, phone-framed, flanked by black */
 .mk-video-section.portrait{height:70vh;background:#0a0a0a;display:flex;justify-content:center}
 .mk-video-portrait-frame{position:relative;height:100%;width:100%;max-width:420px;border:2px solid #0a0a0a;overflow:hidden}
-.mk-video-portrait-frame.mk-video-placeholder{background:#0a0a0a}
 .mk-video-section.portrait .mk-video-overlay{justify-content:flex-end;padding-bottom:28px}
 .mk-video-section.portrait .mk-video-gradient{position:absolute;inset:0;z-index:1;background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,0) 45%)}
 
@@ -385,8 +384,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
 
 <!-- Full-bleed video break -- autoplay/muted/loop/playsinline, no controls -->
 <section class="mk-video-section portrait">
-  <!-- video not yet uploaded to Supabase storage -- black placeholder until it is -->
-  <div class="mk-video-portrait-frame mk-video-placeholder">
+  <div class="mk-video-portrait-frame">
+    <video autoplay muted loop playsinline preload="metadata">
+      <source src="https://cqpxiassldkmusngqorx.supabase.co/storage/v1/object/public/media/7575519-uhd_2160_3840_24fps.mp4" type="video/mp4">
+    </video>
     <div class="mk-video-gradient"></div>
     <div class="mk-video-overlay">
       <p class="mk-video-eyebrow">matching by curl type, porosity + climate</p>
@@ -420,10 +421,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:20px 3
         <div class="mk-phone-notch"></div>
         <div class="mk-phone-screen">
           <div class="mk-screen-label">client style brief</div>
-          <!-- Requested style reference photo. Sourced from Supabase styles.image_url
-               (name ilike '%knotless%') -- see supabase/query used, in the commit notes. -->
+          <!-- Requested style reference photo -- same Pexels photo (id 7624555)
+               used before, now served from Supabase storage since the
+               Cloudinary account it previously loaded from was disabled. -->
           <div class="mk-req-style">
-            <img src="https://res.cloudinary.com/kumxntij/image/upload/v1789764019/pexels-mikhail-nilov-7624555.jpg" alt="knotless braids reference" loading="lazy">
+            <img src="https://cqpxiassldkmusngqorx.supabase.co/storage/v1/object/public/media/photos/7624555.jpeg" alt="knotless braids reference" loading="lazy">
             <div>
               <div class="mk-req-style-label">requested style</div>
               <div class="mk-req-style-name">knotless braids · boho ends</div>
