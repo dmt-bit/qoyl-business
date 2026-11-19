@@ -16,6 +16,13 @@ const nextConfig = {
   // The three B2B marketing pages are static HTML in public/marketing/
   // (served verbatim so their design isn't re-implemented in React).
   // beforeFiles so "/" resolves here instead of an app/page.tsx.
+  // The hair-seller application used to live at /apply/fake-hair-brand;
+  // keep old links working.
+  async redirects() {
+    return [
+      { source: "/apply/fake-hair-brand", destination: "/apply/hair-seller", permanent: true },
+    ];
+  },
   async rewrites() {
     return {
       beforeFiles: [

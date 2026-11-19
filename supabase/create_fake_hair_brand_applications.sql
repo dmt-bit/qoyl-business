@@ -14,7 +14,7 @@ create table if not exists fake_hair_brand_applications (
 
 alter table fake_hair_brand_applications enable row level security;
 
--- Mirrors brand_applications: /apply/fake-hair-brand is public and
+-- Mirrors brand_applications: /apply/hair-seller is public and
 -- unauthenticated.
 create policy "Allow anon insert"
   on fake_hair_brand_applications for insert
