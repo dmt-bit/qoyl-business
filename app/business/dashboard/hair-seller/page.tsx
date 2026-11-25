@@ -76,6 +76,14 @@ export default function HairSellerDashboardPage() {
             Catalog &amp; city demand →
           </Link>
         </p>
+        {account && (
+          <div className="mt-3 inline-flex items-center gap-2">
+            <span className="text-[10px] uppercase tracking-wider font-medium text-[#C8A86A] border border-[rgba(200,168,106,0.4)] px-2.5 py-1">
+              {account.membership_tier ?? "Founding member"}
+            </span>
+            <span className="text-[10px] text-muted">· founding rate locked · 0% commission</span>
+          </div>
+        )}
 
         {dataLoading ? (
           <p className="mt-10 text-muted">Loading...</p>
@@ -128,6 +136,28 @@ export default function HairSellerDashboardPage() {
                   </table>
                 </div>
               )}
+            </section>
+
+            {/* Fulfillment status */}
+            <section className="mt-12 rounded-lg border border-[rgba(200,168,106,0.18)] bg-[rgba(200,168,106,0.03)] p-6">
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                  <h2 className="font-serif text-lg text-cream mb-1">Qoyl fulfillment</h2>
+                  <p className="text-xs text-muted">Ship inventory to Qoyl and we handle fulfillment, the customer experience, and returns.</p>
+                </div>
+                <span className="shrink-0 text-[10px] uppercase tracking-wider font-medium text-[#C8A86A] border border-[rgba(200,168,106,0.4)] px-2.5 py-1 mt-0.5">
+                  Coming Q1
+                </span>
+              </div>
+              <p className="mt-4 text-sm text-muted leading-relaxed">
+                Qoyl warehouse fulfillment is in progress. When live, Growth and Partner members can ship inventory directly to Qoyl — we handle storage, packing, shipping, and returns so your products are always in stock and always shipped on time.
+              </p>
+              <a
+                href="mailto:hey@qoyl.live?subject=Fulfillment%20Interest"
+                className="mt-4 inline-block text-xs font-medium text-bronze2 hover:text-bronze underline underline-offset-2 transition-colors"
+              >
+                Let us know you&apos;re interested →
+              </a>
             </section>
 
             <div className="mt-12 mb-8 grid gap-10 sm:grid-cols-2">
