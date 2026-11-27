@@ -81,19 +81,18 @@ nav{
 .questions{border-bottom:1px solid var(--k)}
 .q-row{
   padding:40px 32px;border-bottom:1px solid var(--g2);
-  display:flex;align-items:center;gap:40px;
+  display:grid;grid-template-columns:1fr 340px;gap:40px;
   transition:background .15s;cursor:default;
 }
 .q-row:last-child{border-bottom:none}
 .q-row:hover{background:var(--g1)}
-.q-num{font-family:var(--m);font-size:11px;color:var(--g4);flex-shrink:0;width:24px}
 .q-text{
   font-size:clamp(18px,2.5vw,28px);font-weight:600;
-  color:var(--k);letter-spacing:-0.5px;text-transform:lowercase;flex:1;
+  color:var(--k);letter-spacing:-0.5px;text-transform:lowercase;
 }
 .q-answer{
-  font-size:12px;color:var(--g6);max-width:340px;line-height:1.65;
-  text-align:right;flex-shrink:0;
+  font-size:12px;color:var(--g6);line-height:1.65;
+  text-align:right;align-self:center;
 }
 
 /* SCORE DEMO — asymmetric. big score left, explanation right */
@@ -137,22 +136,13 @@ nav{
 .alert-body{font-size:12px;color:var(--g6);line-height:1.65}
 .alert-body strong{color:var(--k);font-weight:600}
 
-/* THREE INSIGHTS — unconventional: big left numbers */
+/* THREE INSIGHTS */
 .insights{border-bottom:1px solid var(--k)}
 .insight{
-  display:grid;grid-template-columns:120px 1fr 1fr;
+  display:grid;grid-template-columns:1fr 1fr;
   border-bottom:1px solid var(--g2);min-height:200px;
 }
 .insight:last-child{border-bottom:none}
-.insight-n{
-  padding:40px 32px;border-right:1px solid var(--g2);
-  display:flex;align-items:flex-start;
-}
-.insight-n-text{
-  font-family:var(--m);font-size:56px;font-weight:700;
-  color:var(--g2);line-height:1;writing-mode:vertical-lr;
-  transform:rotate(180deg);letter-spacing:-3px;
-}
 .insight-content{padding:40px 40px;border-right:1px solid var(--g2)}
 .insight-title{font-size:18px;font-weight:700;letter-spacing:-0.5px;text-transform:lowercase;margin-bottom:12px}
 .insight-body{font-size:12px;color:var(--g6);line-height:1.75}
@@ -171,7 +161,6 @@ nav{
   padding:96px 32px;text-align:center;
   border-bottom:1px solid var(--k);
 }
-.integrity-pre{font-family:var(--m);font-size:9px;letter-spacing:.16em;color:var(--g4);margin-bottom:24px;text-transform:lowercase}
 .integrity-h{font-size:clamp(24px,3vw,40px);font-weight:700;letter-spacing:-1.5px;line-height:1.1;text-transform:lowercase;margin-bottom:20px}
 .integrity-body{font-size:14px;color:var(--g6);line-height:1.85;margin-bottom:0}
 .integrity-rules{
@@ -187,22 +176,20 @@ nav{
 .ir:nth-last-child(-n+2){border-bottom:none}
 .ir strong{color:var(--k);font-weight:500;display:block;margin-bottom:3px}
 
-/* PRICING — horizontal row, not cards */
+/* PRICING */
 .pricing{border-bottom:1px solid var(--k)}
 .pricing-header{
-  padding:48px 32px 0;display:flex;
+  padding:48px 32px 32px;display:flex;
   align-items:flex-end;justify-content:space-between;
   border-bottom:1px solid var(--k);flex-wrap:wrap;gap:24px;
-  padding-bottom:32px;
 }
 .pricing-h{font-size:clamp(20px,2.5vw,32px);font-weight:700;letter-spacing:-1px;text-transform:lowercase}
 .pricing-note{font-size:12px;color:var(--g6);max-width:340px;line-height:1.65;text-align:right}
 .price-single{padding:56px 32px;text-align:center}
 .price-single-amt{font-family:var(--m);font-size:56px;font-weight:700;color:var(--k);line-height:1}
-.price-single-sub{font-family:var(--m);font-size:10px;letter-spacing:.14em;color:var(--g4);margin:10px 0 32px;text-transform:lowercase}
+.price-single-sub{font-size:12px;color:var(--g4);margin:10px 0 32px}
 .price-single-feats{list-style:none;max-width:460px;margin:0 auto 36px;text-align:left}
-.price-single-feats li{font-size:12px;color:var(--g6);padding:9px 0;border-top:1px solid var(--g2);display:flex;gap:8px;text-transform:lowercase;line-height:1.5}
-.price-single-feats li::before{content:'+';flex-shrink:0}
+.price-single-feats li{font-size:13px;color:var(--g6);padding:11px 0;border-top:1px solid var(--g2);text-transform:lowercase;line-height:1.5}
 .price-single-btn{display:inline-block;background:var(--k);color:var(--w);padding:14px 32px;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:lowercase;text-decoration:none;font-family:var(--f)}
 .founding{
   padding:20px 32px;background:var(--g1);
@@ -229,12 +216,11 @@ nav{
   .hero{padding:56px 20px 48px}
   .hero-h{letter-spacing:-2px}
   .hero-split{gap:32px;margin-top:40px}
-  .q-row{flex-direction:column;align-items:flex-start;gap:12px}
-  .q-answer{text-align:left;max-width:100%}
+  .q-row{grid-template-columns:1fr;gap:12px}
+  .q-answer{text-align:left}
   .demo{grid-template-columns:1fr}
   .demo-score{border-right:none;border-bottom:1px solid var(--k)}
   .insight{grid-template-columns:1fr}
-  .insight-n{display:none}
   .insight-content{border-right:none;border-bottom:1px solid var(--g2);padding:32px 20px}
   .insight-example{padding:28px 20px}
   .integrity{padding:64px 20px}
@@ -416,7 +402,7 @@ nav{
 
 <section class="hero">
   <div class="hero-inner">
-    <div class="hero-pre">brand intelligence · ingredient-level · real consumer data</div>
+    <div class="hero-pre">ingredient-level brand intelligence</div>
     <h1 class="hero-h">
       big brands<br>
       <em>already know</em><br>
@@ -433,7 +419,7 @@ nav{
 </section>
 
 <!-- PROOF BAR -->
-<div class="proof-bar"><p>850+ ingredients scored · 8 scoring variables per product · real consumer hair profiles · algorithmic — not pay-to-win</p></div>
+<div class="proof-bar"><p>850+ ingredients scored across 8 variables. algorithmic, not pay-to-win.</p></div>
 
 <!-- Full-bleed video break -- autoplay/muted/loop/playsinline, no controls -->
 <section class="mk-video-section landscape">
@@ -542,13 +528,13 @@ nav{
     <span class="ticker-item"><span>82%</span> ingredient coverage</span>
     <span class="ticker-item"><span>850+</span> ingredients scored</span>
     <span class="ticker-item"><span>8</span> scoring variables per product</span>
-    <span class="ticker-item"><span>porosity</span> · <span>curl type</span> · <span>scalp</span> · <span>climate</span> · <span>water hardness</span> · <span>age</span> · <span>concerns</span> · <span>season</span></span>
-    <span class="ticker-item"><span>$5,000</span> cosmetic consultant → <span>$85</span>/month dashboard</span>
+    <span class="ticker-item">scores across porosity, curl type, scalp, climate, water hardness, age, concerns, season</span>
+    <span class="ticker-item"><span>$5,000</span> cosmetic consultant → <span>$85</span>/month</span>
     <span class="ticker-item"><span>82%</span> ingredient coverage</span>
     <span class="ticker-item"><span>850+</span> ingredients scored</span>
     <span class="ticker-item"><span>8</span> scoring variables per product</span>
-    <span class="ticker-item"><span>porosity</span> · <span>curl type</span> · <span>scalp</span> · <span>climate</span> · <span>water hardness</span> · <span>age</span> · <span>concerns</span> · <span>season</span></span>
-    <span class="ticker-item"><span>$5,000</span> cosmetic consultant → <span>$85</span>/month dashboard</span>
+    <span class="ticker-item">scores across porosity, curl type, scalp, climate, water hardness, age, concerns, season</span>
+    <span class="ticker-item"><span>$5,000</span> cosmetic consultant → <span>$85</span>/month</span>
   </div>
 </div>
 
@@ -556,17 +542,14 @@ nav{
 
 <section class="questions">
   <div class="q-row">
-    <div class="q-num">01</div>
     <div class="q-text">how do customers find your brand on a retail shelf?</div>
     <div class="q-answer">if they can't tell who it's for, they grab the brand they already know. qoyl puts your product in front of the exact consumer whose profile matches your formula — before they ever reach the shelf.</div>
   </div>
   <div class="q-row">
-    <div class="q-num">02</div>
     <div class="q-text">who is actually buying your product — and why?</div>
     <div class="q-answer">not "curly hair" — 30% of the population. qoyl tells you specifically which curl types, porosity levels, scalp conditions, and climate zones your formula scores well for, so you can market to the right person with real precision.</div>
   </div>
   <div class="q-row">
-    <div class="q-num">03</div>
     <div class="q-text">which ingredient is costing you shelf space?</div>
     <div class="q-answer">not a guess. your dashboard names the specific ingredient flagged for specific consumer segments — and shows the reformulation that would open up a new market. this is what a cosmetic consultant charges $5,000 to tell you.</div>
   </div>
@@ -574,9 +557,9 @@ nav{
 
 <section class="demo" id="demo">
   <div class="demo-score">
-    <div class="score-product-name">moisture curl cream · sample analysis</div>
+    <div class="score-product-name">moisture curl cream</div>
     <div class="score-big">91</div>
-    <div class="score-seg-name">4a · high porosity · humid · atlanta</div>
+    <div class="score-seg-name">4a high porosity, humid climate, atlanta</div>
     <div class="score-others">
       <div class="score-other-row">
         <div class="score-other-label">4b low porosity</div>
@@ -596,11 +579,11 @@ nav{
     </div>
   </div>
   <div class="demo-right">
-    <div class="demo-eyebrow">what your dashboard shows</div>
+    <div class="demo-eyebrow" style="display:none"></div>
     <h2 class="demo-h">the same product. four different customers. four completely different scores.</h2>
     <p class="demo-body">the 91 is real — your formula wins for 4a high porosity users in humid climates. the 31 is also real. <strong>propylene glycol at position 3</strong> creates a film on low porosity cuticles that prevents moisture absorption. the 1b fine hair user in a dry climate is not the customer your formula was made for.</p>
     <div class="alert-box">
-      <div class="alert-label">formulation gap · high impact</div>
+      <div class="alert-label">formulation gap</div>
       <div class="alert-body"><strong>propylene glycol at position 3</strong> is flagging for 4b low porosity profiles in dry climates — 623 profiles affected in your search data. swapping to sodium pca is projected to move this segment from 54 → 76. a cosmetic consultant charges $5,000 for this analysis. your dashboard runs it automatically across your entire catalog.</div>
     </div>
   </div>
@@ -608,42 +591,35 @@ nav{
 
 <section class="insights">
   <div class="insight">
-    <div class="insight-n"><div class="insight-n-text">01</div></div>
     <div class="insight-content">
       <h3 class="insight-title">get discovered before they reach the shelf</h3>
       <p class="insight-body">big brands spend millions on retail placement and paid search. qoyl puts your product in front of consumers whose hair profile already matches your formula — through the app they use to decide what to buy. <strong>that's discovery without a media budget.</strong></p>
     </div>
     <div class="insight-example">
-      <div class="eg-label">how discovery works</div>
       <p class="eg-text">a consumer with <em>4a high porosity hair in a humid climate</em> opens qoyl. your deep conditioner scores 91/100 for her profile. it surfaces at the top of her results — before she's ever seen your brand on a shelf or in an ad.</p>
     </div>
   </div>
   <div class="insight">
-    <div class="insight-n"><div class="insight-n-text">02</div></div>
     <div class="insight-content">
       <h3 class="insight-title">know exactly who your formula was made for</h3>
-      <p class="insight-body">not a category. specifically: which curl types, porosity levels, scalp conditions, and climate zones your formula scores well for. <strong>now you can market to the right customer</strong> instead of guessing — and compete head-to-head with brands that have dedicated research teams.</p>
+      <p class="insight-body">not a category. specifically which curl types, porosity levels, scalp conditions, and climate zones your formula scores well for. <strong>now you can market to the right customer</strong> instead of guessing — and compete head-to-head with brands that have dedicated research teams.</p>
     </div>
     <div class="insight-example">
-      <div class="eg-label">what this looks like</div>
       <p class="eg-text">your deep conditioner scores <em>91/100 for 4a high porosity in humid climates</em> — atlanta, houston, miami. it scores <em>54/100 for 4b low porosity in dry climates</em>. your instagram spend is going to chicago influencers. your formula wins in atlanta.</p>
     </div>
   </div>
   <div class="insight">
-    <div class="insight-n"><div class="insight-n-text">03</div></div>
     <div class="insight-content">
       <h3 class="insight-title">reformulation signals a cosmetic consultant would charge $5,000 for</h3>
       <p class="insight-body">qoyl identifies the specific ingredient flagged for specific segments — and shows the swap that closes the gap. <strong>this used to require a cosmetic chemist, a focus group, and months of work.</strong> qoyl produces it automatically, for every product in your catalog.</p>
     </div>
     <div class="insight-example">
-      <div class="eg-label">real insight example</div>
       <p class="eg-text">propylene glycol at position 3 is flagging for <em>34% of the hair profiles</em> in our database. swapping to sodium pca would move this segment from <em>54 → an estimated 79</em> — and open up a market segment your formula currently loses.</p>
     </div>
   </div>
 </section>
 
 <section class="integrity">
-  <div class="integrity-pre">on data integrity</div>
   <h2 class="integrity-h">the score is the score. no exceptions.</h2>
   <p class="integrity-body">a platform that adjusts scores for paying brands produces data that no one trusts. qoyl produces data that brands use to make real formulation decisions — because the score reflects the science, not the commercial relationship.</p>
   <div class="integrity-rules">
@@ -661,15 +637,14 @@ nav{
   </div>
   <div class="price-single">
     <div class="price-single-amt">$85<span style="font-size:18px;font-weight:400">/month</span></div>
-    <div class="price-single-sub">everything included · no setup fee · cancel any time</div>
+    <div class="price-single-sub">everything included. no setup fee. cancel any time.</div>
     <ul class="price-single-feats">
       <li>full product score matrix across 6 hair profiles</li>
       <li>segment breakdown by curl type, porosity, scalp condition, and climate</li>
       <li>ingredient flag analysis with reformulation signals</li>
       <li>geographic demand data by city</li>
-      <li>style match placement — discovered by the right consumer before they reach the shelf</li>
-      <li>unlimited products in your catalog</li>
-      <li>know who your formula was made for. market to them directly.</li>
+      <li>style match placement — your product discovered by the right consumer</li>
+      <li>unlimited products</li>
     </ul>
     <a href="https://business.qoyl.live/apply" class="price-single-btn">apply for brand access →</a>
   </div>
