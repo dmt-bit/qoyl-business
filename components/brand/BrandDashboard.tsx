@@ -1,7 +1,6 @@
 "use client";
 
-import { Fragment, useState, type FormEvent } from "react";
-import Link from "next/link";
+import { useState, type FormEvent } from "react";
 import ReportsSection, { type SentReport } from "./ReportsSection";
 
 // Shapes returned by GET /api/business/brand/dashboard (see lib/scoreReportClient.ts).
@@ -772,12 +771,11 @@ function DemandMap({ cities }: { cities: { city: string; count: number }[] }) {
 function ShareholderReport({
   brandName,
   productName,
-  report,
   cities,
 }: {
   brandName: string;
   productName: string;
-  report: ScoreReport | null;
+  report?: ScoreReport | null;
   cities: { city: string; count: number }[];
 }) {
   const [sent, setSent] = useState(false);
@@ -857,7 +855,7 @@ const REQUEST_TYPES = [
   },
 ];
 
-function RequestPanel({ onSubmit, brandName, productName }: { onSubmit: (name: string) => Promise<string>; brandName: string; productName: string }) {
+function RequestPanel({ brandName, productName }: { onSubmit?: (name: string) => Promise<string>; brandName: string; productName: string }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [sent, setSent] = useState<string | null>(null);
