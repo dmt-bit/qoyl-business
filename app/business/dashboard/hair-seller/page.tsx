@@ -76,14 +76,6 @@ export default function HairSellerDashboardPage() {
             Catalog &amp; city demand →
           </Link>
         </p>
-        {account && (
-          <div className="mt-3 inline-flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-medium text-[#C8A86A] border border-[rgba(200,168,106,0.4)] px-2.5 py-1">
-              {account.membership_tier ?? "Founding member"}
-            </span>
-            <span className="text-[10px] text-muted">· founding rate locked · 0% commission</span>
-          </div>
-        )}
 
         {dataLoading ? (
           <p className="mt-10 text-muted">Loading...</p>
