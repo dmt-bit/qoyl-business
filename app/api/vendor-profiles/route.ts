@@ -6,7 +6,7 @@ import { str, validEmail } from "@/lib/applications";
 
 export const dynamic = "force-dynamic";
 
-const PLAN_TYPES = new Set(["stylist", "hair-seller", "brand"]);
+const PLAN_TYPES = new Set(["hair-seller", "brand"]);
 const SIGNUP_NOTIFY_EMAIL = "hey@qoyl.live";
 
 // Best-effort: resolves the Stripe customer id from the checkout session, so

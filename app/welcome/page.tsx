@@ -9,7 +9,6 @@ const inputClass =
   "w-full border border-[#0a0a0a] bg-white px-4 py-3 text-sm font-light text-[#0a0a0a] placeholder:text-[#aaa] focus:outline-none focus:ring-1 focus:ring-[#0a0a0a]";
 
 const PLAN_LABELS: Record<string, string> = {
-  stylist: "stylist",
   "hair-seller": "hair seller",
   brand: "brand",
 };
@@ -44,9 +43,6 @@ function WelcomeForm() {
     // hair seller
     hair_types: [] as string[],
     textures: "",
-    // stylist
-    specialties: "",
-    booking_link: "",
     // brand
     product_categories: "",
   });
@@ -67,9 +63,6 @@ function WelcomeForm() {
     if (plan === "hair-seller") {
       profile_data.hair_types = form.hair_types;
       profile_data.textures = form.textures;
-    } else if (plan === "stylist") {
-      profile_data.specialties = form.specialties;
-      profile_data.booking_link = form.booking_link;
     } else {
       profile_data.product_categories = form.product_categories;
     }
@@ -159,25 +152,6 @@ function WelcomeForm() {
                 onChange={(e) => update("textures", e.target.value)}
                 className={inputClass}
               />
-            </label>
-          </>
-        )}
-
-        {plan === "stylist" && (
-          <>
-            <label className="block">
-              <span className={`${MONO} mb-2 block text-[10px] lowercase tracking-[0.1em] text-[#666]`}>specialties</span>
-              <input
-                type="text"
-                placeholder="e.g. knotless braids, u-part wigs, silk press"
-                value={form.specialties}
-                onChange={(e) => update("specialties", e.target.value)}
-                className={inputClass}
-              />
-            </label>
-            <label className="block">
-              <span className={`${MONO} mb-2 block text-[10px] lowercase tracking-[0.1em] text-[#666]`}>booking link</span>
-              <input type="text" placeholder="https://" value={form.booking_link} onChange={(e) => update("booking_link", e.target.value)} className={inputClass} />
             </label>
           </>
         )}

@@ -6,7 +6,6 @@ import { ReportReviewQueue, GenerateAllReportsButton, GenerateBrandReportsButton
 import {
   approveFakeHairBrandApplication,
   rejectFakeHairBrandApplication,
-  approveStylistApplication,
   resendBrandPaymentLink,
   cancelBrandAccount,
   matchBrandAccount,
@@ -118,33 +117,6 @@ type SellerProduct = {
   in_stock: boolean | null;
 };
 
-type StylistApplication = {
-  id: string;
-  display_name: string;
-  contact_name: string;
-  email: string;
-  phone: string | null;
-  city: string;
-  neighborhood: string | null;
-  salon_name: string | null;
-  instagram: string | null;
-  years_experience: number | null;
-  hair_types_served: string[] | null;
-  why_qoyl: string | null;
-  status: string;
-  created_at: string;
-};
-
-type StylistAccount = {
-  id: string;
-  display_name: string;
-  contact_name: string;
-  email: string;
-  city: string;
-  status: string;
-  created_at: string;
-};
-
 export type ProductRequest = {
   id: string;
   product_name: string;
@@ -158,9 +130,7 @@ type TabKey =
   | "product_requests"
   | "brand_applications"
   | "brand_accounts"
-  | "hair_sellers"
-  | "stylist_applications"
-  | "stylist_accounts";
+  | "hair_sellers";
 
 type ApprovalStatus = "ok" | "email_failed" | "auth_failed" | "account_failed" | "not_found";
 
@@ -208,8 +178,6 @@ export default function AdminTabs({
   brandAccounts,
   fakeHairApplications,
   fakeHairAccounts,
-  stylistApplications,
-  stylistAccounts,
   sellerProducts,
   catalogBrands,
   catalogProductCounts,
@@ -229,8 +197,6 @@ export default function AdminTabs({
   brandAccounts: BrandAccount[];
   fakeHairApplications: FakeHairApplication[];
   fakeHairAccounts: FakeHairAccount[];
-  stylistApplications: StylistApplication[];
-  stylistAccounts: StylistAccount[];
   sellerProducts: SellerProduct[];
   password: string;
   initialTab: TabKey;
@@ -262,8 +228,6 @@ export default function AdminTabs({
     { key: "brand_applications", label: "Brand Applications" },
     { key: "brand_accounts", label: "Brand Accounts" },
     { key: "hair_sellers", label: "Hair Sellers" },
-    { key: "stylist_applications", label: "Stylist Applications" },
-    { key: "stylist_accounts", label: "Stylist Accounts" },
   ];
 
   return (
@@ -676,113 +640,6 @@ export default function AdminTabs({
         </div>
       )}
 
-      {tab === "stylist_applications" && (
-        <div className="overflow-x-auto rounded-lg border border-warm/10">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-warm/[0.04] text-muted uppercase text-xs tracking-wider">
-              <tr>
-                <th className="px-4 py-3">Display name</th>
-                <th className="px-4 py-3">Contact</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">City</th>
-                <th className="px-4 py-3">Experience</th>
-                <th className="px-4 py-3">Hair types served</th>
-                <th className="px-4 py-3">Why Qoyl</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Applied</th>
-                <th className="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {stylistApplications.map((app) => (
-                <tr key={app.id} className="border-t border-warm/10 align-top">
-                  <td className="px-4 py-3 text-cream">{app.display_name}</td>
-                  <td className="px-4 py-3 text-sand">{app.contact_name}</td>
-                  <td className="px-4 py-3 text-sand">{app.email}</td>
-                  <td className="px-4 py-3 text-sand">
-                    {app.city}
-                    {app.neighborhood ? `, ${app.neighborhood}` : ""}
-                  </td>
-                  <td className="px-4 py-3 text-sand">
-                    {app.years_experience != null ? `${app.years_experience} yrs` : "—"}
-                  </td>
-                  <td className="px-4 py-3 text-sand">
-                    {app.hair_types_served?.join(", ") || "—"}
-                  </td>
-                  <td className="px-4 py-3 text-sand max-w-xs">{app.why_qoyl || "—"}</td>
-                  <td className={`px-4 py-3 font-medium ${STATUS_STYLES[app.status] ?? "text-muted"}`}>
-                    {app.status}
-                  </td>
-                  <td className="px-4 py-3 text-muted whitespace-nowrap">
-                    {new Date(app.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3">
-                    {app.status === "pending" ? (
-                      <form action={approveStylistApplication}>
-                        <input type="hidden" name="id" value={app.id} />
-                        <input type="hidden" name="password" value={password} />
-                        <button
-                          type="submit"
-                          className="rounded-full bg-bronze px-4 py-2 text-xs font-medium uppercase tracking-wider text-dark transition-colors hover:bg-bronze2"
-                        >
-                          Approve
-                        </button>
-                      </form>
-                    ) : null}
-                  </td>
-                </tr>
-              ))}
-              {stylistApplications.length === 0 && (
-                <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-muted">
-                    No applications yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {tab === "stylist_accounts" && (
-        <div className="overflow-x-auto rounded-lg border border-warm/10">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-warm/[0.04] text-muted uppercase text-xs tracking-wider">
-              <tr>
-                <th className="px-4 py-3">Display name</th>
-                <th className="px-4 py-3">Contact</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">City</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Joined</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stylistAccounts.map((account) => (
-                <tr key={account.id} className="border-t border-warm/10">
-                  <td className="px-4 py-3 text-cream">{account.display_name}</td>
-                  <td className="px-4 py-3 text-sand">{account.contact_name}</td>
-                  <td className="px-4 py-3 text-sand">{account.email}</td>
-                  <td className="px-4 py-3 text-sand">{account.city}</td>
-                  <td className={`px-4 py-3 font-medium ${STATUS_STYLES[account.status] ?? "text-muted"}`}>
-                    {account.status}
-                  </td>
-                  <td className="px-4 py-3 text-muted whitespace-nowrap">
-                    {new Date(account.created_at).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-              {stylistAccounts.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted">
-                    No stylist accounts yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
     </div>
   );
 }

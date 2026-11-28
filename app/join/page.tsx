@@ -1,7 +1,7 @@
 const MONO = "font-[family-name:var(--font-mono-apply)]";
 
 type Plan = {
-  key: "stylist" | "hair-seller" | "brand";
+  key: "hair-seller" | "brand";
   label: string;
   price: string;
   body: string;
@@ -10,18 +10,7 @@ type Plan = {
   featured?: boolean;
 };
 
-// Stylist is the featured (black) card -- the most accessible entry point
-// for a salon owner, the one pitched most in person.
 const PLANS: Plan[] = [
-  {
-    key: "stylist",
-    label: "stylist",
-    price: "$35/mo",
-    body: "clients arrive prepared. style chosen. install type selected. products already matched.",
-    cta: "join as a stylist →",
-    href: "https://buy.stripe.com/7sY6oI1ad3gPceQ0rO3ks0c",
-    featured: true,
-  },
   {
     key: "hair-seller",
     label: "hair seller",
@@ -29,12 +18,13 @@ const PLANS: Plan[] = [
     body: "your bundles surface in style matches for buyers whose texture and color goals match your inventory.",
     cta: "join as a hair seller →",
     href: "https://buy.stripe.com/cNi7sM0697x50w87Ug3ks0d",
+    featured: true,
   },
   {
     key: "brand",
     label: "brand",
     price: "$50/mo",
-    body: "geographic scan data. stylist match rates. neighborhood-level product performance.",
+    body: "geographic scan data. neighborhood-level product performance. real buyer intelligence.",
     cta: "join as a brand →",
     href: "https://buy.stripe.com/fZu3cw4mp6t16Uw1vS3ks0e",
   },
@@ -68,7 +58,7 @@ export default function JoinPage() {
       </section>
 
       {/* PLAN CARDS */}
-      <section className="mt-14 grid gap-5 sm:mt-16 sm:grid-cols-3">
+      <section className="mt-14 grid gap-5 sm:mt-16 sm:grid-cols-2">
         {PLANS.map((plan) => (
           <div
             key={plan.key}

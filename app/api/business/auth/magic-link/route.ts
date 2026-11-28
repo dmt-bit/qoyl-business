@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 // used to find out who has an account. What gets sent depends on the account:
 //   active brand           -> sign-in link to the brand dashboard
 //   pending_payment brand  -> the payment email again (no link in the response)
-//   stylist / hair seller  -> sign-in link to their dashboard
+//   hair seller            -> sign-in link to their dashboard
 const ACK = {
   success: true,
   message: "If an account exists for that email, we've sent a link to it. Check your inbox and spam folder.",
@@ -49,7 +49,7 @@ async function sendSignInLink(email: string, contactName: string, path: string) 
 }
 
 async function sendLinkIfAccount(email: string) {
-  // The admin login has no brand/stylist/seller row, so it's checked first.
+  // The admin login has no brand/seller row, so it's checked first.
   // The link goes to /admin (generateSignInLink builds it from NEXT_PUBLIC_SITE_URL).
   if (email === ADMIN_EMAIL) {
     await sendSignInLink(email, "there", "/admin");
@@ -63,16 +63,6 @@ async function sendLinkIfAccount(email: string) {
     const row = brand as BrandAccountRow;
     if (row.status === "active") await sendSignInLink(email, row.contact_name, "/dashboard");
     else if (row.status === "pending_payment") await sendBrandPaymentEmail(row);
-    return;
-  }
-
-  const { data: stylist } = await admin
-    .from("stylist_accounts")
-    .select("contact_name")
-    .eq("email", email)
-    .maybeSingle();
-  if (stylist) {
-    await sendSignInLink(email, stylist.contact_name, "/stylist/dashboard");
     return;
   }
 

@@ -19,7 +19,6 @@ const MONO = "'Space Mono',Menlo,Consolas,monospace";
 
 export const TYPE_LABEL: Record<AccountType, string> = {
   brand: "brand",
-  stylist: "stylist",
   hair_seller: "hair seller",
 };
 
@@ -92,10 +91,6 @@ const WELCOME_COPY: Record<AccountType, { lead: string; next: string }> = {
     lead: "thanks for applying for a qoyl brand intelligence dashboard.",
     next: "once you're approved you'll get a login to your dashboard — ingredient performance scores, consumer demand signals from real qoyl users, and reformulation recommendations.",
   },
-  stylist: {
-    lead: "thanks for applying to list your services on qoyl.",
-    next: "once you're approved you'll get a login to your stylist dashboard — see what your potential clients are matching with each month, and get discovered when a qoyl user finds a style that needs a pro.",
-  },
   hair_seller: {
     lead: "thanks for applying to list your catalog on qoyl.",
     next: "once you're approved you'll get a login to upload your products and colorways, so they can be matched into style match shopping lists by color, texture and heat rating.",
@@ -147,14 +142,6 @@ const APPROVAL_COPY: Record<AccountType, { subject: string; lead: string; bullet
       "Ingredient performance scores for your products",
       "Consumer demand signals from real Qoyl users",
       "Reformulation recommendations",
-    ],
-  },
-  stylist: {
-    subject: "Your Qoyl Stylist Dashboard is approved",
-    lead: "your stylist dashboard is ready.",
-    bullets: [
-      "What your potential clients are matching with each month",
-      "Booking inquiries from consumers who chose you after a Style Match",
     ],
   },
   hair_seller: {

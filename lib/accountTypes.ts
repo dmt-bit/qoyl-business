@@ -1,7 +1,7 @@
 // Single source of truth for the B2B account types: prices (keep in sync with
 // public/marketing/*.html), and the Stripe Payment Link env var each plan's
 // emails point at.
-export type AccountType = "brand" | "stylist" | "hair_seller";
+export type AccountType = "brand" | "hair_seller";
 
 // Brands have one plan. The DB keeps the 'early_stage' value (the only one in
 // use); it isn't shown anywhere in the UI.
@@ -13,8 +13,7 @@ export const BRAND_PLAN = {
   envVar: "STRIPE_LINK_BRAND_EARLY_STAGE",
 };
 
-export const STYLIST_PLAN = { label: "Stylist listing", price: "$35/month", envVar: "STRIPE_LINK_STYLIST" };
-export const HAIR_SELLER_PLAN = { label: "Hair seller listing", price: "$35/month", envVar: "STRIPE_LINK_HAIR_SELLER" };
+export const HAIR_SELLER_PLAN = { label: "Hair seller listing", price: "$50/month", envVar: "STRIPE_LINK_HAIR_SELLER" };
 
 // Stripe Payment Links accept ?prefilled_email= so the applicant doesn't
 // retype it. Returns null when the env var isn't configured.
@@ -35,12 +34,10 @@ export function paymentLink(envVar: string, email: string, clientReferenceId?: s
 
 export type PaymentOption = { label: string; price: string; url: string };
 
-// Payment Link for a stylist or hair seller approval email. Empty when the
-// env var isn't set, so the email omits the payment block.
-export function paymentOptionsFor(type: "stylist" | "hair_seller", email: string): PaymentOption[] {
-  const plan = type === "stylist" ? STYLIST_PLAN : HAIR_SELLER_PLAN;
-  const url = paymentLink(plan.envVar, email);
-  return url ? [{ label: plan.label, price: plan.price, url }] : [];
+// Payment Link for a hair seller approval email. Empty when the env var isn't set.
+export function paymentOptionsFor(type: "hair_seller", email: string): PaymentOption[] {
+  const url = paymentLink(HAIR_SELLER_PLAN.envVar, email);
+  return url ? [{ label: HAIR_SELLER_PLAN.label, price: HAIR_SELLER_PLAN.price, url }] : [];
 }
 
 // The brand's own Payment Link, with client_reference_id = brand_accounts.id.

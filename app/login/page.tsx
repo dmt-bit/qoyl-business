@@ -12,9 +12,9 @@ const inputClass =
 const primaryButton =
   "w-full bg-[#0a0a0a] px-8 py-4 text-xs font-semibold lowercase tracking-[0.06em] text-white transition-opacity hover:opacity-80 disabled:opacity-50";
 
-// One login for brand, stylist and hair seller accounts. Magic link is the
-// main path (every account is created without a password); the password form
-// is still there for anyone who set one.
+// One login for brand and hair seller accounts. Magic link is the main path
+// (every account is created without a password); the password form is still
+// there for anyone who set one.
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -68,14 +68,14 @@ export default function LoginPage() {
 
     // Route by whichever table has a row for this email. RLS scopes each read
     // to the caller's own row, so this can't be used to probe other accounts.
-    const [{ data: stylist }, { data: fakeHairBrand }] = await Promise.all([
-      supabase.from("stylist_accounts").select("id").eq("email", email).maybeSingle(),
-      supabase.from("fake_hair_brand_accounts").select("id").eq("email", email).maybeSingle(),
-    ]);
+    const { data: fakeHairBrand } = await supabase
+      .from("fake_hair_brand_accounts")
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
     setSubmitting(false);
 
-    if (stylist) router.push("/stylist/dashboard");
-    else if (fakeHairBrand) router.push("/fake-hair-brand/dashboard");
+    if (fakeHairBrand) router.push("/fake-hair-brand/dashboard");
     else router.push("/dashboard");
   }
 

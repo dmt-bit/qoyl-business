@@ -51,8 +51,6 @@ export default async function AdminPage({
     { data: brandAccounts },
     { data: fakeHairApplications },
     { data: fakeHairAccounts },
-    { data: stylistApplications },
-    { data: stylistAccounts },
     { data: sellerProducts },
   ] = await Promise.all([
     supabaseAdmin.from("brand_applications").select("*").order("created_at", { ascending: false }),
@@ -65,8 +63,6 @@ export default async function AdminPage({
       .from("fake_hair_brand_accounts")
       .select("*")
       .order("created_at", { ascending: false }),
-    supabaseAdmin.from("stylist_applications").select("*").order("created_at", { ascending: false }),
-    supabaseAdmin.from("stylist_accounts").select("*").order("created_at", { ascending: false }),
     supabaseAdmin
       .from("fake_hair_products")
       .select("id, brand_id, product_name, hair_type, in_stock")
@@ -96,17 +92,13 @@ export default async function AdminPage({
     "brand_applications",
     "brand_accounts",
     "hair_sellers",
-    "stylist_applications",
-    "stylist_accounts",
   ]);
   const initialTab = VALID_TABS.has(searchParams.tab ?? "")
     ? (searchParams.tab as
         | "product_requests"
         | "brand_applications"
         | "brand_accounts"
-        | "hair_sellers"
-        | "stylist_applications"
-        | "stylist_accounts")
+        | "hair_sellers")
     : "brand_applications";
 
   // "brands" in the sidebar lands here with ?tab=brand_accounts -- highlight
@@ -124,8 +116,6 @@ export default async function AdminPage({
           brandAccounts={brandAccounts ?? []}
           fakeHairApplications={fakeHairApplications ?? []}
           fakeHairAccounts={fakeHairAccounts ?? []}
-          stylistApplications={stylistApplications ?? []}
-          stylistAccounts={stylistAccounts ?? []}
           sellerProducts={sellerProducts ?? []}
           catalogBrands={catalogBrands ?? []}
           catalogProductCounts={catalogProductCounts}

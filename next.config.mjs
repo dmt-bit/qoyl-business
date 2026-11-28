@@ -20,7 +20,6 @@ const nextConfig = {
     return {
       beforeFiles: [
         { source: "/", destination: "/marketing/brands.html" },
-        { source: "/stylists", destination: "/marketing/stylists.html" },
         { source: "/hair-sellers", destination: "/marketing/hair-sellers.html" },
       ],
     };

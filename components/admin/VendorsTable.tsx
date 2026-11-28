@@ -6,7 +6,7 @@ import { approveVendorProfile } from "@/app/admin/actions";
 export type VendorProfile = {
   id: string;
   user_email: string;
-  plan_type: "stylist" | "hair-seller" | "brand";
+  plan_type: "hair-seller" | "brand";
   business_name: string | null;
   location: string | null;
   profile_data: Record<string, unknown>;
@@ -16,14 +16,12 @@ export type VendorProfile = {
 };
 
 const PLAN_LABELS: Record<VendorProfile["plan_type"], string> = {
-  stylist: "stylist",
   "hair-seller": "hair-seller",
   brand: "brand",
 };
 
 const FILTERS: { key: "all" | VendorProfile["plan_type"]; label: string }[] = [
   { key: "all", label: "all" },
-  { key: "stylist", label: "stylist" },
   { key: "hair-seller", label: "hair seller" },
   { key: "brand", label: "brand" },
 ];
@@ -35,13 +33,8 @@ const STATUS_COLOR: Record<VendorProfile["status"], string> = {
 };
 
 function PlanBadge({ plan }: { plan: VendorProfile["plan_type"] }) {
-  const filled = plan === "stylist";
   return (
-    <span
-      className={`inline-block px-2 py-0.5 font-mono text-[8px] lowercase ${
-        filled ? "bg-[#0a0a0a] text-white" : "border border-[#0a0a0a] text-[#0a0a0a]"
-      }`}
-    >
+    <span className="inline-block border border-[#0a0a0a] px-2 py-0.5 font-mono text-[8px] lowercase text-[#0a0a0a]">
       {PLAN_LABELS[plan]}
     </span>
   );
