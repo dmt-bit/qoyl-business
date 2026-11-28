@@ -247,8 +247,8 @@ function OverviewView({
                   onClick={() => onSelectProduct(i)}
                   className="group text-left border border-[#e8e8e8] hover:border-[#0a0a0a] transition-colors overflow-hidden"
                 >
-                  {/* Product image strip */}
-                  {p.image_url ? (
+                  {/* Product image strip — only shown when an image exists */}
+                  {p.image_url && (
                     <div className="relative h-36 w-full overflow-hidden bg-[#f5f5f5]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -256,10 +256,6 @@ function OverviewView({
                         alt={p.name}
                         className="h-full w-full object-contain p-3"
                       />
-                    </div>
-                  ) : (
-                    <div className="flex h-36 items-center justify-center bg-[#f5f5f5]">
-                      <span className={`${MONO} text-[8px] lowercase text-[#ccc]`}>no image</span>
                     </div>
                   )}
                   <div className="p-5">
@@ -410,14 +406,10 @@ function ProductView({
       <div className="px-6 pb-16">
         {/* Product identity header */}
         <div className="flex items-center gap-6 pt-8 pb-6 border-b border-[#f0f0f0]">
-          {product.image_url ? (
+          {product.image_url && (
             <div className="h-20 w-20 shrink-0 overflow-hidden rounded-sm border border-[#e8e8e8] bg-[#f5f5f5]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={product.image_url} alt={product.name} className="h-full w-full object-contain p-2" />
-            </div>
-          ) : (
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-sm border border-[#e8e8e8] bg-[#f5f5f5]">
-              <span className={`${MONO} text-[8px] text-[#ccc]`}>no img</span>
             </div>
           )}
           <div>
