@@ -29,6 +29,7 @@ export type ScoreReport =
 export type DashboardProduct = {
   id: string;
   name: string;
+  image_url: string | null;
   category: { name: string; slug: string } | null;
   score_report: ScoreReport | null;
   geo: { city: string; count: number }[];
@@ -244,8 +245,24 @@ function OverviewView({
                   key={p.id}
                   type="button"
                   onClick={() => onSelectProduct(i)}
-                  className="group text-left border border-[#e8e8e8] p-5 hover:border-[#0a0a0a] transition-colors"
+                  className="group text-left border border-[#e8e8e8] hover:border-[#0a0a0a] transition-colors overflow-hidden"
                 >
+                  {/* Product image strip */}
+                  {p.image_url ? (
+                    <div className="relative h-36 w-full overflow-hidden bg-[#f5f5f5]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={p.image_url}
+                        alt={p.name}
+                        className="h-full w-full object-contain p-3"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-36 items-center justify-center bg-[#f5f5f5]">
+                      <span className={`${MONO} text-[8px] lowercase text-[#ccc]`}>no image</span>
+                    </div>
+                  )}
+                  <div className="p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className={`${GROTESK} text-sm font-semibold lowercase truncate`}>{lc(p.name)}</p>
@@ -296,6 +313,7 @@ function OverviewView({
                       {r?.status === "not_in_catalog" ? "not yet in scoring catalog" : "scores loading"}
                     </p>
                   )}
+                  </div>
                 </button>
               );
             })}
@@ -390,6 +408,27 @@ function ProductView({
       </div>
 
       <div className="px-6 pb-16">
+        {/* Product identity header */}
+        <div className="flex items-center gap-6 pt-8 pb-6 border-b border-[#f0f0f0]">
+          {product.image_url ? (
+            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-sm border border-[#e8e8e8] bg-[#f5f5f5]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={product.image_url} alt={product.name} className="h-full w-full object-contain p-2" />
+            </div>
+          ) : (
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-sm border border-[#e8e8e8] bg-[#f5f5f5]">
+              <span className={`${MONO} text-[8px] text-[#ccc]`}>no img</span>
+            </div>
+          )}
+          <div>
+            <p className={`${MONO} text-[9px] lowercase tracking-[0.12em] text-[#888]`}>product analysis</p>
+            <h1 className={`${GROTESK} mt-1 text-[22px] font-bold lowercase tracking-[-0.8px]`}>{lc(product.name)}</h1>
+            {product.category && (
+              <p className={`${MONO} mt-1 text-[9px] lowercase text-[#aaa]`}>{lc(product.category.name)}</p>
+            )}
+          </div>
+        </div>
+
         {report?.status !== "ok" ? (
           <p className={`${GROTESK} py-16 text-center text-sm font-light text-[#888]`}>
             {report?.status === "not_in_catalog"

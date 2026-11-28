@@ -52,7 +52,7 @@ async function loadDashboard(account: BrandApiAccount) {
   const admin = getSupabaseAdmin();
   const { data: rows, error } = await admin
     .from("catalog_products")
-    .select("id, name, categories(name, slug), catalog_brands(name)")
+    .select("id, name, image_url, processed_image_url, categories(name, slug), catalog_brands(name)")
     .eq("brand_id", account.brand_id)
     .order("name")
     .limit(MAX_PRODUCTS);
@@ -73,6 +73,7 @@ async function loadDashboard(account: BrandApiAccount) {
       return {
         id: row.id,
         name: row.name,
+        image_url: (row.processed_image_url ?? row.image_url) as string | null,
         category,
         score_report: scoreReport,
         geo: await cityCounts(row.id),
