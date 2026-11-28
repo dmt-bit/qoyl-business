@@ -105,13 +105,14 @@ export default function BrandDashboard({
   onRequestProduct: (name: string) => Promise<string>;
   reports: { surveyCompleted: boolean; reports: SentReport[] };
 }) {
-  const [active, setActive] = useState(0);
+  // null = overview, number = product index
+  const [activeProduct, setActiveProduct] = useState<number | null>(null);
 
   if (!data.brand_matched || data.products.length === 0) {
     const subject = encodeURIComponent(`Products for ${data.brand.name} dashboard`);
     const body = encodeURIComponent("Please add the following products to my dashboard: ");
     return (
-      <Shell brandName={data.brand.name}>
+      <Shell brandName={data.brand.name} onLogoClick={() => setActiveProduct(null)}>
         <div className="px-6 py-20 text-center">
           <h2 className={`${GROTESK} text-2xl font-bold lowercase tracking-[-0.8px]`}>your dashboard is ready.</h2>
           <p className={`${GROTESK} mx-auto mt-2 max-w-md text-sm font-light text-[#666]`}>
@@ -132,30 +133,262 @@ export default function BrandDashboard({
     );
   }
 
-  const product = data.products[Math.min(active, data.products.length - 1)];
+  if (activeProduct !== null) {
+    const product = data.products[Math.min(activeProduct, data.products.length - 1)];
+    return (
+      <ProductView
+        product={product}
+        allProducts={data.products}
+        brandName={data.brand.name}
+        activeIndex={activeProduct}
+        onSelectProduct={setActiveProduct}
+        onBack={() => setActiveProduct(null)}
+        onRequestProduct={onRequestProduct}
+        reports={reports}
+      />
+    );
+  }
+
+  return (
+    <OverviewView
+      data={data}
+      onRequestProduct={onRequestProduct}
+      reports={reports}
+      onSelectProduct={setActiveProduct}
+    />
+  );
+}
+
+// ─── Overview ────────────────────────────────────────────────────────────────
+
+function OverviewView({
+  data,
+  onRequestProduct,
+  reports,
+  onSelectProduct,
+}: {
+  data: DashboardData;
+  onRequestProduct: (name: string) => Promise<string>;
+  reports: { surveyCompleted: boolean; reports: SentReport[] };
+  onSelectProduct: (i: number) => void;
+}) {
+  // Aggregate all cities across all products (deduplicated by city name, summed)
+  const allCities = (() => {
+    const counts = new Map<string, number>();
+    for (const p of data.products) {
+      for (const c of p.geo) {
+        if (!c.city || c.city.trim() === "" || c.city === "unknown") continue;
+        counts.set(c.city, (counts.get(c.city) ?? 0) + c.count);
+      }
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([city, count]) => ({ city, count }));
+  })();
+
+  const scoredProducts = data.products.filter((p) => p.score_report?.status === "ok");
+  const totalFlags = scoredProducts.reduce((n, p) => {
+    const r = p.score_report;
+    if (r?.status !== "ok") return n;
+    return n + r.ingredients.filter((i) => i.flag).length;
+  }, 0);
+  const avgBestScore =
+    scoredProducts.length === 0
+      ? null
+      : Math.round(
+          scoredProducts.reduce((n, p) => {
+            const r = p.score_report;
+            if (r?.status !== "ok") return n;
+            return n + Math.max(...r.profiles.map((pr) => pr.score));
+          }, 0) / scoredProducts.length
+        );
+
+  return (
+    <Shell brandName={data.brand.name} onLogoClick={() => {}}>
+      <div className="px-6 pb-16">
+        {/* Brand summary stats */}
+        <section className="pt-8">
+          <p className={`${MONO} text-[9px] lowercase tracking-[0.12em] text-[#888]`}>brand overview</p>
+          <h2 className={`${GROTESK} mt-2 text-[22px] font-bold lowercase tracking-[-0.8px]`}>{lc(data.brand.name)}</h2>
+          <div className="mt-6 grid grid-cols-2 gap-px bg-[#0a0a0a] sm:grid-cols-4">
+            {[
+              { label: "products tracked", value: String(data.products.length) },
+              { label: "avg peak score", value: avgBestScore !== null ? String(avgBestScore) : "—" },
+              { label: "reformulation signals", value: String(totalFlags) },
+              { label: "demand cities", value: String(allCities.length) },
+            ].map(({ label, value }) => (
+              <div key={label} className="bg-white px-5 py-6">
+                <p className={`${MONO} text-[8px] lowercase tracking-[0.08em] text-[#888]`}>{label}</p>
+                <p className={`${GROTESK} mt-2 text-[36px] font-bold leading-none tracking-[-1.5px]`}>{value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Product cards grid */}
+        <section className="pt-10">
+          <p className={`${MONO} text-[9px] lowercase tracking-[0.12em] text-[#888]`}>01 · products</p>
+          <h2 className={`${GROTESK} mt-2 text-[22px] font-bold lowercase tracking-[-0.8px]`}>your catalog</h2>
+          <p className={`${GROTESK} mt-1 text-[13px] font-light text-[#888]`}>click any product for the full analysis</p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {data.products.map((p, i) => {
+              const r = p.score_report;
+              const hasReport = r?.status === "ok";
+              const best = hasReport ? Math.max(...r.profiles.map((pr) => pr.score)) : null;
+              const worst = hasReport ? Math.min(...r.profiles.map((pr) => pr.score)) : null;
+              const bestProfile = hasReport ? r.profiles.reduce((a, b) => (a.score > b.score ? a : b)) : null;
+              const flags = hasReport ? r.ingredients.filter((ing) => ing.flag).length : 0;
+              const topCity = p.geo.find((c) => c.city && c.city !== "unknown");
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onSelectProduct(i)}
+                  className="group text-left border border-[#e8e8e8] p-5 hover:border-[#0a0a0a] transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className={`${GROTESK} text-sm font-semibold lowercase truncate`}>{lc(p.name)}</p>
+                      {p.category && (
+                        <p className={`${MONO} text-[9px] lowercase text-[#aaa] mt-0.5`}>{lc(p.category.name)}</p>
+                      )}
+                    </div>
+                    <span className={`${MONO} shrink-0 text-[9px] text-[#888] group-hover:text-[#0a0a0a] transition-colors`}>
+                      view →
+                    </span>
+                  </div>
+                  {hasReport ? (
+                    <div className="mt-4 flex items-end justify-between gap-4">
+                      <div>
+                        <p className={`${MONO} text-[8px] text-[#888]`}>peak score</p>
+                        <p
+                          className={`${MONO} text-[32px] font-bold leading-none`}
+                          style={{ color: scoreColor(best!) }}
+                        >
+                          {best}
+                        </p>
+                        {bestProfile && (
+                          <p className={`${MONO} mt-1 text-[9px] text-[#aaa]`}>{lc(bestProfile.label)}</p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="flex gap-3 justify-end">
+                          {worst !== null && worst !== best && (
+                            <div>
+                              <p className={`${MONO} text-[8px] text-[#888]`}>low</p>
+                              <p className={`${MONO} text-lg font-bold`} style={{ color: scoreColor(worst) }}>{worst}</p>
+                            </div>
+                          )}
+                          {flags > 0 && (
+                            <div>
+                              <p className={`${MONO} text-[8px] text-[#888]`}>flags</p>
+                              <p className={`${MONO} text-lg font-bold text-[#C4831A]`}>{flags}</p>
+                            </div>
+                          )}
+                        </div>
+                        {topCity && (
+                          <p className={`${MONO} mt-2 text-[9px] text-[#aaa]`}>top: {lc(topCity.city)}</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className={`${GROTESK} mt-4 text-[12px] font-light text-[#aaa]`}>
+                      {r?.status === "not_in_catalog" ? "not yet in scoring catalog" : "scores loading"}
+                    </p>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Brand-wide demand map */}
+        <Section eyebrow="02 · demand" title="where your brand is being searched" sub="all products · last 30 days">
+          {allCities.length === 0 ? (
+            <p className={`${GROTESK} text-sm font-light text-[#888]`}>
+              search data builds over time. share qoyl.live with your audience to accelerate data collection.
+            </p>
+          ) : (
+            <DemandMap cities={allCities} />
+          )}
+        </Section>
+
+        {/* Shareholder report and requests at brand level */}
+        <Section eyebrow="03 · shareholder report" title="export a report for stakeholders">
+          <ShareholderReport
+            brandName={data.brand.name}
+            productName={data.products.map((p) => p.name).join(", ")}
+            report={data.products[0]?.score_report ?? null}
+            cities={allCities}
+          />
+        </Section>
+
+        <Section eyebrow="04 · requests" title="request analysis or support">
+          <RequestPanel onSubmit={onRequestProduct} brandName={data.brand.name} productName={data.products[0]?.name ?? ""} />
+        </Section>
+
+        <Section eyebrow="05 · add products" title="add more products to your dashboard">
+          <AddProductForm onSubmit={onRequestProduct} />
+        </Section>
+
+        <ReportsSection surveyCompleted={reports.surveyCompleted} reports={reports.reports} />
+      </div>
+    </Shell>
+  );
+}
+
+// ─── Product drill-down ───────────────────────────────────────────────────────
+
+function ProductView({
+  product,
+  allProducts,
+  brandName,
+  activeIndex,
+  onSelectProduct,
+  onBack,
+  onRequestProduct,
+  reports,
+}: {
+  product: DashboardProduct;
+  allProducts: DashboardProduct[];
+  brandName: string;
+  activeIndex: number;
+  onSelectProduct: (i: number) => void;
+  onBack: () => void;
+  onRequestProduct: (name: string) => Promise<string>;
+  reports: { surveyCompleted: boolean; reports: SentReport[] };
+}) {
   const productName = lc(product.name);
-  // Unknown or blank cities are dropped, not shown.
   const cities = product.geo.filter((c) => c.city && c.city.trim() && c.city !== "unknown");
   const report = product.score_report;
 
   return (
-    <Shell brandName={data.brand.name}>
-      {data.products.length > 1 && (
-        <div className="flex gap-6 overflow-x-auto border-b border-[#0a0a0a] px-6">
-          {data.products.map((p, i) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => setActive(i)}
-              className={`${GROTESK} whitespace-nowrap py-3 text-sm lowercase ${
-                i === active ? "border-b-2 border-[#0a0a0a] font-semibold text-[#0a0a0a]" : "text-[#888]"
-              }`}
-            >
-              {lc(p.name)}
-            </button>
-          ))}
-        </div>
-      )}
+    <Shell brandName={brandName} onLogoClick={onBack}>
+      {/* Product tabs */}
+      <div className="flex gap-0 overflow-x-auto border-b border-[#0a0a0a]">
+        <button
+          type="button"
+          onClick={onBack}
+          className={`${MONO} shrink-0 px-5 py-3 text-[9px] lowercase tracking-[0.08em] text-[#888] hover:text-[#0a0a0a] border-r border-[#e8e8e8]`}
+        >
+          ← overview
+        </button>
+        {allProducts.map((p, i) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => onSelectProduct(i)}
+            className={`${GROTESK} whitespace-nowrap px-5 py-3 text-sm lowercase ${
+              i === activeIndex
+                ? "border-b-2 border-[#0a0a0a] font-semibold text-[#0a0a0a]"
+                : "text-[#888] hover:text-[#0a0a0a]"
+            }`}
+          >
+            {lc(p.name)}
+          </button>
+        ))}
+      </div>
 
       <div className="px-6 pb-16">
         {report?.status !== "ok" ? (
@@ -187,7 +420,7 @@ export default function BrandDashboard({
           </>
         )}
 
-        <Section eyebrow="04 · demand" title="where your products are being searched" sub="last 30 days">
+        <Section eyebrow="04 · demand" title="where this product is being searched" sub="last 30 days">
           {cities.length === 0 ? (
             <p className={`${GROTESK} text-sm font-light text-[#888]`}>
               search data builds over time. share qoyl.live with your audience to accelerate data collection.
@@ -204,15 +437,11 @@ export default function BrandDashboard({
         </Section>
 
         <Section eyebrow="06 · shareholder report" title="export a report for stakeholders">
-          <ShareholderReport brandName={data.brand.name} productName={product.name} report={report} cities={cities} />
+          <ShareholderReport brandName={brandName} productName={product.name} report={report} cities={cities} />
         </Section>
 
         <Section eyebrow="07 · requests" title="request analysis or support">
-          <RequestPanel onSubmit={onRequestProduct} brandName={data.brand.name} productName={product.name} />
-        </Section>
-
-        <Section eyebrow="08 · add products" title="add more products to your dashboard">
-          <AddProductForm onSubmit={onRequestProduct} />
+          <RequestPanel onSubmit={onRequestProduct} brandName={brandName} productName={product.name} />
         </Section>
 
         <ReportsSection surveyCompleted={reports.surveyCompleted} reports={reports.reports} />
@@ -221,14 +450,14 @@ export default function BrandDashboard({
   );
 }
 
-function Shell({ brandName, children }: { brandName: string; children: React.ReactNode }) {
+function Shell({ brandName, children, onLogoClick }: { brandName: string; children: React.ReactNode; onLogoClick: () => void }) {
   return (
     <div className="min-h-screen bg-white text-[#0a0a0a]">
       <header className="flex items-center justify-between border-b border-[#0a0a0a] px-6 py-4">
         <div className="flex items-baseline gap-4">
-          <Link href="https://business.qoyl.live" className={`${GROTESK} text-[17px] font-bold lowercase`}>
+          <button type="button" onClick={onLogoClick} className={`${GROTESK} text-[17px] font-bold lowercase hover:opacity-70 transition-opacity`}>
             qoyl
-          </Link>
+          </button>
           <span className={`${GROTESK} text-sm font-normal text-[#666]`}>{lc(brandName)}</span>
         </div>
         <span className={`${MONO} bg-black px-3 py-1 text-[9px] lowercase text-white`}>brand intelligence</span>
