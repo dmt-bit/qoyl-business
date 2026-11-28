@@ -94,7 +94,7 @@ export async function GET(request: Request) {
   try {
     const data = await unstable_cache(
       () => loadDashboard(access.account),
-      ["brand-dashboard", access.account.id],
+      ["brand-dashboard-v2", access.account.id],
       { revalidate: 3600 }
     )();
     return NextResponse.json(data);
