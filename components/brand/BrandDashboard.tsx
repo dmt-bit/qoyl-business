@@ -193,7 +193,7 @@ export default function BrandDashboard({
               search data builds over time. share qoyl.live with your audience to accelerate data collection.
             </p>
           ) : (
-            <CityList cities={cities} />
+            <DemandMap cities={cities} />
           )}
         </Section>
 
@@ -203,7 +203,15 @@ export default function BrandDashboard({
           </p>
         </Section>
 
-        <Section eyebrow="06 · add products" title="add more products to your dashboard">
+        <Section eyebrow="06 · shareholder report" title="export a report for stakeholders">
+          <ShareholderReport brandName={data.brand.name} productName={product.name} report={report} cities={cities} />
+        </Section>
+
+        <Section eyebrow="07 · requests" title="request analysis or support">
+          <RequestPanel onSubmit={onRequestProduct} brandName={data.brand.name} productName={product.name} />
+        </Section>
+
+        <Section eyebrow="08 · add products" title="add more products to your dashboard">
           <AddProductForm onSubmit={onRequestProduct} />
         </Section>
 
@@ -223,7 +231,7 @@ function Shell({ brandName, children }: { brandName: string; children: React.Rea
           </Link>
           <span className={`${GROTESK} text-sm font-normal text-[#666]`}>{lc(brandName)}</span>
         </div>
-        <span className={`${MONO} bg-black px-3 py-1 text-[9px] lowercase text-white`}>brand intelligence · $50/month</span>
+        <span className={`${MONO} bg-black px-3 py-1 text-[9px] lowercase text-white`}>brand intelligence</span>
       </header>
       <div className="mx-auto max-w-[900px]">{children}</div>
     </div>
@@ -407,6 +415,294 @@ function CityList({ cities }: { cities: { city: string; count: number }[] }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+// US state centroids (approximate) for demand map dots
+const STATE_DOTS: Record<string, { x: number; y: number; abbr: string }> = {
+  "new york": { x: 820, y: 185, abbr: "NY" },
+  "los angeles": { x: 95, y: 310, abbr: "LA" },
+  "chicago": { x: 650, y: 200, abbr: "IL" },
+  "houston": { x: 500, y: 390, abbr: "TX" },
+  "phoenix": { x: 175, y: 320, abbr: "AZ" },
+  "philadelphia": { x: 800, y: 205, abbr: "PA" },
+  "san antonio": { x: 480, y: 405, abbr: "TX" },
+  "san diego": { x: 110, y: 330, abbr: "CA" },
+  "dallas": { x: 505, y: 370, abbr: "TX" },
+  "san jose": { x: 70, y: 265, abbr: "CA" },
+  "austin": { x: 495, y: 390, abbr: "TX" },
+  "jacksonville": { x: 740, y: 350, abbr: "FL" },
+  "fort worth": { x: 500, y: 370, abbr: "TX" },
+  "columbus": { x: 715, y: 220, abbr: "OH" },
+  "charlotte": { x: 755, y: 285, abbr: "NC" },
+  "san francisco": { x: 65, y: 255, abbr: "CA" },
+  "indianapolis": { x: 680, y: 230, abbr: "IN" },
+  "seattle": { x: 100, y: 90, abbr: "WA" },
+  "denver": { x: 345, y: 240, abbr: "CO" },
+  "washington": { x: 790, y: 240, abbr: "DC" },
+  "nashville": { x: 695, y: 290, abbr: "TN" },
+  "oklahoma city": { x: 490, y: 320, abbr: "OK" },
+  "el paso": { x: 345, y: 375, abbr: "TX" },
+  "boston": { x: 855, y: 165, abbr: "MA" },
+  "portland": { x: 100, y: 115, abbr: "OR" },
+  "las vegas": { x: 155, y: 295, abbr: "NV" },
+  "memphis": { x: 650, y: 310, abbr: "TN" },
+  "louisville": { x: 695, y: 255, abbr: "KY" },
+  "baltimore": { x: 795, y: 230, abbr: "MD" },
+  "milwaukee": { x: 665, y: 185, abbr: "WI" },
+  "atlanta": { x: 715, y: 325, abbr: "GA" },
+  "miami": { x: 755, y: 420, abbr: "FL" },
+  "minneapolis": { x: 565, y: 150, abbr: "MN" },
+  "detroit": { x: 710, y: 190, abbr: "MI" },
+  "richmond": { x: 795, y: 255, abbr: "VA" },
+  "new orleans": { x: 630, y: 385, abbr: "LA" },
+  "cleveland": { x: 735, y: 200, abbr: "OH" },
+  "tampa": { x: 735, y: 395, abbr: "FL" },
+  "pittsburgh": { x: 760, y: 215, abbr: "PA" },
+  "kansas city": { x: 575, y: 270, abbr: "MO" },
+  "sacramento": { x: 85, y: 240, abbr: "CA" },
+  "salt lake city": { x: 230, y: 215, abbr: "UT" },
+  "raleigh": { x: 775, y: 280, abbr: "NC" },
+  "cincinnati": { x: 710, y: 240, abbr: "OH" },
+  "st. louis": { x: 630, y: 265, abbr: "MO" },
+};
+
+function normalizeCity(city: string): string {
+  return city.toLowerCase().trim().replace(/,.*$/, "").trim();
+}
+
+function DemandMap({ cities }: { cities: { city: string; count: number }[] }) {
+  const max = Math.max(...cities.map((c) => c.count), 1);
+  const matched = cities
+    .map((c) => ({ ...c, dot: STATE_DOTS[normalizeCity(c.city)] }))
+    .filter((c) => c.dot);
+  const unmatched = cities.filter((c) => !STATE_DOTS[normalizeCity(c.city)]);
+
+  return (
+    <div>
+      <div className="relative overflow-hidden border border-[#e8e8e8] bg-[#fafafa]">
+        {/* US outline SVG — simplified lower-48 shape */}
+        <svg viewBox="0 0 960 600" className="w-full" aria-hidden="true" style={{ display: "block" }}>
+          {/* Background */}
+          <rect width="960" height="600" fill="#fafafa" />
+          {/* Simplified US landmass */}
+          <path
+            d="M140,80 L200,70 L260,65 L320,68 L400,72 L480,70 L560,68 L640,70 L720,72 L800,70 L870,80 L890,100 L900,130 L895,160 L880,180 L870,200 L880,220 L885,250 L875,280 L865,310 L850,335 L835,355 L815,370 L795,375 L775,380 L760,395 L750,415 L745,440 L735,450 L720,445 L710,430 L700,415 L690,400 L675,390 L655,392 L640,400 L625,405 L605,400 L590,390 L575,380 L560,375 L545,382 L535,400 L525,415 L510,420 L495,415 L480,405 L465,398 L445,400 L430,410 L415,415 L395,410 L375,400 L355,395 L335,400 L315,405 L295,400 L275,390 L255,380 L235,375 L215,380 L195,390 L175,392 L158,385 L145,370 L135,350 L128,325 L125,300 L128,275 L132,250 L130,225 L125,200 L120,175 L118,150 L122,120 L130,100 Z"
+            fill="#ebebeb"
+            stroke="#ccc"
+            strokeWidth="1"
+          />
+          {/* Florida peninsula */}
+          <path
+            d="M700,415 L710,430 L720,445 L735,460 L745,475 L748,495 L742,510 L730,520 L715,515 L705,500 L698,480 L695,460 L698,440 Z"
+            fill="#ebebeb"
+            stroke="#ccc"
+            strokeWidth="1"
+          />
+          {/* Demand dots */}
+          {matched.map((c) => {
+            const r = 4 + (c.count / max) * 18;
+            return (
+              <g key={c.city}>
+                <circle cx={c.dot!.x} cy={c.dot!.y} r={r} fill="#0a0a0a" opacity={0.12 + (c.count / max) * 0.55} />
+                <circle cx={c.dot!.x} cy={c.dot!.y} r={2.5} fill="#0a0a0a" opacity={0.9} />
+                <text
+                  x={c.dot!.x}
+                  y={c.dot!.y - r - 4}
+                  textAnchor="middle"
+                  fontSize="8"
+                  fill="#0a0a0a"
+                  fontFamily="monospace"
+                  opacity={0.75}
+                >
+                  {normalizeCity(c.city)}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+        {matched.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <p className={`${GROTESK} text-sm text-[#aaa]`}>map builds as search data comes in</p>
+          </div>
+        )}
+      </div>
+      {/* Ranked list below map */}
+      <div className="mt-6">
+        <CityList cities={cities} />
+      </div>
+      {unmatched.length > 0 && (
+        <p className={`${MONO} mt-3 text-[9px] text-[#aaa]`}>
+          {unmatched.map((c) => lc(c.city)).join(" · ")} · not shown on map
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ShareholderReport({
+  brandName,
+  productName,
+  report,
+  cities,
+}: {
+  brandName: string;
+  productName: string;
+  report: ScoreReport | null;
+  cities: { city: string; count: number }[];
+}) {
+  const [sent, setSent] = useState(false);
+  const subject = encodeURIComponent(`Shareholder report request — ${brandName}`);
+  const body = encodeURIComponent(
+    `Hi,\n\nPlease generate a shareholder-ready report for ${brandName} covering:\n- Product: ${productName}\n- Geographic demand summary\n- Score breakdown across hair profiles\n- Key reformulation signals\n- Market opportunity overview\n\nThank you.`
+  );
+
+  if (sent) {
+    return (
+      <div className="border-l-[3px] border-[#2D7A3D] bg-[#f5fff8] px-5 py-4">
+        <p className={`${MONO} text-[9px] lowercase text-[#2D7A3D]`}>request received</p>
+        <p className={`${GROTESK} mt-2 text-[13px] font-light text-[#666]`}>
+          we&apos;ll prepare a shareholder-ready report and send it within 2 business days.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <p className={`${GROTESK} mb-6 text-[13px] font-light leading-[1.85] text-[#666]`}>
+        get a formatted report suitable for investors and stakeholders — covering your product scores,
+        geographic demand, segment breakdown, and market opportunity. formatted for a board presentation.
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2 mb-6">
+        {[
+          ["product score summary", `how ${lc(productName)} scores across six hair profiles`],
+          ["segment opportunity", "which customer segments your formula wins, and where the gap is"],
+          ["geographic demand", `${cities.length > 0 ? `${cities.length} cities` : "demand data"} mapped and ranked`],
+          ["reformulation signals", "ingredient-level findings and swap recommendations"],
+        ].map(([title, desc]) => (
+          <div key={title} className="border border-[#e8e8e8] p-4">
+            <p className={`${MONO} text-[9px] lowercase text-[#0a0a0a]`}>{title}</p>
+            <p className={`${GROTESK} mt-1 text-[12px] font-light text-[#888]`}>{desc}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-3">
+        <a
+          href={`mailto:hey@qoyl.live?subject=${subject}&body=${body}`}
+          onClick={() => setSent(true)}
+          className={`${MONO} inline-block bg-[#0a0a0a] px-6 py-3 text-[10px] lowercase text-white`}
+        >
+          request shareholder report →
+        </a>
+        <p className={`${GROTESK} self-center text-[12px] font-light text-[#888]`}>delivered within 2 business days</p>
+      </div>
+    </div>
+  );
+}
+
+const REQUEST_TYPES = [
+  {
+    id: "reformulation",
+    label: "reformulation consultation",
+    desc: "walk through specific ingredient swaps with the qoyl team. we'll show you exactly what moves your score for your target segment.",
+    example: `e.g. shea moisture wants to expand their curl milk into the low porosity market. we map which humectant is flagging, suggest sodium pca as a swap, and project the score shift.`,
+  },
+  {
+    id: "competitor",
+    label: "competitive formula analysis",
+    desc: "compare your product scores against top competitors in your category. see where you win and where the gap is.",
+    example: "e.g. how does your moisture cream score against mielle, pattern, and aunt jackie's for type 4 hair?",
+  },
+  {
+    id: "segment",
+    label: "custom segment report",
+    desc: "request a deep dive into any specific segment — a curl type, porosity level, or climate region — and what it takes to win there.",
+    example: "e.g. what does a product need to score 80+ for high porosity, humid climate customers?",
+  },
+  {
+    id: "catalog",
+    label: "full catalog audit",
+    desc: "score your entire product line and get a ranked view of which products to reformulate first and which to market harder.",
+    example: "e.g. surface which of your 12 skus are ready to lead and which are drag.",
+  },
+];
+
+function RequestPanel({ onSubmit, brandName, productName }: { onSubmit: (name: string) => Promise<string>; brandName: string; productName: string }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [note, setNote] = useState("");
+  const [sent, setSent] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selected) return;
+    setBusy(true);
+    const req = REQUEST_TYPES.find((r) => r.id === selected);
+    const subject = encodeURIComponent(`${req?.label ?? selected} — ${brandName}`);
+    const noteText = note.trim() ? `\n\nAdditional context:\n${note}` : "";
+    const body = encodeURIComponent(`Hi,\n\nRequesting: ${req?.label ?? selected}\nBrand: ${brandName}\nProduct: ${productName}${noteText}\n\nThank you.`);
+    // Open mailto and optimistically show success
+    window.location.href = `mailto:hey@qoyl.live?subject=${subject}&body=${body}`;
+    await new Promise((r) => setTimeout(r, 300));
+    setSent(req?.label ?? selected);
+    setBusy(false);
+  }
+
+  if (sent) {
+    return (
+      <div className="border-l-[3px] border-[#2D7A3D] bg-[#f5fff8] px-5 py-4">
+        <p className={`${MONO} text-[9px] lowercase text-[#2D7A3D]`}>request submitted</p>
+        <p className={`${GROTESK} mt-2 text-[13px] font-light text-[#666]`}>
+          your {lc(sent)} request is on its way. we&apos;ll follow up within 1 business day.
+        </p>
+        <button type="button" onClick={() => { setSent(null); setSelected(null); setNote(""); }} className={`${MONO} mt-3 text-[10px] lowercase text-[#888] underline`}>
+          submit another →
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <p className={`${GROTESK} mb-5 text-[13px] font-light text-[#888]`}>
+        select the type of analysis or support you need.
+      </p>
+      <div className="grid gap-2 sm:grid-cols-2 mb-6">
+        {REQUEST_TYPES.map((r) => (
+          <button
+            key={r.id}
+            type="button"
+            onClick={() => setSelected(r.id === selected ? null : r.id)}
+            className={`text-left border p-4 transition-colors ${selected === r.id ? "border-[#0a0a0a] bg-[#0a0a0a] text-white" : "border-[#e8e8e8] hover:border-[#0a0a0a]"}`}
+          >
+            <p className={`${MONO} text-[9px] lowercase ${selected === r.id ? "text-[#aaa]" : "text-[#0a0a0a]"}`}>{r.label}</p>
+            <p className={`${GROTESK} mt-1 text-[12px] font-light leading-[1.6] ${selected === r.id ? "text-[#ddd]" : "text-[#666]"}`}>{r.desc}</p>
+            {selected === r.id && (
+              <p className={`${MONO} mt-2 text-[9px] leading-[1.6] text-[#aaa]`}>{r.example}</p>
+            )}
+          </button>
+        ))}
+      </div>
+      {selected && (
+        <div className="mb-4">
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="anything specific you want us to focus on? (optional)"
+            rows={3}
+            className={`${GROTESK} w-full border border-[#e8e8e8] px-4 py-3 text-sm font-light focus:border-[#0a0a0a] focus:outline-none resize-none`}
+          />
+        </div>
+      )}
+      <button
+        type="submit"
+        disabled={!selected || busy}
+        className={`${MONO} bg-[#0a0a0a] px-6 py-3 text-[10px] lowercase text-white disabled:opacity-30`}
+      >
+        {busy ? "sending..." : "submit request →"}
+      </button>
+    </form>
   );
 }
 

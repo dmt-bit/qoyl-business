@@ -35,7 +35,7 @@ export default function ReportsSection({ surveyCompleted, reports }: { surveyCom
 
   return (
     <section className="pt-8">
-      <p className={`${MONO} text-[9px] lowercase tracking-[0.12em] text-[#888]`}>07 · r&amp;d reports</p>
+      <p className={`${MONO} text-[9px] lowercase tracking-[0.12em] text-[#888]`}>09 · r&amp;d reports</p>
       <h2 className={`${GROTESK} mt-2 text-[22px] font-bold lowercase tracking-[-0.8px]`}>your monthly intelligence reports</h2>
       <p className={`${GROTESK} mb-6 mt-1 text-[13px] font-light text-[#888]`}>generated monthly based on your preferences · reviewed before sending</p>
 
